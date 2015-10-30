@@ -7,12 +7,12 @@ from lxml import html
 import requests
 
 # Path to the category files
-path = '../categories/'
+path = '../raw_categories/'
 
 # Read them all into an array
 all_files = [ f for f in listdir(path) if isfile(join(path, f)) ]
 
-# HTML parser which 
+# HTML parser which extracts relevant info
 for f in all_files:
 	
 	# Load the file into a string
