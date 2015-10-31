@@ -3,18 +3,32 @@ MARKETS = abraxas agora blackbank dream evolution hydra marketplace nucleus silk
 # Unzip everything
 
 raw: raw.zip
-	@./scripts/run_script.sh unzip_raw # | tee logs/raw`date +"%m-%d-%Y-%T"`.log
+	@./scripts/run_script.sh unzip_raw
 
 # Sort contents by site
 
 raw_by_site/%: raw
-	@./scripts/run_script.sh sort_marketplace $* | tee logs/raw_by_site_$*_`date +"%m-%d-%Y-%T"`.log
+	@./scripts/run_script.sh sort_marketplace $* # | tee logs/sort_marketplace_$*_`date +"%m-%d-%Y-%T"`.log
+	@./scripts/run_script.sh sort_marketplace_$* # | tee logs/sort_marketplace_$*_`date +"%m-%d-%Y-%T"`.log
 
-raw_by_site: $(patsubst %,raw_by_site/%,$(MARKETS))
+raw_by_site: raw $(patsubst %,raw_by_site/%,$(MARKETS))
 
 # Extract categories
 
-categories/%: raw_by_site/%
-	@./scripts/run_script.sh pull_categories_$* | tee logs/categories_$*_`date +"%m-%d-%Y-%T"`.log
+clean_categories/%: raw_by_site/%
+	@./scripts/run_script.sh pull_categories_$* # | tee logs/categories_$*_`date +"%m-%d-%Y-%T"`.log
 
-categories: $(patsubst %,categories/%,$(MARKETS))
+clean_categories: $(patsubst %,clean_categories/%,$(MARKETS))
+
+# Clean listings
+
+clean_listings/%: raw_by_site/%
+	@./scripts/run_script.sh clean_listings_$* # | tee logs/clean_listings_$*_`date +"%m-%d-%Y-%T"`.log
+
+clean_listings: $(patsubst %,clean_listings/%,$(MARKETS))
+
+clean:
+	rm -rf raw
+	rm -rf raw_by_site
+	rm -rf clean_listings
+	rm -rf clean_categories

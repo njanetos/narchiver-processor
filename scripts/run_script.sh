@@ -10,9 +10,9 @@ if [ -f scripts/$1.* ]; then
 	elif [ $extension = "sh" ]; then
 		./$scriptname "${@: -1}"
 	else
-		echo "Unknown script type: $1"
+		echo "[pipe finder]: Unknown script type: $1"
 	fi
 
 else
-	echo "Missing segment: $1"
+	echo "[pipe finder]: Missing segment: $1"
 fi

@@ -5,10 +5,11 @@
 
 rm -rf raw && mkdir raw
 
-unzip raw.zip -d raw
+scripts/update_progress.sh "Unzipping raw.zip."
+unzip -q  -d raw raw.zip
 
 cd raw
 
 while [ "`find . -type f -name '*.zip' | wc -l`" -gt 0 ]; do
-	find -type f -name "*.zip" -exec sh -c 'echo "Unzipping ""$1" && unzip -q -d "${1%.*}" "$1" && rm "$1"' _ {} \;;
+	find -type f -name "*.zip" -exec sh -c '../scripts/update_progress.sh "Unzipping ""$1" && unzip -q -d "${1%.*}" "$1" && rm "$1"' _ {} \;;
 done
