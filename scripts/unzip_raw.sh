@@ -3,6 +3,12 @@
 # Unzips all files in raw.zip to /raw, then goes through and recursively unzips all of those files into the same folder.
 # Then, deletes all zip files in /raw.
 # Finally, sorts them by marketplace.
+# The final directory structure should look like
+# raw/
+#	marketplace1/
+#		...
+#	marketplace2/
+#		...
 
 rm -rf raw
 mkdir raw
@@ -21,14 +27,8 @@ cd .. && rm -rf raw_site_temp && mkdir raw_site_temp && cd raw
 
 for marketplace in silkroad evolution agora nucleus blackbank abraxas dream; do
 	mkdir ../raw_site_temp/$marketplace
+	echo "Collecting $marketplace..."
 	find -type d -name "*$marketplace*" -exec cp -r '{}' ../raw_site_temp/$marketplace/ \;;
-	find -type d -name "*$marketplace*" -exec rm -rf '{}' \;;
-
-	rm -rf $marketplace
-	mkdir $marketplace
-
-	find ../raw_site_temp/$marketplace/ -type f -exec cp '{}' $marketplace/ \;;
-	rm -rf ../raw_site_temp/$marketplace
 done
 
-rm -rf ../raw_site_temp
+cd .. && rm -rf raw && mv raw_site_temp raw
