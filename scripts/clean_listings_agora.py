@@ -15,7 +15,8 @@ from clean_text import clean
 # Paths
 path 		= 'raw_by_site/agora/listings/'
 output_path 	= 'clean_listings/'
-output_file 	= 'agora.db'
+output_file 	= 'temp.db'
+final_output    = 'agora.db'
 
 try:
     os.remove(output_path + output_file)
@@ -32,7 +33,7 @@ print_progress("Connecting to " + output_file)
 
 try:
     con = lite.connect(output_path + output_file)
-    con.cursor().execute("CREATE TABLE listings(dat INT, title TEXT, price REAL, conversion REAL, vendor TEXT, category TEXT)")
+    con.cursor().execute("CREATE TABLE listings(dat INT, title TEXT, price REAL, conversion REAL, vendor TEXT, reviews TEXT, category TEXT)")
 except lite.Error, e:
     print_progress("Failed to clean agora listings, error %s:" % e.args[0])
 
@@ -45,7 +46,7 @@ for f in listdir(path):
 
 	# Load the file into a string
     with open(path + f, "r") as file:
-        file_string = file.read()
+        file_string = file.read().decode('utf-8').encode('ascii', errors='ignore')
 
 	# Parse the HTML
     tree = html.fromstring(file_string)
@@ -58,7 +59,7 @@ for f in listdir(path):
         continue
 
     # Encode file in ASCII
-    title = title[0].encode('ascii', errors='backslashreplace')
+    title = title[0]
 
     # Clean title
     title = clean(title)
@@ -108,12 +109,25 @@ for f in listdir(path):
     # Read the date
     date = f[0:10]
 
+    # Read reviews
+    reviews = tree.find_class('embedded-feedback-list')
+    if (len(reviews) != 1):
+        print_progress("Malprocessed reviews: " + f)
+        continue
+
+    reviews = clean(reviews[0].text_content()).replace(' ', '')
+
     try:
         con = lite.connect(output_path + output_file)
-        con.cursor().execute("INSERT INTO listings VALUES({0}, '{1}', {2}, {3}, '{4}', '{5}')".format(date, title, price, conversion, vendor, category))
+        con.cursor().execute("INSERT INTO listings VALUES({0}, '{1}', {2}, {3}, '{4}', '{5}', '{6}')".format(date, title, price, conversion, vendor, reviews, category))
         con.commit()
         con.close()
     except lite.Error, e:
         print_progress("Failed to clean agora listings, error %s:" % e.args[0])
 
-print_progress("Cleaned agora listings, output in " + output_path + output_file)
+try:
+    os.rename(output_path + output_file, output_path + final_output)
+except OSError:
+    pass
+
+print_progress("Cleaned agora listings, output in " + output_path + final_output)
