@@ -18,6 +18,8 @@ Every operation then may be run with the global build target
 make sense
 ```
 
+The full set of data may be downloaded from [here](http://njanetos.econ.upenn.edu/narchiver/raw.zip). (Warning: Large file!) A smaller set of data for testing may be downloaded from [here](http://njanetos.econ.upenn.edu/narchiver/raw_test.zip). 
+
 ## Organization / contribution
 
 The data processing pipeline is organized as a tree, encoded in the makefile, with the root node being `raw.zip`. New segments of the pipeline must consist of the following parts:
