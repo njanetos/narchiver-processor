@@ -1,41 +1,16 @@
 # Reads through all files in ..raw_by_site/agora/categories, and extracts price, name, vendor, title, popularity, etc.
 
 import os
-from update_progress import update_progress
-from update_progress import print_progress
-import re
-from os import listdir
-from os.path import isfile, join
-from lxml import html
-import requests
-import sqlite3 as lite
-import sys
-from clean_text import clean
 
-# Paths
-path 		= 'raw_by_site/agora/listings/'
-output_path 	= 'clean_listings/'
-output_file 	= 'temp.db'
-final_output    = 'agora.db'
+market = 'agora'
 
-try:
-    os.remove(output_path + output_file)
-except OSError:
-    pass
-
-if not os.path.exists(output_path):
-    os.makedirs(output_path)
-
-size = len([name for name in os.listdir(path)])
-
-print_progress("Cleaning html files and putting information in sql format for agora market.")
-print_progress("Connecting to " + output_file)
+execfile('scripts/clean_listings_common.py')
 
 try:
     con = lite.connect(output_path + output_file)
-    con.cursor().execute("CREATE TABLE listings(dat INT, title TEXT, price REAL, conversion REAL, vendor TEXT, reviews TEXT, category TEXT)")
+    con.cursor().execute("CREATE TABLE listings(dat INT, title TEXT, price REAL, conversion REAL, vendor TEXT, reviews TEXT, category TEXT, ships_from TEXT, ships_to TEXT)")
 except lite.Error, e:
-    print_progress("Failed to clean agora listings, error %s:" % e.args[0])
+    print_progress("Failed to clean " + market + " listings, error %s:" % e.args[0])
 
 count = 0;
 for f in listdir(path):
@@ -68,7 +43,7 @@ for f in listdir(path):
     price = tree.xpath('//div[@style="text-align: left;"]/text()')
 
     if (len(price) != 1):
-        print_progress("Malprocessed price " + f + len(price))
+        print_progress("Malprocessed price " + f + str(len(price)))
         continue
 
     price = price[0]
@@ -115,15 +90,35 @@ for f in listdir(path):
         print_progress("Malprocessed reviews: " + f)
         continue
 
-    reviews = clean(reviews[0].text_content()).replace(' ', '')
+    # Clean up reviews -- remove spaces, remove special characters, remove 'Feedback' from every listings.
+    reviews = clean(reviews[0].text_content()).replace(' ', '')[8:]
 
+    # Get origin
+    ships = tree.xpath('//div[@class="product-page-ships"]/text()')
+    ships = "".join(ships).replace(' ', '')
+
+    ships_from = re.search('(?<=From:)(.*)(?=To:)', ships)
+    ships_to = re.search('(?<=To:)(.*)', ships)
+
+    if ships_from is None:
+        ships_from = ""
+    else:
+        ships_from = clean(ships_from.group(0))
+
+    if ships_to is None:
+        ships_to = ""
+    else:
+        ships_to = clean(ships_to.group(0))
+
+    # Insert into SQL
     try:
         con = lite.connect(output_path + output_file)
-        con.cursor().execute("INSERT INTO listings VALUES({0}, '{1}', {2}, {3}, '{4}', '{5}', '{6}')".format(date, title, price, conversion, vendor, reviews, category))
+        con.cursor().execute("INSERT INTO listings VALUES({0}, '{1}', {2}, {3}, '{4}', '{5}', '{6}', '{7}', '{8}')".format(date, title, price, conversion, vendor, reviews, category, ships_from, ships_to))
         con.commit()
         con.close()
     except lite.Error, e:
-        print_progress("Failed to clean agora listings, error %s:" % e.args[0])
+        print_progress("Failed to insert into database, error %s:" % e.args[0])
+        continue
 
 try:
     os.rename(output_path + output_file, output_path + final_output)

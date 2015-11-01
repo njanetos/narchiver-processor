@@ -2,7 +2,8 @@ MARKETS = abraxas agora blackbank dream evolution hydra marketplace nucleus silk
 
 # Unzip everything
 
-raw: raw.zip
+.INTERMEDIATE: raw
+raw: raw_zipped
 	@./scripts/run_script.sh unzip_raw
 
 # Sort contents by site
@@ -13,15 +14,15 @@ raw_by_site/%: raw
 
 raw_by_site: raw $(patsubst %,raw_by_site/%,$(MARKETS))
 
-# Extract categories
+# Pipeline scripts
 
+# Extract categories
 clean_categories/%: raw_by_site/%
 	@./scripts/run_script.sh pull_categories_$* # | tee logs/categories_$*_`date +"%m-%d-%Y-%T"`.log
 
 clean_categories: $(patsubst %,clean_categories/%,$(MARKETS))
 
 # Clean listings
-
 clean_listings/%.db: raw_by_site/%
 	@./scripts/run_script.sh clean_listings_$* # | tee logs/clean_listings_$*_`date +"%m-%d-%Y-%T"`.log
 
