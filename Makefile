@@ -22,10 +22,12 @@ clean_categories: $(patsubst %,clean_categories/%,$(MARKETS))
 
 # Clean listings
 
-clean_listings/%: raw_by_site/%
+clean_listings/%.db: raw_by_site/%
 	@./scripts/run_script.sh clean_listings_$* # | tee logs/clean_listings_$*_`date +"%m-%d-%Y-%T"`.log
 
-clean_listings: $(patsubst %,clean_listings/%,$(MARKETS))
+clean_listings: $(MARKETS:%=clean_listings/%.db)
+
+sense: clean_listings, clean_categories
 
 clean:
 	rm -rf raw

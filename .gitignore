@@ -2,3 +2,5 @@ raw.zip
 *.pyc
 raw/
 raw_by_site/
+clean_listings/
+clean_categories/
