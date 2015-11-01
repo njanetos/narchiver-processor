@@ -4,13 +4,16 @@ Processing scripts for the Narchiver.
 
 ## Usage
 
-Requires `raw.zip` containing raw narchived zip files. Only requirement is that pages begin with the date they were scraped on (in ms since 1970) and that they belong to a zip file which contains the name of the market from which they were scraped. The file structure should look like
+Requires a directory `raw_zipped` containing raw narchived zip files. Only requirement is that pages begin with the date they were scraped on (in ms since 1970) and that they belong to a zip file which contains the name of the market from which they were scraped. The file structure should look like
 
 ```
-scripts/
 logs/
 Makefile
-raw.zip
+scripts/
+raw_zipped/
+    |- archive[date1].zip
+    |- archive[date2].zip
+    ...
 ```
 
 Every operation then may be run with the global build target
@@ -18,11 +21,11 @@ Every operation then may be run with the global build target
 make sense
 ```
 
-The full set of data may be downloaded from [here](http://njanetos.econ.upenn.edu/narchiver/raw.zip). (Warning: Large file!) A smaller set of data for testing may be downloaded from [here](http://njanetos.econ.upenn.edu/narchiver/raw_test.zip). 
+The full set of data may be downloaded from [here](http://njanetos.econ.upenn.edu/narchiver/raw_zipped). A smaller set of data for testing may be downloaded from [here](http://njanetos.econ.upenn.edu/narchiver/raw_test.zip). 
 
 ## Organization / contribution
 
-The data processing pipeline is organized as a tree, encoded in the makefile, with the root node being `raw.zip`. New segments of the pipeline must consist of the following parts:
+The data processing pipeline is organized as a tree, encoded in the makefile, with the root node being `raw`. New segments of the pipeline must consist of the following parts:
 
 1. Code in `/scripts` to process the data. The code can be in any language, but should follow the format `[name of segment]_[name of market].[extension]`. For example, the python script to clean up html for the Agora marketplace is called `clean_listings_agora.py`.
 1. Two build targets in the Makefile. 
