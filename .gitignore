@@ -1,2 +1,4 @@
 raw.zip
 *.pyc
+raw/
+raw_by_site/
