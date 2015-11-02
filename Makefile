@@ -28,7 +28,7 @@ clean_listings/%.db: raw_by_site/%
 
 clean_listings: $(MARKETS:%=clean_listings/%.db)
 
-sense: clean_listings, clean_categories
+sense: clean_listings clean_categories
 
 clean:
 	rm -rf raw
