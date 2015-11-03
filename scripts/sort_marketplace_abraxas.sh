@@ -11,7 +11,7 @@ cd ../../raw
 find -name *abraxas* -type d | while read directory; do
 	../scripts/update_progress.sh "Sorting directory $directory..."
 	find "$directory" -type f -name "*%2Flisting%2F*" -exec sh -c 'perl -pe "s|(<style ?type ?= ?\"text/css\">)(.*?)(<\/style>)||g" < $0 > ../raw_by_site/abraxas/listings/`echo $0 | sed "s/.*\///"`' {} \;;
-        find "$directory" -type f -name "*%2Fvendor%2F*" -exec sh -c 'perl -pe "s|(<style ?type ?= ?\"text/css\">)(.*?)(<\/style>)||g" < $0 > ../raw_by_site/abraxas/vendors/`echo $0 | sed "s/.*\///"`' {} \;; done
-	find "$directory" -type f -name "*%2Fc%2F*" -exec sh -c 'perl -pe "s|(<style ?type ?= ?\"text/css\">)(.*?)(<\/style>)||g" < $0 > ../raw_by_site/abraxas/categories/`echo $0 | sed "s/.*\///"`' {} \;; done
+        find "$directory" -type f -name "*%2Fvendor%2F*" -exec sh -c 'perl -pe "s|(<style ?type ?= ?\"text/css\">)(.*?)(<\/style>)||g" < $0 > ../raw_by_site/abraxas/vendors/`echo $0 | sed "s/.*\///"`' {} \;;
+	find "$directory" -type f -name "*%2Fc%2F*" -exec sh -c 'perl -pe "s|(<style ?type ?= ?\"text/css\">)(.*?)(<\/style>)||g" < $0 > ../raw_by_site/abraxas/categories/`echo $0 | sed "s/.*\///"`' {} \;;
 done
 
