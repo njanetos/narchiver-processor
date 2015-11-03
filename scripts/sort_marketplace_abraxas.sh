@@ -1,29 +1,17 @@
 #!/bin/bash
 
-# Sorts the agora files into listings, vendors, and categories.
+mkdir -p raw_by_site && cd raw_by_site
 
-cd raw_by_site/abraxas
+rm -rf abraxas && mkdir abraxas && cd abraxas && mkdir listings && mkdir vendors && mkdir categories
 
-rm -rf ../listings
-rm -rf ../vendors
-rm -rf ../categories
-rm -rf ../stats
+cd ../../raw
 
-mkdir ../listings
-mkdir ../vendors
-mkdir ../categories
-mkdir ../stats
+# Find all directories with abraxas in the title and pipe all files it contains to the appropriate directory
 
-../../scripts/update_progress.sh "Sorting abraxas into listings..."
-find -type f -name "*%2Flisting%2F*" -exec mv '{}' ../listings \;;
-../../scripts/update_progress.sh "Sorting abraxas into vendors..."
-find -type f -name "*%2Fvendor%2F*" -exec mv '{}' ../vendors \;;
-../../scripts/update_progress.sh "Sorting abraxas into categories..."
-find -type f -name "*%2Fc%2F*" -exec mv '{}' ../categories \;;
-../../scripts/update_progress.sh "Sorting abraxas into stats..."
-find -type f -name "*%2Fstats%2F*" -exec mv '{}' ../stats \;;
+find -name *abraxas* -type d | while read directory; do
+	../scripts/update_progress.sh "Sorting directory $directory..."
+	find "$directory" -type f -name "*%2Flisting%2F*" -exec sh -c 'perl -pe "s|(<style ?type ?= ?\"text/css\">)(.*?)(<\/style>)||g" < $0 > ../raw_by_site/abraxas/listings/`echo $0 | sed "s/.*\///"`' {} \;;
+        find "$directory" -type f -name "*%2Fvendor%2F*" -exec sh -c 'perl -pe "s|(<style ?type ?= ?\"text/css\">)(.*?)(<\/style>)||g" < $0 > ../raw_by_site/abraxas/vendors/`echo $0 | sed "s/.*\///"`' {} \;; done
+	find "$directory" -type f -name "*%2Fc%2F*" -exec sh -c 'perl -pe "s|(<style ?type ?= ?\"text/css\">)(.*?)(<\/style>)||g" < $0 > ../raw_by_site/abraxas/categories/`echo $0 | sed "s/.*\///"`' {} \;; done
+done
 
-mv ../listings listings
-mv ../vendors vendors
-mv ../categories categories
-mv ../stats stats
