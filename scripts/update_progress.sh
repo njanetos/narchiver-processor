@@ -2,4 +2,4 @@
 
 PARENT_COMMAND="$(ps -o comm= $PPID)"
 
-echo "["$PARENT_COMMAND"]: " $1
+echo "[ "$PARENT_COMMAND" ]: " $1

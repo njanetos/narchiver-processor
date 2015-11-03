@@ -5,3 +5,4 @@ raw_by_site/
 raw_zipped/
 clean_listings/
 clean_categories/
+scripts/push.sh

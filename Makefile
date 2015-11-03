@@ -2,7 +2,6 @@ MARKETS = abraxas agora blackbank dream evolution hydra marketplace nucleus silk
 
 # Unzip everything
 
-.INTERMEDIATE: raw
 raw: raw_zipped
 	@./scripts/run_script.sh unzip_raw
 
@@ -10,8 +9,10 @@ raw: raw_zipped
 
 raw_by_site/%: raw
 	@./scripts/run_script.sh sort_marketplace_$* # | tee logs/sort_marketplace_$*_`date +"%m-%d-%Y-%T"`.log
+	@./scripts/push.sh "Sorting raw by site" "$*"
 
 raw_by_site: raw $(patsubst %,raw_by_site/%,$(MARKETS))
+	@./scripts/push.sh "Sorted raw by site" ""
 
 # Pipeline scripts
 
