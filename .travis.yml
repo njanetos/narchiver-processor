@@ -5,6 +5,7 @@ addons:
   apt:
     packages:
     - python-lxml
+    - python-requests
 before_install:
   - rm -rf raw_zipped_test.zip
   - wget https://github.com/njanetos/narchiver-processor/raw/master/raw_zipped_test.zip
