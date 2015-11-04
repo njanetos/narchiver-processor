@@ -1,4 +1,4 @@
-# Reads through all files in ..raw_by_site/agora/categories, and extracts price, name, vendor, title, popularity, etc.
+# Reads through all files in ..raw_by_site/agora/listings, and extracts price, name, vendor, title, popularity, etc.
 
 import os
 
@@ -12,25 +12,26 @@ try:
 except lite.Error, e:
     print_progress("Failed to clean " + market + " listings, error %s:" % e.args[0])
 
-count = 0;
+count = 0
+tot_scraped = 0
 for f in listdir(path):
 
     # Update the progress
     update_progress(count, size)
     count = count + 1
 
-	# Load the file into a string
+    # Load the file into a string
     with open(path + f, "r") as file:
         file_string = file.read().decode('utf-8').encode('ascii', errors='ignore')
 
-	# Parse the HTML
+    # Parse the HTML
     tree = html.fromstring(file_string)
 
-	# Read title
+    # Read title
     title = tree.xpath('//h1/text()')
 
     if (len(title) != 1):
-        print_progress("Malprocessed title " + f)
+        # print_progress("Malprocessed title " + f)
         continue
 
     # Encode file in ASCII
@@ -38,26 +39,26 @@ for f in listdir(path):
 
     # Clean title
     title = clean(title)
-
-	# Read price
+	
+    # Read price
     price = tree.xpath('//div[@style="text-align: left;"]/text()')
 
     if (len(price) != 1):
-        print_progress("Malprocessed price " + f + str(len(price)))
+        # print_progress("Malprocessed price " + f + str(len(price)))
         continue
 
     price = price[0]
     raw_price = price
     conversion = -1
 
-	# Convert to USD if necessary
+    # Convert to USD if necessary
     if "BTC" in price:
         price = price.replace("BTC", "")
         price = float(price)
         try:
             conversion = re.search('(?<=fa-btc"></i> ).*?(?= USD)', file_string).group(0)
         except AttributeError:
-            print_progress("[clean_listings_agora]: Cannot find conversion rate " + f)
+            # print_progress("[clean_listings_agora]: Cannot find conversion rate " + f)
             continue
         conversion = float(conversion)
         price = price*conversion
@@ -65,7 +66,7 @@ for f in listdir(path):
         price = price.replace("USD", "")
         price = float(price)
     else:
-        print_progress("Unrecognized currency: " + price)
+        # print_progress("Unrecognized currency: " + price)
         continue
 
     # Read vendor
@@ -73,8 +74,8 @@ for f in listdir(path):
         vendor = re.search('(?<=class="gen-user-link").*?(?=</a>)', file_string).group(0)
         vendor = re.search('(?<=>).*', vendor).group(0).replace(' ', '')
     except AttributeError:
-        print_progress("Cannot find vendor: " + f)
-        continue
+        # print_progress("Cannot find vendor: " + f)
+        vendor = ""
 
     # Read category
     category = tree.xpath('//div[@class="topnav-element"]/a/text()')
@@ -87,7 +88,7 @@ for f in listdir(path):
     # Read reviews
     reviews = tree.find_class('embedded-feedback-list')
     if (len(reviews) != 1):
-        print_progress("Malprocessed reviews: " + f)
+        # print_progress("Malprocessed reviews: " + f)
         continue
 
     # Clean up reviews -- remove spaces, remove special characters, remove 'Feedback' from every listings.
@@ -120,9 +121,13 @@ for f in listdir(path):
         print_progress("Failed to insert into database, error %s:" % e.args[0])
         continue
 
+    tot_scraped = tot_scraped + 1
+
 try:
     os.rename(output_path + output_file, output_path + final_output)
 except OSError:
     pass
 
 print_progress("Cleaned agora listings, output in " + output_path + final_output)
+print_progress("Scraped " + str(tot_scraped) + " out of " + str(count) + " listings.")
+

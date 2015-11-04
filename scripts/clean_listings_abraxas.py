@@ -13,7 +13,8 @@ except lite.Error, e:
     print_progress("Failed to clean " + market + " listings, error %s:" % e.args[0])
 
 
-count = 0;
+count = 0
+tot_scraped = 0
 for f in listdir(path):
 
     # Update the progress
@@ -31,7 +32,7 @@ for f in listdir(path):
     title = tree.xpath('//h2/text()')
 
     if (len(title) != 1):
-        print_progress("Malprocessed title " + f)
+        # print_progress("Malprocessed title " + f)
         continue
 
     # Clean title
@@ -41,20 +42,20 @@ for f in listdir(path):
 	# Read price
     price = tree.xpath('//span[@class="price_row"]/span/text()')
     if (len(price) != 1):
-        print_progress("Malprocessed price " + f + " " + str(len(price)))
+        # print_progress("Malprocessed price " + f + " " + str(len(price)))
         continue
 
     # Get exchange rate
     exchange = [s for s in tree.xpath('//div[@class="well well-sm"]/ul/li[1]/text()') if "$" in s]
     if (len(exchange) != 1):
-        print_progress("Malprocessed exchange rate " + f + " " + str(len(exchange)))
+        # print_progress("Malprocessed exchange rate " + f + " " + str(len(exchange)))
         continue
 
     try:
         price = float(price[0][:-3])
         exchange = float(exchange[0][3:])
     except:
-        print_progress("Malprocessed price " + f)
+        # print_progress("Malprocessed price " + f)
         continue
 
     price = price*exchange
@@ -62,21 +63,21 @@ for f in listdir(path):
     # Get category
     category = tree.xpath('//ol[@class="breadcrumb"]/li/a/text()')
     if (len(category) == 0):
-        print_progress("Malprocessed category " + f + " " + str(len(category)))
+        # print_progress("Malprocessed category " + f + " " + str(len(category)))
         continue
     category = ".".join(category)
 
     # Get vendor
     vendor = tree.xpath('//div/span/a[@class="username"]/text()')
     if (len(vendor) != 1):
-        print_progress("Malprocessed vendor " + f + " " + str(len(vendor)))
+        # print_progress("Malprocessed vendor " + f + " " + str(len(vendor)))
         continue
     vendor = clean(vendor[0])
 
     # Get vendor's rating
     vendor_rating = [s for s in tree.xpath('//div/span/span[@class="rating"]/text()') if ("/" in s or "~" in s)]
     if (len(vendor_rating) != 2):
-        print_progress("Malprocessed vendor rating " + f + " " + str(len(vendor_rating)))
+        # print_progress("Malprocessed vendor rating " + f + " " + str(len(vendor_rating)))
         continue
     vendor_rating = "".join(vendor_rating).replace(' ', '')
 
@@ -84,7 +85,7 @@ for f in listdir(path):
     review_value = tree.xpath('//table[@class="table table-hower table-static"]/tbody/tr/td/strong/text()')
     reviews_date = tree.xpath('//table[@class="table table-hower table-static"]/tbody/tr/td[@class="nowrap"]/text()')
     if (len(review_value) == 0):
-        print_progress("Malprocessed reviews " + f + " " + str(len(review_value)) + ", " + str(len(reviews_date)))
+        # print_progress("Malprocessed reviews " + f + " " + str(len(review_value)) + ", " + str(len(reviews_date)))
         continue
 
     if (review_value[0] == 'No feedbacks yet'):
@@ -119,11 +120,15 @@ for f in listdir(path):
         con.commit()
         con.close()
     except lite.Error, e:
-        print_progress("Failed to insert into database, error %s:" % e.args[0])
+        # print_progress("Failed to insert into database, error %s:" % e.args[0])
         continue
+
+    tot_scraped = tot_scraped + 1
+	
 try:
     os.rename(output_path + output_file, output_path + final_output)
 except OSError:
     pass
 
 print_progress("Cleaned abraxas listings, output in " + output_path + final_output)
+print_progress("Scraped " + str(tot_scraped) + " out of " + str(count) + " listings.")
