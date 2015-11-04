@@ -13,7 +13,7 @@ except lite.Error, e:
     print_progress("Failed to clean " + market + " listings, error %s:" % e.args[0])
 
 
-count = 0
+count = 1
 tot_scraped = 0
 for f in listdir(path):
 

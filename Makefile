@@ -9,10 +9,10 @@ raw: raw_zipped
 
 raw_by_site/%: raw
 	@./scripts/run_script.sh sort_marketplace_$* # | tee logs/sort_marketplace_$*_`date +"%m-%d-%Y-%T"`.log
-	@./scripts/push.sh "Sorting raw by site" "$*"
+	@./scripts/push.sh "Sorting raw by site" "$*" || true
 
 raw_by_site: raw $(patsubst %,raw_by_site/%,$(MARKETS))
-	@./scripts/push.sh "Sorted raw by site" ""
+	@./scripts/push.sh "Sorted raw by site" "Complete" || true
 
 # Pipeline scripts
 
@@ -25,8 +25,10 @@ clean_categories: $(patsubst %,clean_categories/%,$(MARKETS))
 # Clean listings
 clean_listings/%.db: raw_by_site/%
 	@./scripts/run_script.sh clean_listings_$* # | tee logs/clean_listings_$*_`date +"%m-%d-%Y-%T"`.log
+	@./scripts/push.sh "Cleaning listings" "$*" || true
 
 clean_listings: $(MARKETS:%=clean_listings/%.db)
+	@./scripts/push.sh "Cleaned listings" "Complete" || true
 
 sense: clean_listings clean_categories
 
