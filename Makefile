@@ -14,6 +14,11 @@ raw_by_site/%: raw
 raw_by_site: raw $(patsubst %,raw_by_site/%,$(MARKETS))
 	@./scripts/push.sh "Sorted raw by site" "Complete" || true
 
+# Test dataset
+
+raw_zipped_test.zip: raw
+	@./scripts/generate_test_dataset.sh # | tee logs/generate_test_dataset_`date +"%m-%d-%Y-%T"`.log
+
 # Pipeline scripts
 
 # Extract categories
