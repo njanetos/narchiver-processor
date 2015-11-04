@@ -2,7 +2,7 @@ language: c
 branches:
   only: master
 before_install:
-  - wget https://github.com/njanetos/narchiver-processor/raw/master/raw_zipped_test.zip
+  - curl https://github.com/njanetos/narchiver-processor/raw/master/raw_zipped_test.zip > raw_zipped_test.zip
 script: make sense
 notifications:
   email:
