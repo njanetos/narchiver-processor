@@ -5,17 +5,17 @@ Processing scripts for the Narchiver.
 ## Usage
 
 
-Requires a directory `raw_zipped` containing raw narchived zip files. The test dataset, `raw_zipped_test.zip` will be automatically unzipped into `raw_zipped` if `raw_zipped` is not available. The file structure should look like
+Requires a directory `raw_zipped` containing raw narchived zip files. The test dataset, `raw_zipped_test.zip` will be automatically unzipped into `raw_zipped` if `raw_zipped` is not available. `raw_zipped_test.zip` consists of 5000 randomly selected items from the full archives. Support for `git-lfs` must be enabled for the test dataset to be downloaded with the rest of the repository. Otherwise, it may be downloaded manually. The file structure should look like
 
 ```
 logs/
 Makefile
 scripts/
-raw_zipped/
+raw_zipped/ [optional]
     |- archive[date1].zip
     |- archive[date2].zip
     ...
-raw_zipped_test/
+raw_zipped_test.zip
 ```
 
 Every operation may be run with the global build target
