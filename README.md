@@ -4,7 +4,8 @@ Processing scripts for the Narchiver.
 
 ## Usage
 
-Requires a directory `raw_zipped` containing raw narchived zip files. Only requirement is that pages begin with the date they were scraped on (in ms since 1970) and that they belong to a zip file which contains the name of the market from which they were scraped. The file structure should look like
+
+Requires a directory `raw_zipped` containing raw narchived zip files. The test dataset, `raw_zipped_test.zip` will be automatically unzipped into `raw_zipped` if `raw_zipped` is not available. The file structure should look like
 
 ```
 logs/
@@ -14,14 +15,13 @@ raw_zipped/
     |- archive[date1].zip
     |- archive[date2].zip
     ...
+raw_zipped_test/
 ```
 
-Every operation then may be run with the global build target
+Every operation may be run with the global build target
 ```{bash}
 make sense
 ```
-
-The full set of data may be downloaded from [here](http://njanetos.econ.upenn.edu/narchiver/raw_zipped). A smaller set of data for testing may be downloaded from [here](http://njanetos.econ.upenn.edu/narchiver/raw_test.zip). 
 
 ## Organization / contribution
 
