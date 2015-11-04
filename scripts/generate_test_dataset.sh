@@ -4,6 +4,17 @@
 
 rm -rf raw_zipped_test && mkdir raw_zipped_test && cd raw
 
-test=`find -type f | shuf -n 10`
+randomfiles=`find -type f | shuf -n 2000`
 
-echo "$test"
+while read -r file; do
+	cp --parents "$file" ../raw_zipped_test
+done <<< "$randomfiles"
+
+cd ../raw_zipped_test
+
+alldirs=`ls`
+
+while read -r dir; do
+	zip -qr "$dir"".zip" "$dir"
+	rm -rf "$dir"
+done <<< "$alldirs"
