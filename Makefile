@@ -2,7 +2,7 @@ MARKETS = abraxas agora blackbank dream evolution hydra marketplace nucleus silk
 
 # Unzip everything
 
-raw: raw_zipped
+raw:
 	@./scripts/run_script.sh unzip_raw
 
 # Sort contents by site
