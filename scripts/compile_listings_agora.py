@@ -1,16 +1,17 @@
-# Reads through all files in ..raw_by_site/abraxas/categories, and extracts price, name, vendor, title, popularity, etc.
+# Compiles readable SQL file for listings for the agora site
 
 import os
 
 market = 'abraxas'
 
-execfile('scripts/clean_listings_common.py')
+execfile('scripts/compile_listings_common.py')
 
 try:
     con = lite.connect(output_path + output_file)
     con.cursor().execute("CREATE TABLE listings(dat INT, title TEXT, price REAL, vendor TEXT, reviews TEXT, category TEXT, vendor_rating TEXT, ships_from TEXT, ships_to TEXT)")
 except lite.Error, e:
     print_progress("Failed to clean " + market + " listings, error %s:" % e.args[0])
+
 
 count = 1
 tot_scraped = 0
