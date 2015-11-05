@@ -19,14 +19,6 @@ raw_by_site: raw $(patsubst %,raw_by_site/%,$(MARKETS))
 raw_zipped_test.zip: raw
 	@./scripts/generate_test_dataset.sh # | tee logs/generate_test_dataset_`date +"%m-%d-%Y-%T"`.log
 
-# Pipeline scripts
-
-# Extract categories
-clean_categories/%: raw_by_site/%
-	@./scripts/run_script.sh pull_categories_$* # | tee logs/categories_$*_`date +"%m-%d-%Y-%T"`.log
-
-clean_categories: $(patsubst %,clean_categories/%,$(MARKETS))
-
 # Clean listings
 clean_listings/%.db: raw_by_site/%
 	@./scripts/run_script.sh clean_listings_$* # | tee logs/clean_listings_$*_`date +"%m-%d-%Y-%T"`.log
@@ -35,10 +27,19 @@ clean_listings/%.db: raw_by_site/%
 clean_listings: $(MARKETS:%=clean_listings/%.db)
 	@./scripts/push.sh "Cleaned listings" "Complete" || true
 
-sense: clean_listings clean_categories
+# Aggregate listings
+aggregate_listings/%.db: clean_listings/%.db
+	@./scripts/run_script.sh aggregate_listings_$* # | tee logs/aggregate_listings_$*_`date +"%m-%d-%Y-%T"`.log
+	@./scripts/push.sh "Aggregating listings" "$*" || true
+
+aggregate_listings: $(MARKETS:%=aggregate_listings/%.db)
+	@./scripts/push.sh "Aggregated listings" "Complete" || true
+
+sense: clean_listings aggregate_listings
 
 clean:
 	rm -rf raw
 	rm -rf raw_by_site
 	rm -rf clean_listings
 	rm -rf clean_categories
+	rm -rf aggregate_listings

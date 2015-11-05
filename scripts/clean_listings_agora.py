@@ -8,7 +8,7 @@ execfile('scripts/clean_listings_common.py')
 
 try:
     con = lite.connect(output_path + output_file)
-    con.cursor().execute("CREATE TABLE listings(dat INT, title TEXT, price REAL, conversion REAL, vendor TEXT, reviews TEXT, category TEXT, ships_from TEXT, ships_to TEXT)")
+    con.cursor().execute("CREATE TABLE listings(dat INT, title TEXT, price REAL, vendor TEXT, reviews TEXT, category TEXT, ships_from TEXT, ships_to TEXT)")
 except lite.Error, e:
     print_progress("Failed to clean " + market + " listings, error %s:" % e.args[0])
 
@@ -39,7 +39,7 @@ for f in listdir(path):
 
     # Clean title
     title = clean(title)
-	
+
     # Read price
     price = tree.xpath('//div[@style="text-align: left;"]/text()')
 
@@ -92,7 +92,7 @@ for f in listdir(path):
         continue
 
     # Clean up reviews -- remove spaces, remove special characters, remove 'Feedback' from every listings.
-    reviews = clean(reviews[0].text_content()).replace(' ', '')[8:]
+    reviews = clean(re.sub("  +", ", ", reviews[0].text_content())[11:])
 
     # Get origin
     ships = tree.xpath('//div[@class="product-page-ships"]/text()')
@@ -114,7 +114,7 @@ for f in listdir(path):
     # Insert into SQL
     try:
         con = lite.connect(output_path + output_file)
-        con.cursor().execute("INSERT INTO listings VALUES({0}, '{1}', {2}, {3}, '{4}', '{5}', '{6}', '{7}', '{8}')".format(date, title, price, conversion, vendor, reviews, category, ships_from, ships_to))
+        con.cursor().execute("INSERT INTO listings VALUES({0}, '{1}', {2}, '{3}', '{4}', '{5}', '{6}', '{7}')".format(date, title, price, vendor, reviews, category, ships_from, ships_to))
         con.commit()
         con.close()
     except lite.Error, e:
@@ -130,4 +130,3 @@ except OSError:
 
 print_progress("Cleaned agora listings, output in " + output_path + final_output)
 print_progress("Scraped " + str(tot_scraped) + " out of " + str(count) + " listings.")
-
