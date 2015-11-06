@@ -8,6 +8,10 @@ import requests
 import sqlite3 as lite
 import sys
 from clean_text import clean
+from dateutil.parser import parse
+import calendar
+import time
+import datetime
 
 # Paths
 path            = 'raw_by_site/' + market + '/listings/'

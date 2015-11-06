@@ -43,8 +43,9 @@ for d in dirs:
 				# Read it, remove CSS, and write it out
 				with open (os.path.join(root, f)) as open_file:
 					value = open_file.read()
-					value = re.sub('(<style ?type ?= ?"text/css">)(.*?)(<\/style>)', '', value)
-					value = re.sub('(<img)(.*?)(>)', '', value)
+					#value = re.sub('(<style ?type ?= ?"text/css">)(.*?)(<\/style>)', '', value)
+					#value = re.sub('(<img)(.*?)(>)', '', value)
+					#value = re.sub('(<head)(.*?)(head>)', '', value)
 				with open(os.path.join('raw_by_site', market, dest_dir, f), "w") as open_file:
 					open_file.write(value)
 	count = count + 1

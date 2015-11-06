@@ -32,7 +32,7 @@ write_cur.execute('CREATE TABLE categories(category TEXT)')
 write_cur.execute('CREATE TABLE ships_from(location TEXT)')
 write_cur.execute('CREATE TABLE ships_to(location TEXT)')
 write_cur.execute('CREATE TABLE prices(dat INT, listing INT, price REAl)')
-write_cur.execute('CREATE TABLE reviews(dat INT, listing INT, review TEXT, val INT)')
+write_cur.execute('CREATE TABLE reviews(dat INT, listing INT, review TEXT, val INT, price REAL)')
 write.commit()
 
 categories = [c[0] for c in categories]

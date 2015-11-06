@@ -20,7 +20,7 @@ try:
 		write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2})".format(row[0], i, round(float(row[2]), 2)))
 		write.commit()
 		count = count + 1
-		# update_progress(count, tot_count)
+		update_progress(count, tot_count)
 
 		# Get reviews
 		reviews = row[4].split('.')
@@ -33,7 +33,7 @@ try:
 			if "daysago" in reviews[r+1]:
 				days_ago = int(reviews[r+1].replace("daysago", "").replace("(editafter", "  ")[0:2])
 				date = (days_since-days_ago)*86400
-				write_cur.execute("INSERT INTO reviews VALUES({0}, {1}, '{2}', {3})".format(date*86400, i, "", int(reviews[r][0])))
+				write_cur.execute("INSERT INTO reviews VALUES({0}, {1}, '{2}', {3}, 0)".format(date*86400, i, "", int(reviews[r][0])))
 				write.commit()
 
 	# Collapse duplicate rows
