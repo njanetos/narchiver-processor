@@ -17,6 +17,7 @@ tot_scraped = 0
 try:
     con = lite.connect(output_path + output_file)
 
+    buf = 0;
     for f in listdir(path):
 
         # Update the progress
@@ -112,10 +113,14 @@ try:
 
         # Write to database
         con.cursor().execute("INSERT INTO listings VALUES({0}, '{1}', {2}, '{3}', '{4}', '{5}', '{6}', '{7}')".format(date, title, price, vendor, reviews, category, ships_from, ships_to))
-        con.commit()
+        buf = buf + 1
+	if buf == 500:
+            con.commit()
+            buf = 0
 except lite.Error, e:
     print_progress("Failed to insert into database, error %s:" % e.args[0])
 finally:
+    con.commit()
     con.close()
 
 try:

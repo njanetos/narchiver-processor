@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ -f scripts/$1.* ]; then
+if [ -f "scripts/""$1""."* ]; then
 
 	scriptname=`echo scripts/$1.*`
 	extension="${scriptname#*.}"
