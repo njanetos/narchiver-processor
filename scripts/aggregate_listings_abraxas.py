@@ -12,6 +12,7 @@ try:
 	# Get the price history
 	print_progress("Aggregating reviews and prices...")
 	tot_count, count = val, 0
+	buf = 0
 	for i in range(1, val):
 		read_cur.execute("SELECT * FROM listings WHERE rowid = {0}".format(i))
 		row = read_cur.fetchall()[0]
@@ -34,7 +35,10 @@ try:
 				days_ago = int(reviews[r+1].replace("daysago", "").replace("(editafter", "  ")[0:2])
 				date = (days_since-days_ago)*86400
 				write_cur.execute("INSERT INTO reviews VALUES({0}, {1}, '{2}', {3}, 0)".format(date*86400, i, "", int(reviews[r][0])))
-				write.commit()
+				buf = buf + 1
+				if buf > 500:
+					write.commit()
+					buf = 0
 
 	# Collapse duplicate rows
 	print_progress("Collapsing duplicate reviews...")
@@ -47,6 +51,7 @@ except lite.Error, e:
 	print "Error %s:" % e.args[0]
 finally:
 	if write:
+		write.commit()
 		write.close()
 	if read:
 		read.close()
