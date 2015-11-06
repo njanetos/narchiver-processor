@@ -62,18 +62,21 @@ for f in listdir(path):
     reviews_strong = tree.xpath('//div[@class="content"]/div[@class="item"]/table[@class="table"]/tr/td/strong/text()')
 
     if len(reviews) > 0:
-        reviews_strong = reviews_strong[4::2]
-        review_text = [ clean(r.replace('\t', '')) for r in reviews[0::6] ]
-        review_price = reviews[3::6]
-        review_name = reviews[4::6]
-        review_date = [ str(int(time.mktime(parse(r).timetuple()))) for r in reviews[5::6] ]
-        reviews = [0] * 5 * len(review_date)
-        reviews[0::5] = reviews_strong
-        reviews[1::5] = review_text
-        reviews[2::5] = review_price
-        reviews[3::5] = review_name
-        reviews[4::5] = review_date
-        reviews = "|".join(reviews)
+	try:
+            reviews_strong = reviews_strong[4::2]
+            review_text = [ clean(r.replace('\t', '')) for r in reviews[0::6] ]
+            review_price = reviews[3::6]
+            review_name = reviews[4::6]
+            review_date = [ str(int(time.mktime(parse(r).timetuple()))) for r in reviews[5::6] ]
+            reviews = [0] * 5 * len(review_date)
+            reviews[0::5] = reviews_strong
+            reviews[1::5] = review_text
+            reviews[2::5] = review_price
+            reviews[3::5] = review_name
+            reviews[4::5] = review_date
+            reviews = "|".join(reviews)
+        except:
+            reviews = ""
     else:
         reviews = ""
 
