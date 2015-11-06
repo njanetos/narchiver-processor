@@ -5,6 +5,8 @@ import re
 from update_progress import update_progress
 from update_progress import print_progress
 
+print_progress("Sorting and cleaning " + market + "...")
+
 # Create the destination folders
 for d, m in destinations:
 	if not os.path.exists(os.path.join('raw_by_site', market, d)):
