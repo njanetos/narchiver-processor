@@ -9,6 +9,8 @@ if [ -f "scripts/""$1""."* ]; then
 		python $scriptname "${@: -1}"
 	elif [ $extension = "sh" ]; then
 		./$scriptname "${@: -1}"
+	elif [ $extension = "R" ]; then
+		Rscript $scriptname "${@: -1}"
 	else
 		echo "[pipe finder]: Unknown script type: $1"
 	fi
