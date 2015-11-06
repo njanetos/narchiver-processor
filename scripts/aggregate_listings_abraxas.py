@@ -43,9 +43,6 @@ try:
 	remaining_reviews = (write_cur.execute("SELECT Count(*) FROM reviews").fetchall()[0])[0]
 	print_progress("Kept " + str(remaining_reviews) + " out of " + str(tot_reviews))
 
-	print_progress("Finished aggregating.")
-
-
 except lite.Error, e:
 	print "Error %s:" % e.args[0]
 finally:
@@ -53,3 +50,10 @@ finally:
 		write.close()
 	if read:
 		read.close()
+
+try:
+    os.rename(os.join.path('aggregate_listings', 'temp.db'), os.join.path('aggregate_listings', market+'.db'))
+except OSError:
+    pass
+
+print_progress("Finished aggregating, output in " + os.join.path('aggregate_listings', market+'.db'))

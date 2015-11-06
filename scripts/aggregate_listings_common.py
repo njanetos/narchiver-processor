@@ -9,8 +9,8 @@ if not os.path.exists('aggregate_listings'):
     os.makedirs('aggregate_listings')
 
 try:
-	if os.path.exists('aggregate_listings/'+market+'.db'):
-		os.remove('aggregate_listings/'+market+'.db')
+	if os.path.exists('aggregate_listings/temp.db'):
+		os.remove('aggregate_listings/temp.db')
 except OSError:
 	sys.exit(1)
 
@@ -25,7 +25,7 @@ ships_from = read_cur.fetchall()
 read_cur.execute('SELECT DISTINCT ships_to FROM listings')
 ships_to = read_cur.fetchall()
 
-write = lite.connect(os.path.join('aggregate_listings', market+'.db'))
+write = lite.connect(os.path.join('aggregate_listings', 'temp.db'))
 write_cur = write.cursor()
 write_cur.execute('CREATE TABLE listings(title TEXT, vendor TEXT, category INT, ships_from INT, ships_to INT)')
 write_cur.execute('CREATE TABLE categories(category TEXT)')

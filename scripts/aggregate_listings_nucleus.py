@@ -59,3 +59,10 @@ finally:
 		write.close()
 	if read:
 		read.close()
+
+try:
+    os.rename(os.join.path('aggregate_listings', 'temp.db'), os.join.path('aggregate_listings', market+'.db'))
+except OSError:
+    pass
+
+print_progress("Finished aggregating, output in " + os.join.path('aggregate_listings', market+'.db'))
