@@ -19,6 +19,8 @@ output_path 	= 'clean_listings/'
 output_file 	= 'temp.db'
 final_output    = market + '.db'
 
+buffer_limit = 10000
+
 try:
     os.remove(output_path + output_file)
 except OSError:
