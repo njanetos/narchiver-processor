@@ -18,7 +18,7 @@ try:
 		row = read_cur.fetchall()[0]
 
 		# Add price in
-		write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2})".format(row[0], i, round(float(row[2]), 2)))
+		write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2})".format(row[0], titles.index(row[1])+1, float(row[2])))
 		write.commit()
 		count = count + 1
 		update_progress(count, tot_count)

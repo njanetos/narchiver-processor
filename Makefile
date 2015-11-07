@@ -35,7 +35,13 @@ aggregate_listings/%.db: clean_listings/%.db
 aggregate_listings: $(MARKETS:%=aggregate_listings/%.db)
 	@./scripts/push.sh "Aggregated listings" "Complete" || true
 
-sense: clean_listings aggregate_listings
+# Graph stuff
+graphs_%: aggregate_listings/%.db
+	@./scripts/run_script.sh graphs $*
+
+graphs: $(MARKETS:%=graphs_%)
+
+sense: clean_listings aggregate_listings graphs
 
 clean:
 	rm -rf raw

@@ -115,7 +115,6 @@ try:
             ships_to = clean(ships_to.group(0))
 
         # Insert into SQL
-
         con.cursor().execute("INSERT INTO listings VALUES({0}, '{1}', {2}, '{3}', '{4}', '{5}', '{6}', '{7}')".format(date, title, price, vendor, reviews, category, ships_from, ships_to))
         buf = buf + 1
         if buf == 500:

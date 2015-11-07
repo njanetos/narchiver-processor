@@ -64,9 +64,9 @@ for t in titles:
 
     # Extract unit, amount, quantity info from the title
     try:
-        temp = re.findall("([0-9]+[\.0-9]* ?(?:g|mg|ug|kg|gr|lb|oz|ml))", t[0].lower())
+        temp = re.findall("([\.0-9]*[0-9]+ ?(?:g|mg|ug|kg|gr|lb|oz|ml))", t[0].lower())
         if (len(temp) != 0):
-            units = re.sub('[0-9 ]', '', temp[0])
+            units = re.sub('[0-9\. ]', '', temp[0])
             amount = float(re.sub('[a-z ]', '', temp[0]))
         else:
             units = ""
