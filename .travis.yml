@@ -4,6 +4,7 @@ branches:
 addons:
   apt:
     packages:
+    - r-base
     - python-lxml
     - python-requests
     - python-dateutil
