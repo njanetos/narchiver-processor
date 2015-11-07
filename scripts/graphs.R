@@ -1,3 +1,6 @@
+install.packages("sqldf")
+install.packages("data.table")
+
 library(sqldf)
 library(data.table)
 
