@@ -49,3 +49,4 @@ clean:
 	rm -rf clean_listings
 	rm -rf clean_categories
 	rm -rf aggregate_listings
+	rm -rf plots
