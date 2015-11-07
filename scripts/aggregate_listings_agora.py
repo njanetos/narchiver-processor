@@ -30,11 +30,16 @@ try:
 
 		reviews = []
 		for t in toke:
+			# Check if there are no feedbacks
 			if t == 'No feedbacks found.':
 				continue
+			# If it's a review, add on a new review row
 			elif '55' == t or '45' == t or '35' == t or '25' == t or '15' == t or '05' == t:
 				reviews.append([])
+				reviews[-1].append(t[0])
+				continue
 
+			# Otherwise, append the info onto the end
 			if len(reviews) > 0:
 				reviews[-1].append(t)
 			else: 
@@ -49,12 +54,16 @@ try:
 			if len(dates) != 1:
 				# print_progress("Malformed review date")
 				continue
-			dates = int(dates[0].replace(" days ago", ""))
+			dates = int(re.sub('[a-zA-Z ]', '', dates[0]))
 			# Subtract to estimate days since
 			date = days_since - dates
-			review_text = clean(r[1]);
 
-			write_cur.execute("INSERT INTO reviews VALUES({0}, {1}, '{2}', {3}, 0)".format(date, listing_id, review_text, int(r[0][0])))
+			if len(r) > 1:
+				review_text = clean(r[1]);
+			else:
+				review_text = "N/A"
+
+			write_cur.execute("INSERT INTO reviews VALUES({0}, {1}, '{2}', {3}, 0)".format(date, listing_id, review_text, int(r[0])))
 			buf = buf + 1
 			if buf > buffer_limit:
 				write.commit()
