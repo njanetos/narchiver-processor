@@ -17,8 +17,11 @@ try:
 		read_cur.execute("SELECT * FROM listings WHERE rowid = {0}".format(i))
 		row = read_cur.fetchall()[0]
 
+		# Find listing id
+		listing_id = titles.index(row[1]) + 1
+
 		# Add price in
-		write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2})".format(row[0], titles.index(row[1])+1, float(row[2])))
+		write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2})".format(row[0], listing_id, float(row[2])))
 		count = count + 1
 		update_progress(count, tot_count)
 
@@ -31,7 +34,11 @@ try:
 				continue
 			elif '55' == t or '45' == t or '35' == t or '25' == t or '15' == t or '05' == t:
 				reviews.append([])
-			reviews[-1].append(t)
+
+			if len(reviews) > 0:
+				reviews[-1].append(t)
+			else: 
+				continue
 
 		# Go through the reviews and find the day, in days since 1970, on which it was scraped
 		days_since = int(row[0])//86400
@@ -47,7 +54,7 @@ try:
 			date = days_since - dates
 			review_text = clean(r[1]);
 
-			write_cur.execute("INSERT INTO reviews VALUES({0}, {1}, '{2}', {3}, 0)".format(date*86400, i, review_text, int(r[0][0])))
+			write_cur.execute("INSERT INTO reviews VALUES({0}, {1}, '{2}', {3}, 0)".format(date, listing_id, review_text, int(r[0][0])))
 			buf = buf + 1
 			if buf > buffer_limit:
 				write.commit()
@@ -56,7 +63,7 @@ try:
 	# Collapse duplicate rows
 	print_progress("Collapsing duplicate reviews...")
 	tot_reviews = (write_cur.execute("SELECT Count(*) FROM reviews").fetchall()[0])[0]
-	write_cur.execute("DELETE FROM reviews WHERE rowid NOT IN (SELECT MAX(rowid) FROM reviews GROUP BY dat, review)")
+	write_cur.execute("DELETE FROM reviews WHERE rowid NOT IN (SELECT MAX(rowid) FROM reviews GROUP BY dat, listing, review, val)")
 	remaining_reviews = (write_cur.execute("SELECT Count(*) FROM reviews").fetchall()[0])[0]
 	print_progress("Kept " + str(remaining_reviews) + " out of " + str(tot_reviews))
 

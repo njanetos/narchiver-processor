@@ -17,8 +17,11 @@ try:
 		read_cur.execute("SELECT * FROM listings WHERE rowid = {0}".format(i))
 		row = read_cur.fetchall()[0]
 
+		# Find listing id
+                listing_id = titles.index(row[1]) + 1
+
 		# Add price in
-		write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2})".format(row[0], i, round(float(row[2]), 2)))
+		write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2})".format(row[0], listing_id, round(float(row[2]), 2)))
 		count = count + 1
 		update_progress(count, tot_count)
 
@@ -38,7 +41,7 @@ try:
 				review_date = int(reviews[r+4])
 
 				try:
-					write_cur.execute("INSERT INTO reviews VALUES({0}, {1}, '{2}', {3}, {4})".format(review_date, i, review_text, rating, review_price))
+					write_cur.execute("INSERT INTO reviews VALUES({0}, {1}, '{2}', {3}, {4})".format(review_date, listing_id, review_text, rating, review_price))
 				except:
 					continue
 
@@ -50,7 +53,7 @@ try:
 	# Collapse duplicate rows
 	print_progress("Collapsing duplicate reviews...")
 	tot_reviews = (write_cur.execute("SELECT Count(*) FROM reviews").fetchall()[0])[0]
-	write_cur.execute("DELETE FROM reviews WHERE rowid NOT IN (SELECT MAX(rowid) FROM reviews GROUP BY dat, review)")
+	write_cur.execute("DELETE FROM reviews WHERE rowid NOT IN (SELECT MAX(rowid) FROM reviews GROUP BY dat, listing, review, val, price)")
 	remaining_reviews = (write_cur.execute("SELECT Count(*) FROM reviews").fetchall()[0])[0]
 	print_progress("Kept " + str(remaining_reviews) + " out of " + str(tot_reviews))
 
