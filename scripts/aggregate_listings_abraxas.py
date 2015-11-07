@@ -19,7 +19,6 @@ try:
 
 		# Add price in
 		write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2})".format(row[0], i, round(float(row[2]), 2)))
-		write.commit()
 		count = count + 1
 		update_progress(count, tot_count)
 
@@ -36,7 +35,7 @@ try:
 				date = (days_since-days_ago)*86400
 				write_cur.execute("INSERT INTO reviews VALUES({0}, {1}, '{2}', {3}, 0)".format(date*86400, i, "", int(reviews[r][0])))
 				buf = buf + 1
-				if buf > 500:
+				if buf > buffer_limit:
 					write.commit()
 					buf = 0
 

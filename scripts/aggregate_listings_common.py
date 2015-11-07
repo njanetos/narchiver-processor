@@ -15,6 +15,8 @@ try:
 except OSError:
 	sys.exit(1)
 
+buffer_limit = 10000
+
 read = lite.connect(os.path.join('clean_listings', market+'.db'))
 read_cur = read.cursor()
 read_cur.execute('SELECT DISTINCT title, vendor, category, ships_from, ships_to FROM listings')
@@ -86,7 +88,7 @@ for t in titles:
     write_cur.execute("INSERT INTO listings VALUES('{0}', '{1}', {2}, {3}, {4}, '{5}', {6}, {7})".format(t[0], t[1], 1+categories.index(t[2]), 1+ships_from.index(t[3]), 1+ships_to.index(t[4]), units, amount, quantity))
 
     buf = buf + 1
-    if (buf > 500):
+    if (buf > buffer_limit):
         buf = 0
         write.commit()
     count = count + 1

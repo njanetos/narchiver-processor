@@ -19,7 +19,6 @@ try:
 
 		# Add price in
 		write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2})".format(row[0], i, round(float(row[2]), 2)))
-		write.commit()
 		count = count + 1
 		update_progress(count, tot_count)
 
@@ -44,7 +43,7 @@ try:
 					continue
 
 				buf = buf + 1
-				if buf > 500:
+				if buf > buffer_limit:
 					write.commit()
 					buf = 0
 
