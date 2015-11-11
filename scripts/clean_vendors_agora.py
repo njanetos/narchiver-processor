@@ -13,6 +13,7 @@ from dateutil.parser import parse
 import calendar
 import time
 import datetime
+from lxml.html import fromstring, tostring
 
 market = 'agora'
 
@@ -34,7 +35,7 @@ if not os.path.exists(output_path):
 
 try:
     con = lite.connect(output_path + output_file)
-    con.cursor().execute("CREATE TABLE vendors( stuff here )")
+    con.cursor().execute("CREATE TABLE vendors( dat INT, name TEXT, rating TEXT, ratings TEXT )")
 except lite.Error, e:
     print_progress("Failed to clean " + market + " listings, error %s:" % e.args[0])
 
@@ -58,6 +59,50 @@ try:
 
     	# Parse the HTML
         tree = html.fromstring(file_string)
+
+        name = tree.xpath('//div/strong/text()')
+
+        if len(name) != 1:
+            continue
+        else:
+            name = name[0]
+
+        rating = tree.xpath('//span[@class="gen-user-ratings"]/text()')
+
+        rating = [ r for r in rating if r != ' ']
+
+        if len(rating) < 1:
+            continue
+        else:
+            vendor_rating = clean(rating[0].replace('~', '.').replace('/', '.').replace(' deals', '').replace('.5, ', ' '))
+
+        test = tree.xpath('//div[@class="embedded-feedback-list"]/table/tr/td')
+        if len(test) > 0:
+            rating_vals = [clean(tostring(t).replace('<td>', '').replace('</td>', '').replace('<strong>', '').replace('</strong>', '')) for t in test[0::5]]
+            rating_text = [clean(tostring(t).replace('<td>', '').replace('</td>', '')) for t in test[1::5]]
+            rating_product = [clean(re.sub('(<)(.*?)(>)', '', tostring(t))) for t in test[2::5]]
+            rating_date = [clean(re.sub('(<)(.*?)(>)', '', tostring(t)).replace(' days ago', '')) for t in test[3::5]]
+            rating_rating = [clean(re.sub('(<)(.*?)(>)', '', tostring(t)).replace('~', ' ').replace('/', 's').replace('deals', '').replace('anon &#160;', '')) for t in test[4::5]]
+
+        if not (len(rating_vals) == len(rating_text) == len(rating_product) == len(rating_date) == len(rating_rating)):
+            continue
+
+        # interweave arrays
+
+        ratings = [""]*len(rating_vals)*5
+        ratings[0::5] = rating_vals
+        ratings[1::5] = rating_text
+        ratings[2::5] = rating_product
+        ratings[3::5] = rating_date
+        ratings[4::5] = rating_rating
+
+        ratings = "|".join(ratings)
+
+        # Read the date
+        date = f[0:10]
+
+        # Insert into SQL
+        con.cursor().execute("INSERT INTO vendors VALUES({0}, '{1}', '{2}', '{3}')".format(date, name, vendor_rating, ratings))
 
         tot_scraped = tot_scraped + 1
 
