@@ -27,6 +27,13 @@ clean_listings/%.db: raw_by_site/%
 clean_listings: $(MARKETS:%=clean_listings/%.db)
 	@./scripts/push.sh "Cleaned listings" "Complete" || true
 
+clean_vendors/%.db: raw_by_site/%
+	@./scripts/run_script.sh clean_vendors_$* # | tee logs/clean_listings_$*_`date +"%m-%d-%Y-%T"`.log
+	@./scripts/push.sh "Cleaning listings" "$*" || true
+
+clean_vendors: $(MARKETS:%=clean_vendors/%.db)
+	@./scripts/push.sh "Cleaned listings" "Complete" || true
+
 # Aggregate listings
 aggregate_listings/%.db: clean_listings/%.db
 	@./scripts/run_script.sh aggregate_listings_$* # | tee logs/aggregate_listings_$*_`date +"%m-%d-%Y-%T"`.log
@@ -35,13 +42,7 @@ aggregate_listings/%.db: clean_listings/%.db
 aggregate_listings: $(MARKETS:%=aggregate_listings/%.db)
 	@./scripts/push.sh "Aggregated listings" "Complete" || true
 
-# Graph stuff
-graphs_%: aggregate_listings/%.db
-	@./scripts/run_script.sh graphs $*
-
-graphs: $(MARKETS:%=graphs_%)
-
-sense: clean_listings aggregate_listings graphs
+sense: clean_listings aggregate_listings clean_vendors
 
 clean:
 	rm -rf raw

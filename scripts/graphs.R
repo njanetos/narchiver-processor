@@ -27,6 +27,32 @@ N = length(cats$category)
 u = c('g', 'mg', 'kg', 'lb', 'oz')
 conversion = c(1, 1000, 0.001, 0.00220462, 0.035274)
 
+ratings = subset(sqldf(paste("SELECT * FROM listings AS L JOIN reviews AS R on R.listing=L.rowid"), dbname = path), select = -c(title, ships_from, ships_to, category, listing, review, quantity, amount, units, price))
+ratings = ratings[order(ratings$vendor, ratings$dat),]
+min_date = min(ratings$dat)
+max_date = max(ratings$dat)
+ratings = split(ratings, ratings$vendor)
+
+splines = ratings
+
+for (i in 1:length(ratings)) {
+    ratings[[i]]$dat = ratings[[i]]$dat - min(ratings[[i]]$dat)
+    splines[[i]] = NA
+    try ({splines[[i]] = smooth.spline(ratings[[i]]$dat, ratings[[i]]$val, spar=0.8)})
+}
+
+plot(splines[[1]], type = 'l', xlim = c(0, max_date-min_date), ylim = c(1, 5))
+for (i in 2:length(ratings)) {
+    lines(splines[[i]])
+}
+
+i = 1
+plot(splines[[i]], type = 'l', xlim = c(0, max_date-min_date), ylim = c(1, 5))
+
+i = i + 1
+plot(ratings[[i]]$dat, ratings[[i]]$val, type = 'l', xlim = c(0, max_date-min_date), ylim = c(1, 5))
+
+
 for (i in 1:N) {
     
     all_prices = subset(sqldf(paste("SELECT * FROM listings AS L JOIN prices AS P on P.listing=L.rowid WHERE category =", i), dbname = path), select = -c(vendor, ships_from, ships_to, category, listing))
