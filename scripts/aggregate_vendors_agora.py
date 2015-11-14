@@ -47,10 +47,13 @@ try:
 
     # Sort all the titles
     print_progress("Sorting reviews and ratings by vendor...")
-    tot_count, count = len(vendors), 0
+    tot_count, count, tot_aggregated = row_count, 0, 0
     buf = 0
 
     for i in range(1, row_count):
+
+        count = count + 1
+        update_progress(count, tot_count)
 
         read_cur.execute("SELECT * FROM vendors WHERE rowid == {0}".format(i))
 
@@ -78,7 +81,10 @@ try:
         rating = float(rating)
 
         # Extract their sales.
-        sales = row[2].split(' ')[1].split('.')
+        sales = row[2].split(' ')
+        if len(sales) < 2:
+            continue
+        sales = sales[1].split('.')
         # Take the average if there are two
         if len(sales) > 1:
             sales = (int(sales[0]) + int(sales[1]))//2
@@ -106,8 +112,7 @@ try:
             buf = 0
             write.commit()
 
-        count = count + 1
-        update_progress(count, tot_count)
+        tot_aggregated = tot_aggregated + 1
 
 except lite.Error, e:
 	print "Error %s:" % e.args[0]
@@ -117,6 +122,8 @@ finally:
         write.close()
     if read:
         read.close()
+
+print_progress("Wrote " + str(tot_aggregated) + " out of " + str(row_count) + " to database.")
 
 try:
     os.rename(os.path.join('aggregate_vendors', 'temp.db'), os.path.join('aggregate_vendors', market+'.db'))
