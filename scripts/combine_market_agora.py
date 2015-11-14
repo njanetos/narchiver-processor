@@ -163,4 +163,4 @@ finally:
     if read_list:
         read_list.close()
 
-print_progess("Finished combining databases for the " + market + " market.")
+print_progress("Finished combining databases for the " + market + " market.")

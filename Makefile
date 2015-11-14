@@ -42,7 +42,7 @@ aggregate_listings/%.db: clean_listings/%.db
 aggregate_listings: $(MARKETS:%=aggregate_listings/%.db)
 	@./scripts/push.sh "Aggregated listings" "Complete" || true
 
-# Aggregate listings
+# Aggregate vendors
 aggregate_vendors/%.db: clean_vendors/%.db
 	@./scripts/run_script.sh aggregate_vendors_$* # | tee logs/aggregate_listings_$*_`date +"%m-%d-%Y-%T"`.log
 	@./scripts/push.sh "Aggregating vendors" "$*" || true
@@ -50,7 +50,15 @@ aggregate_vendors/%.db: clean_vendors/%.db
 aggregate_vendors: $(MARKETS:%=aggregate_vendors/%.db)
 	@./scripts/push.sh "Aggregated vendors" "Complete" || true
 
-sense: clean_listings aggregate_listings clean_vendors aggregate_vendors
+# Combine everything together
+combined_market/%.db: aggregate_vendors/%.db aggregate_listings/%.db
+	@./scripts/run_script.sh combine_market_$* # | tee logs/aggregate_listings_$*_`date +"%m-%d-%Y-%T"`.log
+	@./scripts/push.sh "Combining market" "$*" || true
+
+combined_market: $(MARKETS:%=combined_market/%.db)
+	@./scripts/push.sh "Combined markets" "Complete" || true
+
+sense: clean_listings aggregate_listings clean_vendors aggregate_vendors combined_market
 
 clean:
 	rm -rf raw
