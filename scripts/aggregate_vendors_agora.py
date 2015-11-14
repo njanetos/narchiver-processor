@@ -89,8 +89,11 @@ try:
         if len(sales) > 1:
             sales = (int(sales[0]) + int(sales[1]))//2
         elif len(sales) == 1:
-            sales = int(sales[0])
-
+            try:
+                sales = int(sales[0])
+            except:
+                continue
+        
         # Write this to the database
         write_cur.execute("INSERT INTO ratings VALUES({0}, {1}, {2})".format(vendor_id, rating, date))
         write_cur.execute("INSERT INTO sales VALUES({0}, {1}, {2})".format(vendor_id, sales, date))
