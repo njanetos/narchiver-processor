@@ -163,4 +163,9 @@ finally:
     if read_list:
         read_list.close()
 
+try:
+    os.rename(os.path.join('combined_market', 'temp.db'), os.path.join('combined_market', market+'.db'))
+except OSError:
+    pass
+
 print_progress("Finished combining databases for the " + market + " market.")
