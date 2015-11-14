@@ -86,14 +86,14 @@ try:
             continue
         sales = sales[1].split('.')
         # Take the average if there are two
-        if len(sales) > 1:
-            sales = (int(sales[0]) + int(sales[1]))//2
-        elif len(sales) == 1:
-            try:
+        try:
+            if len(sales) > 1:
+                sales = (int(sales[0]) + int(sales[1]))//2
+            elif len(sales) == 1:
                 sales = int(sales[0])
-            except:
-                continue
-        
+        except:
+            continue
+
         # Write this to the database
         write_cur.execute("INSERT INTO ratings VALUES({0}, {1}, {2})".format(vendor_id, rating, date))
         write_cur.execute("INSERT INTO sales VALUES({0}, {1}, {2})".format(vendor_id, sales, date))
