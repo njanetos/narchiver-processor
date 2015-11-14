@@ -42,38 +42,116 @@ try:
     # Copy in and cross-reference stuff!
 
     # Vendors
+    print_progress("Cross-referencing vendors...")
     read_ven_cur.execute('SELECT name FROM vendors')
-    vendors = read_ven_cur.fetchall()
-    vendors = [ v[0] for v in vendors ]
-
+    vendors = [ v[0] for v in read_ven_cur.fetchall() ]
+    written, tot = 0, len(vendors)
     for v in vendors:
+        update_progress(written, tot)
         write_cur.execute("INSERT INTO vendors VALUES('{0}')".format(v))
+        written = written + 1
     write.commit()
+    print_progress("Vendors cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%')
 
     # Listings
+    print_progress("Cross-referencing listings...")
     read_list_cur.execute('SELECT * FROM listings')
-    for l in read_list_cur.fetchall():
+    listings = read_list_cur.fetchall()
+    written, tot = 0, len(listings)
+    for l in listings:
+        update_progress(written, tot)
         # Find the vendor
-        print vendors
-        vendor_id = vendors.index(l[1])
-        print vendor_id
-        # write_cur.execute("INSERT INTO listings VALUES('{0}')".format(v))
-
-    quit()
+        try:
+            vendor_id = vendors.index(l[1])
+        except ValueError, e:
+            continue
+        # Insert the new listings object with vendor name replaced by id
+        write_cur.execute("INSERT INTO listings VALUES('{0}', {1}, {2}, {3}, {4}, '{5}', {6}, {7})".format(l[0], vendor_id, l[2], l[3], l[4], l[5], l[6], l[7]))
+        written = written + 1
+    write.commit()
+    print_progress("Listings cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%')
 
     # Ships_from
+    print_progress("Cross-referencing ships_from...")
+    read_list_cur.execute('SELECT location FROM ships_from')
+    ships_from = [ v[0] for v in read_list_cur.fetchall() ]
+    written, tot = 0, len(ships_from)
+    for v in ships_from:
+        update_progress(written, tot)
+        write_cur.execute("INSERT INTO ships_from VALUES('{0}')".format(v))
+        written = written + 1
+    write.commit()
+    print_progress("ships_from cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%')
 
     # Ships_to
+    print_progress("Cross-referencing ships_to...")
+    read_list_cur.execute('SELECT location FROM ships_to')
+    ships_to = [ v[0] for v in read_list_cur.fetchall() ]
+    written, tot = 0, len(ships_to)
+    for v in ships_to:
+        update_progress(written, tot)
+        write_cur.execute("INSERT INTO ships_to VALUES('{0}')".format(v))
+        written = written + 1
+    write.commit()
+    print_progress("ships_to cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%')
 
     # Prices
+    print_progress("Cross-referencing prices...")
+    read_list_cur.execute('SELECT * FROM prices')
+    prices = read_list_cur.fetchall()
+    written, tot = 0, len(prices)
+    for p in prices:
+        update_progress(written, tot)
+        # Find the vendor
+        try:
+            l = listings[p[1]-1]
+            vendor_id = vendors.index(l[1]) + 1
+        except ValueError, e:
+            continue
+        write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2}, {3})".format(p[0], p[1], vendor_id, p[2]))
+        written = written + 1
+    write.commit()
+    print_progress("Prices cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%')
 
     # Categories
+    print_progress("Cross-referencing categories...")
+    read_list_cur.execute('SELECT * FROM categories')
+    categories = [ v[0] for v in read_list_cur.fetchall() ]
+    written, tot = 0, len(categories)
+    for v in categories:
+        update_progress(written, tot)
+        write_cur.execute("INSERT INTO categories VALUES('{0}')".format(v))
+        written = written + 1
+    write.commit()
+    print_progress("Categories cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%')
 
     # Sales
+    print_progress("Cross-referencing sales...")
+    read_ven_cur.execute('SELECT * FROM sales')
+    sales = [ v for v in read_ven_cur.fetchall() ]
+    written, tot = 0, len(sales)
+    for v in sales:
+        update_progress(written, tot)
+        write_cur.execute("INSERT INTO sales VALUES({0}, {1}, {2})".format(v[0], v[1], v[2]))
+        written = written + 1
+    write.commit()
+    print_progress("Sales cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%')
 
     # Reviews
+    # TODO Fill this in
 
     # Ratings
+    print_progress("Cross-referencing ratings...")
+    read_ven_cur.execute('SELECT * FROM ratings')
+    ratings = [ v for v in read_ven_cur.fetchall() ]
+    written, tot = 0, len(ratings)
+    for v in ratings:
+        update_progress(written, tot)
+        write_cur.execute("INSERT INTO ratings VALUES({0}, {1}, {2})".format(v[0], v[1], v[2]))
+        written = written + 1
+    write.commit()
+    print_progress("Ratings cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%')
+
 except lite.Error, e:
 	print "Error %s:" % e.args[0]
 finally:
@@ -84,3 +162,5 @@ finally:
         read_ven.close()
     if read_list:
         read_list.close()
+
+print_progess("Finished combining databases for the " + market + " market.")
