@@ -42,7 +42,15 @@ aggregate_listings/%.db: clean_listings/%.db
 aggregate_listings: $(MARKETS:%=aggregate_listings/%.db)
 	@./scripts/push.sh "Aggregated listings" "Complete" || true
 
-sense: clean_listings aggregate_listings clean_vendors
+# Aggregate listings
+aggregate_vendors/%.db: clean_vendors/%.db
+	@./scripts/run_script.sh aggregate_vendors_$* # | tee logs/aggregate_listings_$*_`date +"%m-%d-%Y-%T"`.log
+	@./scripts/push.sh "Aggregating vendors" "$*" || true
+
+aggregate_vendors: $(MARKETS:%=aggregate_vendors/%.db)
+	@./scripts/push.sh "Aggregated vendors" "Complete" || true
+
+sense: clean_listings aggregate_listings clean_vendors aggregate_vendors
 
 clean:
 	rm -rf raw
@@ -50,4 +58,5 @@ clean:
 	rm -rf clean_listings
 	rm -rf clean_categories
 	rm -rf aggregate_listings
+	rm -rf aggregate_vendors
 	rm -rf plots
