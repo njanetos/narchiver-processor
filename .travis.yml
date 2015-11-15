@@ -9,6 +9,7 @@ addons:
     - python-requests
     - python-dateutil
 before_install:
+  - mkdir logs
   - rm -rf raw_zipped_test.zip
   - wget https://github.com/njanetos/narchiver-processor/raw/master/raw_zipped_test.zip
 script: make aggregate_listings
