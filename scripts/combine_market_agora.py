@@ -32,12 +32,10 @@ try:
     write_cur.execute('CREATE TABLE vendors(name TEXT)')
     write_cur.execute('CREATE TABLE listings(title TEXT, vendor INT, category INT, ships_from INT, ships_to INT, units TEXT, amount REAL, quantity INT)')
     write_cur.execute('CREATE TABLE reviews(vendor INT, listing INT, val INT, dat INT)')
-    write_cur.execute('CREATE TABLE ratings(vendor INT, val REAL, dat INT)')
-    write_cur.execute('CREATE TABLE sales(vendor INT, val INT, dat INT)')
     write_cur.execute('CREATE TABLE categories(category TEXT)')
     write_cur.execute('CREATE TABLE ships_from(location TEXT)')
     write_cur.execute('CREATE TABLE ships_to(location TEXT)')
-    write_cur.execute('CREATE TABLE prices(dat INT, listing INT, vendor INT, price REAl, rating REAL)')
+    write_cur.execute('CREATE TABLE prices(dat INT, listing INT, vendor INT, price REAl, rating REAL, sales INT)')
     write.commit()
 
     # Copy in and cross-reference stuff!
@@ -79,16 +77,12 @@ try:
     print_progress("ships_to cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%')
 
     # Ratings
-    print_progress("Cross-referencing ratings...")
     read_ven_cur.execute('SELECT * FROM ratings')
     ratings = [ v for v in read_ven_cur.fetchall() ]
-    written, tot = 0, len(ratings)
-    for v in ratings:
-        update_progress(written, tot)
-        write_cur.execute("INSERT INTO ratings VALUES({0}, {1}, {2})".format(v[0], v[1], v[2]))
-        written = written + 1
-    write.commit()
-    print_progress("Ratings cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%')
+
+    # Sales
+    read_ven_cur.execute('SELECT * FROM sales')
+    sales = [ v for v in read_ven_cur.fetchall() ]
 
     # Listings
     print_progress("Cross-referencing listings...")
@@ -113,6 +107,7 @@ try:
     read_list_cur.execute('SELECT * FROM prices')
     prices = read_list_cur.fetchall()
     written, tot = 0, len(prices)
+    buf = 0
     for p in prices:
         update_progress(written, tot)
 
@@ -123,9 +118,13 @@ try:
         except ValueError, e:
             continue
 
-        # Find all the vendor's ratings
+        # Find all the vendor's ratings and sales
         try:
             vendor_ratings = [r for r in ratings if r[0] == vendor_id ]
+            vendor_sales = [r for r in sales if r[0] == vendor_id ]
+
+            if len(vendor_ratings) != len(vendor_sales):
+                continue
 
             if len(vendor_ratings) == 0:
                 # No ratings found
@@ -146,14 +145,21 @@ try:
 
                 if max_val == min_val:
                     rating = vendor_ratings[min_ind][1]
+                    sale = vendor_sales[min_ind][1]
                 else:
                     mix = (float(p[0]) - float(min_val))/(float(max_val) - float(min_val))
                     rating = (1-mix)*vendor_ratings[max_ind][1] + mix*vendor_ratings[min_ind][1]
+                    sale = (1-mix)*vendor_sales[max_ind][1] + mix*vendor_sales[min_ind][1]
         except:
             continue
 
 
-        write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2}, {3}, {4})".format(p[0], p[1], vendor_id, p[2], rating))
+
+        write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2}, {3}, {4}, {5})".format(p[0], p[1], vendor_id, p[2], rating, sale))
+        buf = buf + 1
+        if buf > buffer_limit:
+            write.commit()
+            buf = 0
         written = written + 1
     write.commit()
     print_progress("Prices cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%')
@@ -170,17 +176,6 @@ try:
     write.commit()
     print_progress("Categories cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%')
 
-    # Sales
-    print_progress("Cross-referencing sales...")
-    read_ven_cur.execute('SELECT * FROM sales')
-    sales = [ v for v in read_ven_cur.fetchall() ]
-    written, tot = 0, len(sales)
-    for v in sales:
-        update_progress(written, tot)
-        write_cur.execute("INSERT INTO sales VALUES({0}, {1}, {2})".format(v[0], v[1], v[2]))
-        written = written + 1
-    write.commit()
-    print_progress("Sales cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%')
 
     # Reviews
     # TODO Fill this in

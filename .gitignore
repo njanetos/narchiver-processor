@@ -8,3 +8,4 @@ clean_listings/
 clean_categories/
 raw_zipped_test.zip
 aggregate_listings/
+*.log
