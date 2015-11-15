@@ -18,7 +18,7 @@ def print_progress(progress):
 
 def update_progress(progress, total):
     # Update the progress
-    if (total <= 100):
-        print_progress(float(progress) / float(total))	
-    elif (progress % (total//100) == 0):
-        print_progress(float(progress) / float(total))
+	if (total <= 100):
+		print_progress(float(progress) / float(total))
+	elif (progress % (total//100) == 0):
+		print_progress(float(progress) / float(total))
