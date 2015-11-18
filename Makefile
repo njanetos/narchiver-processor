@@ -65,6 +65,9 @@ clean:
 	rm -rf raw_by_site
 	rm -rf clean_listings
 	rm -rf clean_categories
+	rm -rf clean_vendors
 	rm -rf aggregate_listings
 	rm -rf aggregate_vendors
 	rm -rf plots
+	rm -rf combined_market
+	rm -rf regressions

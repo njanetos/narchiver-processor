@@ -21,7 +21,7 @@ try:
 		listing_id = titles.index(row[1]) + 1
 
 		# Add price in
-		write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2})".format(row[0], listing_id, float(row[2])))
+		write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2}, {3}, {4}, {5})".format(row[0], listing_id, float(row[2]), row[8], row[9], row[10]))
 		count = count + 1
 		update_progress(count, tot_count)
 
@@ -42,7 +42,7 @@ try:
 			# Otherwise, append the info onto the end
 			if len(reviews) > 0:
 				reviews[-1].append(t)
-			else: 
+			else:
 				continue
 
 		# Go through the reviews and find the day, in days since 1970, on which it was scraped

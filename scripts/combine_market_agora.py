@@ -35,7 +35,7 @@ try:
     write_cur.execute('CREATE TABLE categories(category TEXT)')
     write_cur.execute('CREATE TABLE ships_from(location TEXT)')
     write_cur.execute('CREATE TABLE ships_to(location TEXT)')
-    write_cur.execute('CREATE TABLE prices(dat INT, listing INT, vendor INT, price REAl, rating REAL, sales INT)')
+    write_cur.execute('CREATE TABLE prices(dat INT, listing INT, vendor INT, price REAl, est_rating REAL, est_sales INT, rating REAL, min_sales INT, max_sales INT)')
     write.commit()
 
     # Copy in and cross-reference stuff!
@@ -153,9 +153,7 @@ try:
         except:
             continue
 
-
-
-        write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2}, {3}, {4}, {5})".format(p[0], p[1], vendor_id, p[2], rating, sale))
+        write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8})".format(p[0], p[1], vendor_id, p[2], rating, sale, p[3], p[4], p[5]))
         buf = buf + 1
         if buf > buffer_limit:
             write.commit()

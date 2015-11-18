@@ -8,7 +8,7 @@ execfile('scripts/clean_listings_common.py')
 
 try:
     con = lite.connect(output_path + output_file)
-    con.cursor().execute("CREATE TABLE listings(dat INT, title TEXT, price REAL, vendor TEXT, reviews TEXT, category TEXT, ships_from TEXT, ships_to TEXT)")
+    con.cursor().execute("CREATE TABLE listings(dat INT, title TEXT, price REAL, vendor TEXT, reviews TEXT, category TEXT, ships_from TEXT, ships_to TEXT, rating REAL, min_sales INT, max_sales INT)")
 except lite.Error, e:
     print_progress("Failed to clean " + market + " listings, error %s:" % e.args[0])
 
@@ -97,12 +97,31 @@ try:
         # Clean up reviews -- remove spaces, remove special characters, remove 'Feedback' from every listings.
         reviews = clean(re.sub("  +", ", ", reviews[0].text_content())[11:])
 
-        # Get origin
+        # Get origin, destination
         ships = tree.xpath('//div[@class="product-page-ships"]/text()')
         ships = "".join(ships).replace(' ', '')
 
         ships_from = re.search('(?<=From:)(.*)(?=To:)', ships)
         ships_to = re.search('(?<=To:)(.*)', ships)
+
+        # Get vendor rating, sales
+        rating = tree.xpath('//span[@class="gen-user-ratings"]/text()')
+        if len(rating) < 2:
+            continue
+        rating = rating[1].split(',')
+        if len(rating) < 2:
+            continue
+
+        sales = rating[1]
+        rating = rating[0]
+
+        rating = float(rating.replace('/5', '').replace('~', ''))
+
+        sales = sales.replace(' deals', '').split('~')
+        if len(sales) < 2:
+            continue
+        min_sales = int(sales[0])
+        max_sales = int(sales[1])
 
         if ships_from is None:
             ships_from = ""
@@ -115,7 +134,7 @@ try:
             ships_to = clean(ships_to.group(0))
 
         # Insert into SQL
-        con.cursor().execute("INSERT INTO listings VALUES({0}, '{1}', {2}, '{3}', '{4}', '{5}', '{6}', '{7}')".format(date, title, price, vendor, reviews, category, ships_from, ships_to))
+        con.cursor().execute("INSERT INTO listings VALUES({0}, '{1}', {2}, '{3}', '{4}', '{5}', '{6}', '{7}', {8}, {9}, {10})".format(date, title, price, vendor, reviews, category, ships_from, ships_to, rating, min_sales, max_sales))
         buf = buf + 1
         if buf > buffer_limit:
             con.commit()

@@ -34,7 +34,7 @@ write_cur.execute('CREATE TABLE listings(title TEXT, vendor TEXT, category INT, 
 write_cur.execute('CREATE TABLE categories(category TEXT)')
 write_cur.execute('CREATE TABLE ships_from(location TEXT)')
 write_cur.execute('CREATE TABLE ships_to(location TEXT)')
-write_cur.execute('CREATE TABLE prices(dat INT, listing INT, price REAl)')
+write_cur.execute('CREATE TABLE prices(dat INT, listing INT, price REAl, rating REAL, min_sales INT, max_sales INT)')
 write_cur.execute('CREATE TABLE reviews(dat INT, listing INT, review TEXT, val INT, price REAL)')
 write.commit()
 
@@ -83,7 +83,6 @@ for t in titles:
         units = ""
         amount = 0.0
         quantity = 1
-
 
     write_cur.execute("INSERT INTO listings VALUES('{0}', '{1}', {2}, {3}, {4}, '{5}', {6}, {7})".format(t[0], t[1], 1+categories.index(t[2]), 1+ships_from.index(t[3]), 1+ships_to.index(t[4]), units, amount, quantity))
 
