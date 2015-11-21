@@ -8,7 +8,7 @@ execfile('scripts/clean_listings_common.py')
 
 try:
     con = lite.connect(output_path + output_file)
-    con.cursor().execute("CREATE TABLE listings(dat INT, title TEXT, price REAL, vendor TEXT, reviews TEXT, category TEXT, ships_from TEXT, ships_to TEXT)")
+    con.cursor().execute("CREATE TABLE listings(dat INT, title TEXT, price REAL, vendor TEXT, reviews TEXT, category TEXT, ships_from TEXT, ships_to TEXT, url TEXT)")
 except lite.Error, e:
     print_progress("Failed to clean " + market + " listings, error %s:" % e.args[0])
 
@@ -112,7 +112,7 @@ try:
         tot_scraped = tot_scraped + 1
 
         # Write to database
-        con.cursor().execute("INSERT INTO listings VALUES({0}, '{1}', {2}, '{3}', '{4}', '{5}', '{6}', '{7}')".format(date, title, price, vendor, reviews, category, ships_from, ships_to))
+        con.cursor().execute("INSERT INTO listings VALUES({0}, '{1}', {2}, '{3}', '{4}', '{5}', '{6}', '{7}', '{8}')".format(date, title, price, vendor, reviews, category, ships_from, ships_to, f.split('|')[1]))
         buf = buf + 1
 	if buf > buffer_limit:
             con.commit()

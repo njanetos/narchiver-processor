@@ -4,7 +4,7 @@ market = 'abraxas'
 
 try:
 
-	execfile('scripts/aggregate_listings_common.py')
+	execfile('scripts/extract_data_listings_common.py')
 
 	# Get total number of listings
 	val = (read_cur.execute("SELECT Count(*) FROM listings").fetchall()[0])[0]
