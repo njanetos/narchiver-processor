@@ -95,7 +95,11 @@ try:
         try:
             vendor_id = vendors.index(l[1])
         except ValueError, e:
-            continue
+            # We found a new vendor!
+            # Add him in
+            write_cur.execute("INSERT INTO vendors VALUES('{0}')".format(l[1]))
+            vendors.append(l[1])
+            vendor_id = len(vendors)-1
 
         # Insert the new listings object with vendor name replaced by id
         write_cur.execute("INSERT INTO listings VALUES('{0}', {1}, {2}, {3}, {4}, '{5}', {6}, {7})".format(clean(l[0]), vendor_id, l[2], l[3], l[4], l[5], l[6], l[7]))
@@ -157,7 +161,7 @@ try:
     #   a) Was scraped on a different day.
     #   b) Has the same text
     #   c) Was left on the same day
-    written, progress, tot = 0, 0, len(reviews_vendors)
+    written, progress, duplicates, tot = 0, 0, 0, len(reviews_vendors)
     for r in reviews_vendors:
 
         progress = progress + 1
@@ -198,13 +202,13 @@ try:
                                                                                                  r[8] or "'null'",
                                                                                                  r[5]))
         else:
-            continue
-            
+            duplicates = duplicates + 1
+
         written = written + 1
         update_progress(progress, tot)
 
     write.commit()
-    print_progress("Vendor reviews cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%')
+    print_progress("Vendor reviews cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%. Of those, ' + str(round(100*(float(duplicates)/float(written)), 2)) + '% found to be duplicates.')
 
     # Reviews
     # vendor INT, listing INT, val INT, dat INT, content TEXT, user_rating REAL, user_min_sales INT, user_max_sales INT, scraped_at INT
@@ -221,7 +225,7 @@ try:
                                     WHERE r.listing == l.rowid""")
     reviews_listings = [ v for v in read_list_cur.fetchall() ]
 
-    written, progress, tot = 0, 0, len(reviews_listings)
+    written, progress, duplicates, tot = 0, 0, 0, len(reviews_listings)
     for r in reviews_listings:
 
         progress = progress + 1
@@ -230,6 +234,7 @@ try:
         try:
             listing_id = listing_names_clean.index(clean(r[1]).replace(' ', '').lower())
         except ValueError, e:
+            print "Didn't find listing."
             continue
 
         # Find the vendor
@@ -266,13 +271,13 @@ try:
                                                                                                  "'null'",
                                                                                                  r[5]))
         else:
-            continue
+            duplicates = duplicates + 1
 
         written = written + 1
         update_progress(progress, tot)
 
     write.commit()
-    print_progress("Listing reviews cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%')
+    print_progress("Listing reviews cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%. Of those, ' + str(round(100*(float(duplicates)/float(written)), 2)) + '% found to be duplicates.')
 
 except lite.Error, e:
 	print "Error %s:" % e.args[0]
