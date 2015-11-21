@@ -128,8 +128,12 @@ try:
                 review_user_min_sales[i] = 'null'
                 review_user_max_sales[i] = 'null'
             else:
-                review_user_min_sales[i] = int(review_user_sales[i][0].split(' ')[1])
-                review_user_max_sales[i] = int(review_user_sales[i][0].split(' ')[2])
+                try:
+                    review_user_min_sales[i] = int(review_user_sales[i][0].split(' ')[1])
+                    review_user_max_sales[i] = int(review_user_sales[i][0].split(' ')[2])
+                except:
+                    review_user_min_sales[i] = 'null'
+                    review_user_max_sales[i] = 'null'
 
         # Insert reviews
         for i in range(1, len(review_rating)):

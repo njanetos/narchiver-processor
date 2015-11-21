@@ -16,7 +16,6 @@ if not os.path.isfile(sys.argv[1]):
     quit(0)
 
 extension = sys.argv[1].replace('./', '').split('.')
-print extension
 
 if len(extension) != 2:
     print("Malformed file name " + sys.argv[1].replace('./', ''))
