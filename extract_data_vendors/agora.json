@@ -1,0 +1,31 @@
+{
+    "data_doc": "[MISSING DATABASE DESCRIPTION]",
+    "ratings": {
+        "dat": "[MISSING COLUMN: ratings.dat]",
+        "table_doc": "[MISSING TABLE: ratings]",
+        "val": "[MISSING COLUMN: ratings.val]",
+        "vendor": "[MISSING COLUMN: ratings.vendor]"
+    },
+    "reviews": {
+        "content": "[MISSING COLUMN: reviews.content]",
+        "dat": "[MISSING COLUMN: reviews.dat]",
+        "max_user_sales": "[MISSING COLUMN: reviews.max_user_sales]",
+        "min_user_sales": "[MISSING COLUMN: reviews.min_user_sales]",
+        "product": "[MISSING COLUMN: reviews.product]",
+        "scraped_at": "[MISSING COLUMN: reviews.scraped_at]",
+        "table_doc": "[MISSING TABLE: reviews]",
+        "user_rating": "[MISSING COLUMN: reviews.user_rating]",
+        "val": "[MISSING COLUMN: reviews.val]",
+        "vendor": "[MISSING COLUMN: reviews.vendor]"
+    },
+    "sales": {
+        "dat": "[MISSING COLUMN: sales.dat]",
+        "table_doc": "[MISSING TABLE: sales]",
+        "val": "[MISSING COLUMN: sales.val]",
+        "vendor": "[MISSING COLUMN: sales.vendor]"
+    },
+    "vendors": {
+        "name": "[MISSING COLUMN: vendors.name]",
+        "table_doc": "[MISSING TABLE: vendors]"
+    }
+}

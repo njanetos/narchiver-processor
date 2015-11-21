@@ -1,58 +1,58 @@
-# Documentation for dataset listings.db
+# Documentation for dataset agora.db
 
-[MISSING DATABASE DESCRIPTION]
+Contains strings from listings files, with the HTML stripped out. Once the HTML has been stripped, the next stop is to extract data from these strings.
 
 ## Tables
 
 ### listings
 
-[MISSING TABLE: listings]
+Each row corresponds to a single listing page, on the date it was scraped. (That is, each listing should have more than one row, corresponding to different dates.)
 
 #### category
 
-[MISSING COLUMN: listings.category]
+The category to which this listing belongs.
 
 #### rating
 
-[MISSING COLUMN: listings.rating]
+The average rating of the vendor who is offering this listing
 
 #### vendor
 
-[MISSING COLUMN: listings.vendor]
+The name of the vendor offering this listing
 
 #### ships_from
 
-[MISSING COLUMN: listings.ships_from]
+The location this item ships from.
 
 #### title
 
-[MISSING COLUMN: listings.title]
+The name of this listing.
 
 #### url
 
-[MISSING COLUMN: listings.url]
+The stem of the url at which this listing was found.
 
 #### price
 
-[MISSING COLUMN: listings.price]
+The recorded price of this listing.
 
 #### ships_to
 
-[MISSING COLUMN: listings.ships_to]
+The location this item ships to.
 
 #### dat
 
-[MISSING COLUMN: listings.dat]
+The date on which this listing was scraped.
 
 #### reviews
 
-[MISSING COLUMN: listings.reviews]
+All the reviews which were left.
 
 #### max_sales
 
-[MISSING COLUMN: listings.max_sales]
+The Agora marketplace shows a coarse measure of sales of the form '100~200 sales'. This is the lower bound.
 
 #### min_sales
 
-[MISSING COLUMN: listings.min_sales]
+The Agora marketplace shows a coarse measure of sales of the form '100~200 sales'. This is the upper bound.
 

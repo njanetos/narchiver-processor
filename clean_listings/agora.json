@@ -1,18 +1,18 @@
 {
-    "data_doc": "[MISSING DATABASE DESCRIPTION]",
+    "data_doc": "Contains strings from listings files, with the HTML stripped out. Once the HTML has been stripped, the next stop is to extract data from these strings.",
     "listings": {
-        "category": "[MISSING COLUMN: listings.category]",
-        "dat": "[MISSING COLUMN: listings.dat]",
-        "max_sales": "[MISSING COLUMN: listings.max_sales]",
-        "min_sales": "[MISSING COLUMN: listings.min_sales]",
-        "price": "[MISSING COLUMN: listings.price]",
-        "rating": "[MISSING COLUMN: listings.rating]",
-        "reviews": "[MISSING COLUMN: listings.reviews]",
-        "ships_from": "[MISSING COLUMN: listings.ships_from]",
-        "ships_to": "[MISSING COLUMN: listings.ships_to]",
-        "table_doc": "[MISSING TABLE: listings]",
-        "title": "[MISSING COLUMN: listings.title]",
-        "url": "[MISSING COLUMN: listings.url]",
-        "vendor": "[MISSING COLUMN: listings.vendor]"
+        "category": "The category to which this listing belongs.",
+        "dat": "The date on which this listing was scraped.",
+        "max_sales": "The Agora marketplace shows a coarse measure of sales of the form '100~200 sales'. This is the lower bound.",
+        "min_sales": "The Agora marketplace shows a coarse measure of sales of the form '100~200 sales'. This is the upper bound.",
+        "price": "The recorded price of this listing.",
+        "rating": "The average rating of the vendor who is offering this listing",
+        "reviews": "All the reviews which were left.",
+        "ships_from": "The location this item ships from.",
+        "ships_to": "The location this item ships to.",
+        "table_doc": "Each row corresponds to a single listing page, on the date it was scraped. (That is, each listing should have more than one row, corresponding to different dates.)",
+        "title": "The name of this listing.",
+        "url": "The stem of the url at which this listing was found.",
+        "vendor": "The name of the vendor offering this listing"
     }
 }

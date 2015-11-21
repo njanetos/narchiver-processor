@@ -63,6 +63,9 @@ combined_market/%.db: extract_data_vendors/%.db extract_data_listings/%.db
 combined_market: $(MARKETS:%=combined_market/%.db)
 	@./scripts/push.sh "Combined markets" "Complete" || true
 
+document:
+	@find -name *.db -exec ./scripts/run_script.sh autodocument {} \;;
+
 sense: clean_listings extract_data_listings clean_vendors extract_data_vendors combined_market
 
 clean:

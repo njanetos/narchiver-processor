@@ -15,17 +15,18 @@ if not os.path.isfile(sys.argv[1]):
     print("Failed to find " + sys.argv[1])
     quit(0)
 
-extension = sys.argv[1].split('.')
+extension = sys.argv[1].replace('./', '').split('.')
+print extension
 
 if len(extension) != 2:
-    print("Malformed file name")
+    print("Malformed file name " + sys.argv[1].replace('./', ''))
     quit(1)
 
 clean = '--clean' in sys.argv
 
 name = extension[0].split('/')[-1]
 extension = extension[1]
-root = sys.argv[1].split('/')
+root = sys.argv[1].replace('./', '').split('/')
 root = root[:-1]
 root = os.path.join(root)
 
@@ -98,6 +99,7 @@ if extension == 'db':
     # Complain!
     bad = re.findall('\[MISSING', json.dumps(doc_json, indent = 4, sort_keys=True, separators=(',', ': ')))
     if len(bad) > 0:
+        print_progress('Parsed ' + doc_file)
         print_progress('')
         print_progress('')
         print_progress('------------------------- WARNING! -------------------------')
@@ -106,6 +108,8 @@ if extension == 'db':
         print_progress('     DOCUMENT THEM IMMEDIATELY OR YOU WILL BE PUNISHED')
         print_progress('')
         print_progress('')
+    else:
+        print_progress('Parsed ' + doc_file)
 
 else:
     print("Unrecognized file extension: " + extension)
