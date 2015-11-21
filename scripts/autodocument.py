@@ -133,7 +133,5 @@ with open(markdown_file, "w") as file:
         file.write(doc_json[d]['table_doc'])
         file.write("\n\n")
         for s in [s for s in doc_json[d] if s != 'table_doc']:
-            file.write("* " + "__" + s + "__")
-            file.write("\n\n")
-            file.write("  " + doc_json[d][s])
-            file.write("\n\n")
+            file.write("* " + "__" + s + "__: " + doc_json[d][s] + '\n')
+        file.write('\n')

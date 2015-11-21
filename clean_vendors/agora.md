@@ -8,19 +8,8 @@
 
 [MISSING TABLE: vendors]
 
-* __dat__
-
-  [MISSING COLUMN: vendors.dat]
-
-* __rating__
-
-  [MISSING COLUMN: vendors.rating]
-
-* __name__
-
-  [MISSING COLUMN: vendors.name]
-
-* __ratings__
-
-  [MISSING COLUMN: vendors.ratings]
+* __dat__: [MISSING COLUMN: vendors.dat]
+* __rating__: [MISSING COLUMN: vendors.rating]
+* __name__: [MISSING COLUMN: vendors.name]
+* __ratings__: [MISSING COLUMN: vendors.ratings]
 
