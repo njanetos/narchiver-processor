@@ -35,7 +35,7 @@ try:
     write_cur.execute('CREATE TABLE categories(category TEXT)')
     write_cur.execute('CREATE TABLE ships_from(location TEXT)')
     write_cur.execute('CREATE TABLE ships_to(location TEXT)')
-    write_cur.execute('CREATE TABLE prices(dat INT, listing INT, vendor INT, price REAl, est_rating REAL, est_sales INT, rating REAL, min_sales INT, max_sales INT)')
+    write_cur.execute('CREATE TABLE prices(dat INT, listing INT, vendor INT, price REAl, rating REAL, min_sales INT, max_sales INT)')
     write.commit()
 
     # Copy in and cross-reference stuff!
@@ -111,49 +111,7 @@ try:
     for p in prices:
         update_progress(written, tot)
 
-        # Find the vendor
-        try:
-            l = listings[p[1]-1]
-            vendor_id = vendors.index(l[1]) + 1
-        except ValueError, e:
-            continue
-
-        # Find all the vendor's ratings and sales
-        try:
-            vendor_ratings = [r for r in ratings if r[0] == vendor_id ]
-            vendor_sales = [r for r in sales if r[0] == vendor_id ]
-
-            if len(vendor_ratings) != len(vendor_sales):
-                continue
-
-            if len(vendor_ratings) == 0:
-                # No ratings found
-                rating = 0
-            else:
-                greater = [r[2] for r in vendor_ratings if r[2] < p[0]]
-                lesser = [r[2] for r in vendor_ratings if r[2] > p[0]]
-
-                if len(greater) != 0:
-                    max_ind, max_val = max(enumerate(greater), key=operator.itemgetter(1))
-                else:
-                    max_ind, max_val = len(vendor_ratings)-1, vendor_ratings[-1][2]
-
-                if len(lesser) != 0:
-                    min_ind, min_val = min(enumerate(lesser), key=operator.itemgetter(1))
-                else:
-                    min_ind, min_val = 0, vendor_ratings[0][2]
-
-                if max_val == min_val:
-                    rating = vendor_ratings[min_ind][1]
-                    sale = vendor_sales[min_ind][1]
-                else:
-                    mix = (float(p[0]) - float(min_val))/(float(max_val) - float(min_val))
-                    rating = (1-mix)*vendor_ratings[max_ind][1] + mix*vendor_ratings[min_ind][1]
-                    sale = (1-mix)*vendor_sales[max_ind][1] + mix*vendor_sales[min_ind][1]
-        except:
-            continue
-
-        write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8})".format(p[0], p[1], vendor_id, p[2], rating, sale, p[3], p[4], p[5]))
+        write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2}, {3}, {4}, {5}, {6})".format(p[0], p[1], vendor_id, p[2], p[3], p[4], p[5]))
         buf = buf + 1
         if buf > buffer_limit:
             write.commit()

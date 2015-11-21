@@ -28,7 +28,7 @@ try:
     write = lite.connect(os.path.join('extract_data_vendors', 'temp.db'))
     write_cur = write.cursor()
     write_cur.execute('CREATE TABLE vendors(name TEXT)')
-    write_cur.execute('CREATE TABLE reviews(vendor INT, val INT, content TEXT, product TEXT, dat INT)')
+    write_cur.execute('CREATE TABLE reviews(vendor INT, val INT, content TEXT, product TEXT, dat INT, scraped_at INT, user_rating REAL, min_user_sales INT, max_user_sales INT)')
     write_cur.execute('CREATE TABLE ratings(vendor INT, val REAL, dat INT)')
     write_cur.execute('CREATE TABLE sales(vendor INT, val INT, dat INT)')
     write.commit()
@@ -105,10 +105,44 @@ try:
         review_rating = review_raw[0::5]
         review_text = review_raw[1::5]
         review_product = review_raw[2::5]
+        review_date = review_raw[3::5]
+        review_user = review_raw[4::5]
+
+        # Find day on which it was scraped (in days since 1970)
+        scraped_on_days_since_1970 = date//86400
+        review_date = [scraped_on_days_since_1970 - int(r) for r in review_date]
+
+        # Find the user's rating
+        review_user_rating = [re.findall('[0-9\.]+s5', r) for r in review_user]
+        for i in range(0, len(review_user_rating)):
+            if len(review_user_rating[i]) == 0:
+                review_user_rating[i] = 'null'
+            else:
+                review_user_rating[i] = float(review_user_rating[i][0].split('s')[0])
+
+        # Find the user's sales
+        review_user_sales = [re.findall(',[0-9 ]+', r) for r in review_user]
+        review_user_min_sales, review_user_max_sales = [0]*len(review_user_sales), [0]*len(review_user_sales)
+        for i in range(0, len(review_user_sales)):
+            if len(review_user_sales[i]) == 0:
+                review_user_min_sales[i] = 'null'
+                review_user_max_sales[i] = 'null'
+            else:
+                review_user_min_sales[i] = int(review_user_sales[i][0].split(' ')[1])
+                review_user_max_sales[i] = int(review_user_sales[i][0].split(' ')[2])
 
         # Insert reviews
         for i in range(1, len(review_rating)):
-            write_cur.execute("INSERT INTO reviews VALUES({0}, {1}, '{2}', '{3}', {4})".format(vendor_id, int(review_rating[i][1:]), review_text[i], review_product[i], date))
+            # vendor INT, val INT, content TEXT, product TEXT, dat INT, scraped_at INT, user_rating REAL, min_user_sales INT, max_user_sales INT
+            write_cur.execute("INSERT INTO reviews VALUES({0}, {1}, '{2}', '{3}', {4}, {5}, {6}, {7}, {8})".format(vendor_id,
+                                                                                                                   int(review_rating[i][1:]),
+                                                                                                                   review_text[i],
+                                                                                                                   review_product[i],
+                                                                                                                   review_date[i],
+                                                                                                                   scraped_on_days_since_1970,
+                                                                                                                   review_user_rating[i],
+                                                                                                                   review_user_min_sales[i],
+                                                                                                                   review_user_max_sales[i]))
             buf = buf + 1
 
         if (buf > buffer_limit):

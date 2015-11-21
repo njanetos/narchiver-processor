@@ -63,19 +63,13 @@ try:
 			else:
 				review_text = "N/A"
 
-			write_cur.execute("INSERT INTO reviews VALUES({0}, {1}, '{2}', {3}, 0)".format(date, listing_id, review_text, int(r[0])))
+			write_cur.execute("INSERT INTO reviews VALUES({0}, {1}, '{2}', {3}, {4}, {5})".format(date, listing_id, review_text, int(r[0]), 0, days_since))
 			buf = buf + 1
 			if buf > buffer_limit:
 				write.commit()
 				buf = 0
 
 	# Collapse duplicate rows
-	print_progress("Collapsing duplicate reviews...")
-	tot_reviews = (write_cur.execute("SELECT Count(*) FROM reviews").fetchall()[0])[0]
-	write_cur.execute("DELETE FROM reviews WHERE rowid NOT IN (SELECT MAX(rowid) FROM reviews GROUP BY dat, listing, review, val)")
-	remaining_reviews = (write_cur.execute("SELECT Count(*) FROM reviews").fetchall()[0])[0]
-	print_progress("Kept " + str(remaining_reviews) + " out of " + str(tot_reviews))
-
 	print_progress("Finished aggregating.")
 
 except lite.Error, e:
