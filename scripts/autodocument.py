@@ -118,7 +118,7 @@ else:
 # Write to Markdown
 with open(markdown_file, "w") as file:
 
-    file.write("# Documentation for dataset " + name + "." + extension)
+    file.write("# Documentation for dataset " + markdown_file.split('.')[0])
     file.write("\n\n")
 
     file.write(doc_json['data_doc'])
@@ -133,7 +133,7 @@ with open(markdown_file, "w") as file:
         file.write(doc_json[d]['table_doc'])
         file.write("\n\n")
         for s in [s for s in doc_json[d] if s != 'table_doc']:
-            file.write("#### " + s)
+            file.write("####       " + s)
             file.write("\n\n")
             file.write(doc_json[d][s])
             file.write("\n\n")

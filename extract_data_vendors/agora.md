@@ -1,4 +1,4 @@
-# Documentation for dataset vendors.db
+# Documentation for dataset extract_data_vendors/agora
 
 [MISSING DATABASE DESCRIPTION]
 
@@ -8,39 +8,39 @@
 
 [MISSING TABLE: reviews]
 
-#### dat
+####       dat
 
 [MISSING COLUMN: reviews.dat]
 
-#### product
+####       product
 
 [MISSING COLUMN: reviews.product]
 
-#### vendor
+####       vendor
 
 [MISSING COLUMN: reviews.vendor]
 
-#### val
+####       val
 
 [MISSING COLUMN: reviews.val]
 
-#### max_user_sales
+####       max_user_sales
 
 [MISSING COLUMN: reviews.max_user_sales]
 
-#### min_user_sales
+####       min_user_sales
 
 [MISSING COLUMN: reviews.min_user_sales]
 
-#### content
+####       content
 
 [MISSING COLUMN: reviews.content]
 
-#### user_rating
+####       user_rating
 
 [MISSING COLUMN: reviews.user_rating]
 
-#### scraped_at
+####       scraped_at
 
 [MISSING COLUMN: reviews.scraped_at]
 
@@ -48,15 +48,15 @@
 
 [MISSING TABLE: ratings]
 
-#### dat
+####       dat
 
 [MISSING COLUMN: ratings.dat]
 
-#### vendor
+####       vendor
 
 [MISSING COLUMN: ratings.vendor]
 
-#### val
+####       val
 
 [MISSING COLUMN: ratings.val]
 
@@ -64,7 +64,7 @@
 
 [MISSING TABLE: vendors]
 
-#### name
+####       name
 
 [MISSING COLUMN: vendors.name]
 
@@ -72,15 +72,15 @@
 
 [MISSING TABLE: sales]
 
-#### dat
+####       dat
 
 [MISSING COLUMN: sales.dat]
 
-#### vendor
+####       vendor
 
 [MISSING COLUMN: sales.vendor]
 
-#### val
+####       val
 
 [MISSING COLUMN: sales.val]
 

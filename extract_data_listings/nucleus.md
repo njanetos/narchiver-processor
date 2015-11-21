@@ -1,4 +1,4 @@
-# Documentation for dataset ships_to.db
+# Documentation for dataset extract_data_listings/nucleus
 
 [MISSING DATABASE DESCRIPTION]
 
@@ -8,7 +8,7 @@
 
 [MISSING TABLE: ships_from]
 
-#### location
+####       location
 
 [MISSING COLUMN: ships_from.location]
 
@@ -16,35 +16,35 @@
 
 [MISSING TABLE: listings]
 
-#### category
+####       category
 
 [MISSING COLUMN: listings.category]
 
-#### vendor
+####       vendor
 
 [MISSING COLUMN: listings.vendor]
 
-#### ships_from
+####       ships_from
 
 [MISSING COLUMN: listings.ships_from]
 
-#### title
+####       title
 
 [MISSING COLUMN: listings.title]
 
-#### ships_to
+####       ships_to
 
 [MISSING COLUMN: listings.ships_to]
 
-#### amount
+####       amount
 
 [MISSING COLUMN: listings.amount]
 
-#### units
+####       units
 
 [MISSING COLUMN: listings.units]
 
-#### quantity
+####       quantity
 
 [MISSING COLUMN: listings.quantity]
 
@@ -52,35 +52,35 @@
 
 [MISSING TABLE: reviews]
 
-#### user_rating
+####       user_rating
 
 [MISSING COLUMN: reviews.user_rating]
 
-#### user_deals
+####       user_deals
 
 [MISSING COLUMN: reviews.user_deals]
 
-#### val
+####       val
 
 [MISSING COLUMN: reviews.val]
 
-#### price
+####       price
 
 [MISSING COLUMN: reviews.price]
 
-#### listing
+####       listing
 
 [MISSING COLUMN: reviews.listing]
 
-#### dat
+####       dat
 
 [MISSING COLUMN: reviews.dat]
 
-#### review
+####       review
 
 [MISSING COLUMN: reviews.review]
 
-#### scraped_at
+####       scraped_at
 
 [MISSING COLUMN: reviews.scraped_at]
 
@@ -88,31 +88,31 @@
 
 [MISSING TABLE: prices]
 
-#### rating
+####       rating
 
 [MISSING COLUMN: prices.rating]
 
-#### pricel
+####       pricel
 
 [MISSING COLUMN: prices.pricel]
 
-#### url
+####       url
 
 [MISSING COLUMN: prices.url]
 
-#### dat
+####       dat
 
 [MISSING COLUMN: prices.dat]
 
-#### max_sales
+####       max_sales
 
 [MISSING COLUMN: prices.max_sales]
 
-#### listing
+####       listing
 
 [MISSING COLUMN: prices.listing]
 
-#### min_sales
+####       min_sales
 
 [MISSING COLUMN: prices.min_sales]
 
@@ -120,7 +120,7 @@
 
 [MISSING TABLE: ships_to]
 
-#### location
+####       location
 
 [MISSING COLUMN: ships_to.location]
 
@@ -128,7 +128,7 @@
 
 [MISSING TABLE: categories]
 
-#### category
+####       category
 
 [MISSING COLUMN: categories.category]
 

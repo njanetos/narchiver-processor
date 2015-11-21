@@ -5,3 +5,5 @@ raw.zip
 *.RData
 *.Rhistory
 *.db
+raw/
+raw_by_site/

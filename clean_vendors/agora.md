@@ -1,4 +1,4 @@
-# Documentation for dataset vendors.db
+# Documentation for dataset clean_vendors/agora
 
 [MISSING DATABASE DESCRIPTION]
 
@@ -8,19 +8,19 @@
 
 [MISSING TABLE: vendors]
 
-#### dat
+####       dat
 
 [MISSING COLUMN: vendors.dat]
 
-#### rating
+####       rating
 
 [MISSING COLUMN: vendors.rating]
 
-#### name
+####       name
 
 [MISSING COLUMN: vendors.name]
 
-#### ratings
+####       ratings
 
 [MISSING COLUMN: vendors.ratings]
 

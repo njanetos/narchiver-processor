@@ -1,4 +1,4 @@
-# Documentation for dataset vendors.db
+# Documentation for dataset combined_market/agora
 
 Combined, cross-referenced data for the Agora marketplace. This should be the final stop of Agora data, before it goes on to be combined with other markets.
 
@@ -8,7 +8,7 @@ Combined, cross-referenced data for the Agora marketplace. This should be the fi
 
 Complete list of locations listings ship from, the rowid is the id.
 
-#### location
+####       location
 
 The name of the location.
 
@@ -16,35 +16,35 @@ The name of the location.
 
 Each row of this table corresponds to a single listing, by title. For example, a listing might be `100 pills of 200 mg XTC`. It contains data on the amount and quantity of the good on sale, as well as various characteristics of the good, such as its shipping location. Many observations of a single listing were taken over time, but each listing only has one row in this table. See the table `prices` and `reviews` for time dependent data
 
-#### category
+####       category
 
 The id of the category to which this belongs. See table `categories` for a complete listing of categories by id.
 
-#### vendor
+####       vendor
 
 The id of the vendor who offers this listing. See `vendors` for a complete listing of vendors.
 
-#### ships_from
+####       ships_from
 
 The id of the location which this ships from. See column `ships_from` for a complete listing.
 
-#### title
+####       title
 
 The name of this listing.
 
-#### ships_to
+####       ships_to
 
 The id of the location which this ships to. See column `ships_to` for a complete listing.
 
-#### amount
+####       amount
 
 The total amount of each unit of this listing. For example, if the listing is `200 g cocaine`, then `amount` is 200. If an amount was not found, this defaults to 0.
 
-#### units
+####       units
 
 The units in which this listing is measured, e.g., `g` for grams. Empty (or null) if no units found.
 
-#### quantity
+####       quantity
 
 The total quantity of this listing on sale. For example, if the listing is `100 pills of 200 mg XTC`, then quantity is 100. (Compare to column `amount`, which here would be 200.)
 
@@ -52,39 +52,39 @@ The total quantity of this listing on sale. For example, if the listing is `100 
 
 A complete listing of all reviews for each listing.
 
-#### dat
+####       dat
 
 The date at which this review was LEFT, in DAYS since 1970.
 
-#### user_min_sales
+####       user_min_sales
 
 A lower bound on the number of transactions made by the user who left this review.
 
-#### vendor
+####       vendor
 
 The id of the vendor to whom the listing for which this review was left belongs.
 
-#### val
+####       val
 
 The actual review value, from 0 to 5.
 
-#### content
+####       content
 
 The text of the rating.
 
-#### user_max_sales
+####       user_max_sales
 
 An upper bound on the number of transactions made by the user who left this review.
 
-#### listing
+####       listing
 
 The id of the listing to which this review belongs.
 
-#### scraped_at
+####       scraped_at
 
 The date at which this review was SCRAPED, in DAYS since 1970.
 
-#### user_rating
+####       user_rating
 
 The average rating of the user who left this review.
 
@@ -92,7 +92,7 @@ The average rating of the user who left this review.
 
 Complete list of vendors, the rowid is the id.
 
-#### name
+####       name
 
 The name of the vendor.
 
@@ -100,31 +100,31 @@ The name of the vendor.
 
 A complete listing of all price, sales, and rating observations for each listing. The name `prices` is a misnomer, and should be changed, since this table also contains seller characteristics as well.
 
-#### rating
+####       rating
 
 The aggregate rating of the vendor offering the listing to which this price belongs, at the time it was scraped. It ranges from 0 to 5.
 
-#### vendor
+####       vendor
 
 The id of the vendor who offers this listing. See `vendors` for a complete listing of vendors.
 
-#### pricel
+####       pricel
 
 The price (in USD, converted from BTC).
 
-#### dat
+####       dat
 
 The date at which this price was observed, in seconds since 1970.
 
-#### max_sales
+####       max_sales
 
 The upper number of sales the vendor offering the listing to which this price belongs had made, at the time this price was scraped.
 
-#### listing
+####       listing
 
 The id of the listing to which this price belongs.
 
-#### min_sales
+####       min_sales
 
 The lower number of sales the vendor offering the listing to which this price belongs had made, at the time this price was scraped.
 
@@ -132,7 +132,7 @@ The lower number of sales the vendor offering the listing to which this price be
 
 Complete list of locations listings ship to, the rowid is the id.
 
-#### location
+####       location
 
 The name of the location.
 
@@ -140,7 +140,7 @@ The name of the location.
 
 Contains a list of the categories to which listings might belong. The `rowid` is the id of the category.
 
-#### category
+####       category
 
 Textual description of this category.
 
