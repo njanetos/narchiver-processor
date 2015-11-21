@@ -8,12 +8,12 @@ import re
 
 market = 'agora'
 
-if not os.path.exists('aggregate_vendors'):
-    os.makedirs('aggregate_vendors')
+if not os.path.exists('extract_data_vendors'):
+    os.makedirs('extract_data_vendors')
 
 try:
-	if os.path.exists('aggregate_vendors/temp.db'):
-		os.remove('aggregate_vendors/temp.db')
+	if os.path.exists('extract_data_vendors/temp.db'):
+		os.remove('extract_data_vendors/temp.db')
 except OSError:
 	sys.exit(1)
 
@@ -25,7 +25,7 @@ try:
     read_cur.execute('SELECT DISTINCT name FROM vendors')
     names = read_cur.fetchall()
 
-    write = lite.connect(os.path.join('aggregate_vendors', 'temp.db'))
+    write = lite.connect(os.path.join('extract_data_vendors', 'temp.db'))
     write_cur = write.cursor()
     write_cur.execute('CREATE TABLE vendors(name TEXT)')
     write_cur.execute('CREATE TABLE reviews(vendor INT, val INT, content TEXT, product TEXT, dat INT)')
@@ -129,8 +129,8 @@ finally:
 print_progress("Wrote " + str(tot_aggregated) + " out of " + str(row_count) + " to database.")
 
 try:
-    os.rename(os.path.join('aggregate_vendors', 'temp.db'), os.path.join('aggregate_vendors', market+'.db'))
+    os.rename(os.path.join('extract_data_vendors', 'temp.db'), os.path.join('extract_data_vendors', market+'.db'))
 except OSError:
     pass
 
-print_progress("Finished aggregating, output in " + os.path.join('aggregate_vendors', market+'.db'))
+print_progress("Finished aggregating, output in " + os.path.join('extract_data_vendors', market+'.db'))

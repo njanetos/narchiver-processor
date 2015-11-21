@@ -6,12 +6,12 @@ from update_progress import print_progress
 from clean_text import clean
 import re
 
-if not os.path.exists('aggregate_listings'):
-    os.makedirs('aggregate_listings')
+if not os.path.exists('extract_data_listings'):
+    os.makedirs('extract_data_listings')
 
 try:
-	if os.path.exists('aggregate_listings/temp.db'):
-		os.remove('aggregate_listings/temp.db')
+	if os.path.exists('extract_data_listings/temp.db'):
+		os.remove('extract_data_listings/temp.db')
 except OSError:
 	sys.exit(1)
 
@@ -28,7 +28,7 @@ ships_from = read_cur.fetchall()
 read_cur.execute('SELECT DISTINCT ships_to FROM listings')
 ships_to = read_cur.fetchall()
 
-write = lite.connect(os.path.join('aggregate_listings', 'temp.db'))
+write = lite.connect(os.path.join('extract_data_listings', 'temp.db'))
 write_cur = write.cursor()
 write_cur.execute('CREATE TABLE listings(title TEXT, vendor TEXT, category INT, ships_from INT, ships_to INT, units TEXT, amount REAL, quantity INT)')
 write_cur.execute('CREATE TABLE categories(category TEXT)')

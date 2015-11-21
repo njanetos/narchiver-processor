@@ -21,10 +21,10 @@ except OSError:
 buffer_limit = 10000
 
 try:
-    read_ven = lite.connect(os.path.join('aggregate_vendors', market+'.db'))
+    read_ven = lite.connect(os.path.join('extract_data_vendors', market+'.db'))
     read_ven_cur = read_ven.cursor()
 
-    read_list = lite.connect(os.path.join('aggregate_listings', market+'.db'))
+    read_list = lite.connect(os.path.join('extract_data_listings', market+'.db'))
     read_list_cur = read_list.cursor()
 
     write = lite.connect(os.path.join('combined_market', 'temp.db'))

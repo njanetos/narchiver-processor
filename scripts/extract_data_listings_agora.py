@@ -87,8 +87,8 @@ finally:
 		read.close()
 
 try:
-    os.rename(os.path.join('aggregate_listings', 'temp.db'), os.path.join('aggregate_listings', market+'.db'))
+    os.rename(os.path.join('extract_data_listings', 'temp.db'), os.path.join('extract_data_listings', market+'.db'))
 except OSError:
     pass
 
-print_progress("Finished aggregating, output in " + os.path.join('aggregate_listings', market+'.db'))
+print_progress("Finished aggregating, output in " + os.path.join('extract_data_listings', market+'.db'))
