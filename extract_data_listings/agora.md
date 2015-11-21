@@ -8,127 +8,127 @@
 
 [MISSING TABLE: ships_from]
 
-####       location
+* __location__
 
-[MISSING COLUMN: ships_from.location]
+  [MISSING COLUMN: ships_from.location]
 
 ### listings
 
 [MISSING TABLE: listings]
 
-####       category
+* __category__
 
-[MISSING COLUMN: listings.category]
+  [MISSING COLUMN: listings.category]
 
-####       vendor
+* __vendor__
 
-[MISSING COLUMN: listings.vendor]
+  [MISSING COLUMN: listings.vendor]
 
-####       ships_from
+* __ships_from__
 
-[MISSING COLUMN: listings.ships_from]
+  [MISSING COLUMN: listings.ships_from]
 
-####       title
+* __title__
 
-[MISSING COLUMN: listings.title]
+  [MISSING COLUMN: listings.title]
 
-####       ships_to
+* __ships_to__
 
-[MISSING COLUMN: listings.ships_to]
+  [MISSING COLUMN: listings.ships_to]
 
-####       amount
+* __amount__
 
-[MISSING COLUMN: listings.amount]
+  [MISSING COLUMN: listings.amount]
 
-####       units
+* __units__
 
-[MISSING COLUMN: listings.units]
+  [MISSING COLUMN: listings.units]
 
-####       quantity
+* __quantity__
 
-[MISSING COLUMN: listings.quantity]
+  [MISSING COLUMN: listings.quantity]
 
 ### reviews
 
 [MISSING TABLE: reviews]
 
-####       user_rating
+* __user_rating__
 
-[MISSING COLUMN: reviews.user_rating]
+  [MISSING COLUMN: reviews.user_rating]
 
-####       user_deals
+* __user_deals__
 
-[MISSING COLUMN: reviews.user_deals]
+  [MISSING COLUMN: reviews.user_deals]
 
-####       val
+* __val__
 
-[MISSING COLUMN: reviews.val]
+  [MISSING COLUMN: reviews.val]
 
-####       price
+* __price__
 
-[MISSING COLUMN: reviews.price]
+  [MISSING COLUMN: reviews.price]
 
-####       listing
+* __listing__
 
-[MISSING COLUMN: reviews.listing]
+  [MISSING COLUMN: reviews.listing]
 
-####       dat
+* __dat__
 
-[MISSING COLUMN: reviews.dat]
+  [MISSING COLUMN: reviews.dat]
 
-####       review
+* __review__
 
-[MISSING COLUMN: reviews.review]
+  [MISSING COLUMN: reviews.review]
 
-####       scraped_at
+* __scraped_at__
 
-[MISSING COLUMN: reviews.scraped_at]
+  [MISSING COLUMN: reviews.scraped_at]
 
 ### prices
 
 [MISSING TABLE: prices]
 
-####       rating
+* __rating__
 
-[MISSING COLUMN: prices.rating]
+  [MISSING COLUMN: prices.rating]
 
-####       pricel
+* __pricel__
 
-[MISSING COLUMN: prices.pricel]
+  [MISSING COLUMN: prices.pricel]
 
-####       url
+* __url__
 
-[MISSING COLUMN: prices.url]
+  [MISSING COLUMN: prices.url]
 
-####       dat
+* __dat__
 
-[MISSING COLUMN: prices.dat]
+  [MISSING COLUMN: prices.dat]
 
-####       max_sales
+* __max_sales__
 
-[MISSING COLUMN: prices.max_sales]
+  [MISSING COLUMN: prices.max_sales]
 
-####       listing
+* __listing__
 
-[MISSING COLUMN: prices.listing]
+  [MISSING COLUMN: prices.listing]
 
-####       min_sales
+* __min_sales__
 
-[MISSING COLUMN: prices.min_sales]
+  [MISSING COLUMN: prices.min_sales]
 
 ### ships_to
 
 [MISSING TABLE: ships_to]
 
-####       location
+* __location__
 
-[MISSING COLUMN: ships_to.location]
+  [MISSING COLUMN: ships_to.location]
 
 ### categories
 
 [MISSING TABLE: categories]
 
-####       category
+* __category__
 
-[MISSING COLUMN: categories.category]
+  [MISSING COLUMN: categories.category]
 

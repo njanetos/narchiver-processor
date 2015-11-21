@@ -8,39 +8,39 @@ Contains strings from listings files, with the HTML stripped out. Once the HTML 
 
 Each row corresponds to a single listing page, on the date it was scraped. (That is, each listing should have more than one row, corresponding to different dates.)
 
-####       category
+* __category__
 
-The category to which this listing belongs.
+  The category to which this listing belongs.
 
-####       reviews
+* __reviews__
 
-All the reviews which were left.
+  All the reviews which were left.
 
-####       vendor
+* __vendor__
 
-The name of the vendor offering this listing
+  The name of the vendor offering this listing
 
-####       ships_from
+* __ships_from__
 
-The location this item ships from.
+  The location this item ships from.
 
-####       title
+* __title__
 
-The name of this listing.
+  The name of this listing.
 
-####       url
+* __url__
 
-The stem of the url at which this listing was found.
+  The stem of the url at which this listing was found.
 
-####       price
+* __price__
 
-The recorded price of this listing.
+  The recorded price of this listing.
 
-####       ships_to
+* __ships_to__
 
-The location this item ships to.
+  The location this item ships to.
 
-####       dat
+* __dat__
 
-The date on which this listing was scraped.
+  The date on which this listing was scraped.
 

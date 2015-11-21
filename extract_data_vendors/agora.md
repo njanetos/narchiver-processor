@@ -8,79 +8,79 @@
 
 [MISSING TABLE: reviews]
 
-####       dat
+* __dat__
 
-[MISSING COLUMN: reviews.dat]
+  [MISSING COLUMN: reviews.dat]
 
-####       product
+* __product__
 
-[MISSING COLUMN: reviews.product]
+  [MISSING COLUMN: reviews.product]
 
-####       vendor
+* __vendor__
 
-[MISSING COLUMN: reviews.vendor]
+  [MISSING COLUMN: reviews.vendor]
 
-####       val
+* __val__
 
-[MISSING COLUMN: reviews.val]
+  [MISSING COLUMN: reviews.val]
 
-####       max_user_sales
+* __max_user_sales__
 
-[MISSING COLUMN: reviews.max_user_sales]
+  [MISSING COLUMN: reviews.max_user_sales]
 
-####       min_user_sales
+* __min_user_sales__
 
-[MISSING COLUMN: reviews.min_user_sales]
+  [MISSING COLUMN: reviews.min_user_sales]
 
-####       content
+* __content__
 
-[MISSING COLUMN: reviews.content]
+  [MISSING COLUMN: reviews.content]
 
-####       user_rating
+* __user_rating__
 
-[MISSING COLUMN: reviews.user_rating]
+  [MISSING COLUMN: reviews.user_rating]
 
-####       scraped_at
+* __scraped_at__
 
-[MISSING COLUMN: reviews.scraped_at]
+  [MISSING COLUMN: reviews.scraped_at]
 
 ### ratings
 
 [MISSING TABLE: ratings]
 
-####       dat
+* __dat__
 
-[MISSING COLUMN: ratings.dat]
+  [MISSING COLUMN: ratings.dat]
 
-####       vendor
+* __vendor__
 
-[MISSING COLUMN: ratings.vendor]
+  [MISSING COLUMN: ratings.vendor]
 
-####       val
+* __val__
 
-[MISSING COLUMN: ratings.val]
+  [MISSING COLUMN: ratings.val]
 
 ### vendors
 
 [MISSING TABLE: vendors]
 
-####       name
+* __name__
 
-[MISSING COLUMN: vendors.name]
+  [MISSING COLUMN: vendors.name]
 
 ### sales
 
 [MISSING TABLE: sales]
 
-####       dat
+* __dat__
 
-[MISSING COLUMN: sales.dat]
+  [MISSING COLUMN: sales.dat]
 
-####       vendor
+* __vendor__
 
-[MISSING COLUMN: sales.vendor]
+  [MISSING COLUMN: sales.vendor]
 
-####       val
+* __val__
 
-[MISSING COLUMN: sales.val]
+  [MISSING COLUMN: sales.val]
 
