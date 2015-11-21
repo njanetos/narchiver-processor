@@ -1,146 +1,146 @@
 # Documentation for dataset vendors.db
 
-[MISSING DATABASE DESCRIPTION]
+Combined, cross-referenced data for the Agora marketplace. This should be the final stop of Agora data, before it goes on to be combined with other markets.
 
 ## Tables
 
 ### ships_from
 
-[MISSING TABLE: ships_from]
+Complete list of locations listings ship from, the rowid is the id.
 
 #### location
 
-[MISSING COLUMN: ships_from.location]
+The name of the location.
 
 ### listings
 
-[MISSING TABLE: listings]
+Each row of this table corresponds to a single listing, by title. For example, a listing might be `100 pills of 200 mg XTC`. It contains data on the amount and quantity of the good on sale, as well as various characteristics of the good, such as its shipping location. Many observations of a single listing were taken over time, but each listing only has one row in this table. See the table `prices` and `reviews` for time dependent data
 
 #### category
 
-[MISSING COLUMN: listings.category]
+The id of the category to which this belongs. See table `categories` for a complete listing of categories by id.
 
 #### vendor
 
-[MISSING COLUMN: listings.vendor]
+The id of the vendor who offers this listing. See `vendors` for a complete listing of vendors.
 
 #### ships_from
 
-[MISSING COLUMN: listings.ships_from]
+The id of the location which this ships from. See column `ships_from` for a complete listing.
 
 #### title
 
-[MISSING COLUMN: listings.title]
+The name of this listing.
 
 #### ships_to
 
-[MISSING COLUMN: listings.ships_to]
+The id of the location which this ships to. See column `ships_to` for a complete listing.
 
 #### amount
 
-[MISSING COLUMN: listings.amount]
+The total amount of each unit of this listing. For example, if the listing is `200 g cocaine`, then `amount` is 200. If an amount was not found, this defaults to 0.
 
 #### units
 
-[MISSING COLUMN: listings.units]
+The units in which this listing is measured, e.g., `g` for grams. Empty (or null) if no units found.
 
 #### quantity
 
-[MISSING COLUMN: listings.quantity]
+The total quantity of this listing on sale. For example, if the listing is `100 pills of 200 mg XTC`, then quantity is 100. (Compare to column `amount`, which here would be 200.)
 
 ### reviews
 
-[MISSING TABLE: reviews]
+A complete listing of all reviews for each listing.
 
 #### dat
 
-[MISSING COLUMN: reviews.dat]
+The date at which this review was LEFT, in DAYS since 1970.
 
 #### user_min_sales
 
-[MISSING COLUMN: reviews.user_min_sales]
+A lower bound on the number of transactions made by the user who left this review.
 
 #### vendor
 
-[MISSING COLUMN: reviews.vendor]
+The id of the vendor to whom the listing for which this review was left belongs.
 
 #### val
 
-[MISSING COLUMN: reviews.val]
+The actual review value, from 0 to 5.
 
 #### content
 
-[MISSING COLUMN: reviews.content]
+The text of the rating.
 
 #### user_max_sales
 
-[MISSING COLUMN: reviews.user_max_sales]
+An upper bound on the number of transactions made by the user who left this review.
 
 #### listing
 
-[MISSING COLUMN: reviews.listing]
+The id of the listing to which this review belongs.
 
 #### scraped_at
 
-[MISSING COLUMN: reviews.scraped_at]
+The date at which this review was SCRAPED, in DAYS since 1970.
 
 #### user_rating
 
-[MISSING COLUMN: reviews.user_rating]
+The average rating of the user who left this review.
 
 ### vendors
 
-[MISSING TABLE: vendors]
+Complete list of vendors, the rowid is the id.
 
 #### name
 
-[MISSING COLUMN: vendors.name]
+The name of the vendor.
 
 ### prices
 
-[MISSING TABLE: prices]
+A complete listing of all price, sales, and rating observations for each listing. The name `prices` is a misnomer, and should be changed, since this table also contains seller characteristics as well.
 
 #### rating
 
-[MISSING COLUMN: prices.rating]
+The aggregate rating of the vendor offering the listing to which this price belongs, at the time it was scraped. It ranges from 0 to 5.
 
 #### vendor
 
-[MISSING COLUMN: prices.vendor]
+The id of the vendor who offers this listing. See `vendors` for a complete listing of vendors.
 
 #### pricel
 
-[MISSING COLUMN: prices.pricel]
+The price (in USD, converted from BTC).
 
 #### dat
 
-[MISSING COLUMN: prices.dat]
+The date at which this price was observed, in seconds since 1970.
 
 #### max_sales
 
-[MISSING COLUMN: prices.max_sales]
+The upper number of sales the vendor offering the listing to which this price belongs had made, at the time this price was scraped.
 
 #### listing
 
-[MISSING COLUMN: prices.listing]
+The id of the listing to which this price belongs.
 
 #### min_sales
 
-[MISSING COLUMN: prices.min_sales]
+The lower number of sales the vendor offering the listing to which this price belongs had made, at the time this price was scraped.
 
 ### ships_to
 
-[MISSING TABLE: ships_to]
+Complete list of locations listings ship to, the rowid is the id.
 
 #### location
 
-[MISSING COLUMN: ships_to.location]
+The name of the location.
 
 ### categories
 
-[MISSING TABLE: categories]
+Contains a list of the categories to which listings might belong. The `rowid` is the id of the category.
 
 #### category
 
-[MISSING COLUMN: categories.category]
+Textual description of this category.
 
