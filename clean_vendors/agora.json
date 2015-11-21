@@ -1,0 +1,10 @@
+{
+    "data_doc": "[MISSING DATABASE DESCRIPTION]",
+    "vendors": {
+        "dat": "[MISSING COLUMN: vendors.dat]",
+        "name": "[MISSING COLUMN: vendors.name]",
+        "rating": "[MISSING COLUMN: vendors.rating]",
+        "ratings": "[MISSING COLUMN: vendors.ratings]",
+        "table_doc": "[MISSING TABLE: vendors]"
+    }
+}

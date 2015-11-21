@@ -1,0 +1,47 @@
+{
+    "categories": {
+        "category": "[MISSING COLUMN: categories.category]",
+        "table_doc": "[MISSING TABLE: categories]"
+    },
+    "data_doc": "[MISSING DATABASE DESCRIPTION]",
+    "listings": {
+        "amount": "[MISSING COLUMN: listings.amount]",
+        "category": "[MISSING COLUMN: listings.category]",
+        "quantity": "[MISSING COLUMN: listings.quantity]",
+        "ships_from": "[MISSING COLUMN: listings.ships_from]",
+        "ships_to": "[MISSING COLUMN: listings.ships_to]",
+        "table_doc": "[MISSING TABLE: listings]",
+        "title": "[MISSING COLUMN: listings.title]",
+        "units": "[MISSING COLUMN: listings.units]",
+        "vendor": "[MISSING COLUMN: listings.vendor]"
+    },
+    "prices": {
+        "dat": "[MISSING COLUMN: prices.dat]",
+        "listing": "[MISSING COLUMN: prices.listing]",
+        "max_sales": "[MISSING COLUMN: prices.max_sales]",
+        "min_sales": "[MISSING COLUMN: prices.min_sales]",
+        "pricel": "[MISSING COLUMN: prices.pricel]",
+        "rating": "[MISSING COLUMN: prices.rating]",
+        "table_doc": "[MISSING TABLE: prices]",
+        "url": "[MISSING COLUMN: prices.url]"
+    },
+    "reviews": {
+        "dat": "[MISSING COLUMN: reviews.dat]",
+        "listing": "[MISSING COLUMN: reviews.listing]",
+        "price": "[MISSING COLUMN: reviews.price]",
+        "review": "[MISSING COLUMN: reviews.review]",
+        "scraped_at": "[MISSING COLUMN: reviews.scraped_at]",
+        "table_doc": "[MISSING TABLE: reviews]",
+        "user_deals": "[MISSING COLUMN: reviews.user_deals]",
+        "user_rating": "[MISSING COLUMN: reviews.user_rating]",
+        "val": "[MISSING COLUMN: reviews.val]"
+    },
+    "ships_from": {
+        "location": "[MISSING COLUMN: ships_from.location]",
+        "table_doc": "[MISSING TABLE: ships_from]"
+    },
+    "ships_to": {
+        "location": "[MISSING COLUMN: ships_to.location]",
+        "table_doc": "[MISSING TABLE: ships_to]"
+    }
+}

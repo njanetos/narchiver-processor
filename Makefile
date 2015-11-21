@@ -22,6 +22,7 @@ raw_zipped_test.zip: raw
 # Clean listings
 clean_listings/%.db: raw_by_site/%
 	@./scripts/run_script.sh clean_listings_$* | tee logs/clean_listings_$*_`date +"%m-%d-%Y-%T"`.log
+	@./scripts/run_script.sh autodocument clean_listings/$*.db
 	@./scripts/push.sh "Cleaning listings" "$*" || true
 
 clean_listings: $(MARKETS:%=clean_listings/%.db)
@@ -29,6 +30,7 @@ clean_listings: $(MARKETS:%=clean_listings/%.db)
 
 clean_vendors/%.db: raw_by_site/%
 	@./scripts/run_script.sh clean_vendors_$* | tee logs/clean_listings_$*_`date +"%m-%d-%Y-%T"`.log
+	@./scripts/run_script.sh autodocument clean_vendors/$*.db
 	@./scripts/push.sh "Cleaning listings" "$*" || true
 
 clean_vendors: $(MARKETS:%=clean_vendors/%.db)
@@ -37,6 +39,7 @@ clean_vendors: $(MARKETS:%=clean_vendors/%.db)
 # Aggregate listings
 extract_data_listings/%.db: clean_listings/%.db
 	@./scripts/run_script.sh extract_data_listings_$* | tee logs/extract_data_listings_$*_`date +"%m-%d-%Y-%T"`.log
+	@./scripts/run_script.sh autodocument extract_data_listings/$*.db
 	@./scripts/push.sh "Aggregating listings" "$*" || true
 
 extract_data_listings: $(MARKETS:%=extract_data_listings/%.db)
@@ -45,6 +48,7 @@ extract_data_listings: $(MARKETS:%=extract_data_listings/%.db)
 # Aggregate vendors
 extract_data_vendors/%.db: clean_vendors/%.db
 	@./scripts/run_script.sh extract_data_vendors_$* | tee logs/extract_data_vendors_$*_`date +"%m-%d-%Y-%T"`.log
+	@./scripts/run_script.sh extract_data_vendors/$*.db
 	@./scripts/push.sh "Aggregating vendors" "$*" || true
 
 extract_data_vendors: $(MARKETS:%=extract_data_vendors/%.db)
@@ -53,6 +57,7 @@ extract_data_vendors: $(MARKETS:%=extract_data_vendors/%.db)
 # Combine everything together
 combined_market/%.db: extract_data_vendors/%.db extract_data_listings/%.db
 	@./scripts/run_script.sh combine_market_$* | tee logs/combined_market_$*_`date +"%m-%d-%Y-%T"`.log
+	@./scripts/run_script.sh autodocument combined_market/$*.db
 	@./scripts/push.sh "Combining market" "$*" || true
 
 combined_market: $(MARKETS:%=combined_market/%.db)
@@ -61,13 +66,4 @@ combined_market: $(MARKETS:%=combined_market/%.db)
 sense: clean_listings extract_data_listings clean_vendors extract_data_vendors combined_market
 
 clean:
-	rm -rf raw
-	rm -rf raw_by_site
-	rm -rf clean_listings
-	rm -rf clean_categories
-	rm -rf clean_vendors
-	rm -rf extract_data_listings
-	rm -rf extract_data_vendors
-	rm -rf plots
-	rm -rf combined_market
-	rm -rf regressions
+	find -name *.db -delete

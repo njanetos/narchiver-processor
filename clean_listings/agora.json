@@ -1,0 +1,18 @@
+{
+    "data_doc": "[MISSING DATABASE DESCRIPTION]",
+    "listings": {
+        "category": "[MISSING COLUMN: listings.category]",
+        "dat": "[MISSING COLUMN: listings.dat]",
+        "max_sales": "[MISSING COLUMN: listings.max_sales]",
+        "min_sales": "[MISSING COLUMN: listings.min_sales]",
+        "price": "[MISSING COLUMN: listings.price]",
+        "rating": "[MISSING COLUMN: listings.rating]",
+        "reviews": "[MISSING COLUMN: listings.reviews]",
+        "ships_from": "[MISSING COLUMN: listings.ships_from]",
+        "ships_to": "[MISSING COLUMN: listings.ships_to]",
+        "table_doc": "[MISSING TABLE: listings]",
+        "title": "[MISSING COLUMN: listings.title]",
+        "url": "[MISSING COLUMN: listings.url]",
+        "vendor": "[MISSING COLUMN: listings.vendor]"
+    }
+}
