@@ -96,8 +96,9 @@ try:
             vendor_id = vendors.index(l[1])
         except ValueError, e:
             continue
+
         # Insert the new listings object with vendor name replaced by id
-        write_cur.execute("INSERT INTO listings VALUES('{0}', {1}, {2}, {3}, {4}, '{5}', {6}, {7})".format(l[0], vendor_id, l[2], l[3], l[4], l[5], l[6], l[7]))
+        write_cur.execute("INSERT INTO listings VALUES('{0}', {1}, {2}, {3}, {4}, '{5}', {6}, {7})".format(clean(l[0]), vendor_id, l[2], l[3], l[4], l[5], l[6], l[7]))
         written = written + 1
     write.commit()
     print_progress("Listings cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%')
@@ -135,20 +136,143 @@ try:
     # Reviews
     # vendor INT, listing INT, val INT, dat INT, content TEXT, user_rating REAL, user_min_sales INT, user_max_sales INT, scraped_at INT
 
-    # Listing review format:
-    #
     # Vendor review format:
-    #
-    # print_progress("Cross-referencing reviews...")
-    # read_list_cur.execute('SELECT * FROM reviews')
-    #reviews_listings = [ v[0] for v in read_list_cur.fetchall() ]
+    # vendor INT, val INT, content TEXT, product TEXT, dat INT, scraped_at INT, user_rating REAL, min_user_sales INT, max_user_sales INT
+
+    print_progress("Cross-referencing vendor reviews...")
+
+    # Read in the vendor reviews
+    read_ven_cur.execute("""SELECT v.name, r.val, r.content, r.product, r.dat, r.scraped_at, r.user_rating, r.min_user_sales, r.max_user_sales
+                                FROM reviews AS r
+                                INNER JOIN vendors AS v
+                                    WHERE r.vendor == v.rowid""")
+    reviews_vendors = [ v for v in read_ven_cur.fetchall() ]
+
+    # Get a list of clean listing names for comparison
+    write_cur.execute("SELECT title FROM listings")
+    listing_names_clean = [ l[0].replace(' ', '').lower() for l in write_cur.fetchall() ]
 
     # Add each review to the database.
+    # Check when you add it to see if there's another review which
+    #   a) Was scraped on a different day.
+    #   b) Has the same text
+    #   c) Was left on the same day
+    written, progress, tot = 0, 0, len(reviews_vendors)
+    for r in reviews_vendors:
 
-    # read_ven_cur.execute('SELECT * FROM reviews')
-    # reviews_vendors = [ v[0] for v in read_list_ven.fetchall() ]
+        progress = progress + 1
 
-    # print_progress("Categories cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%')
+        # Find the vendor
+        try:
+            vendor_id = vendors.index(r[0])
+        except ValueError, e:
+            continue
+
+        # Find the listing
+        try:
+            listing_id = listing_names_clean.index(clean(r[3]).replace(' ', '').lower())
+        except ValueError, e:
+            continue
+
+        # Check to see if there's already a corresponding listing
+        write_cur.execute("""SELECT (count(*) > 0)
+                                FROM reviews AS r
+                             WHERE
+                                r.dat == {0} AND
+                                r.scraped_at != {1} AND
+                                r.listing == {2} AND
+                                r.vendor == {3} AND
+                                r.val == {4} AND
+                                r.content == '{5}'""".format(r[4], r[5], listing_id, vendor_id, r[1], clean(r[2])))
+        test = write_cur.fetchall()[0][0]
+        if test == 0:
+            # Add in the review
+            write_cur.execute("""INSERT INTO reviews
+                                 VALUES({0}, {1}, {2}, {3}, '{4}', {5}, {6}, {7}, {8})""".format(vendor_id,
+                                                                                                 listing_id,
+                                                                                                 r[1],
+                                                                                                 r[4],
+                                                                                                 clean(r[2]),
+                                                                                                 r[6] or "'null'",
+                                                                                                 r[7] or "'null'",
+                                                                                                 r[8] or "'null'",
+                                                                                                 r[5]))
+        else:
+            continue
+            
+        written = written + 1
+        update_progress(progress, tot)
+
+    write.commit()
+    print_progress("Vendor reviews cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%')
+
+    # Reviews
+    # vendor INT, listing INT, val INT, dat INT, content TEXT, user_rating REAL, user_min_sales INT, user_max_sales INT, scraped_at INT
+
+    # Listing review format:
+    # dat INT, listing INT, review TEXT, val INT, price REAL, scraped_at INT, user_rating REAL, user_deals INT
+
+    print_progress("Cross-referencing listing reviews...")
+
+    # Read in the listing reviews
+    read_list_cur.execute("""SELECT r.dat, l.title, r.review, r.val, r.price, r.dat, r.scraped_at, r.user_rating, r.user_deals
+                                FROM reviews AS r
+                                INNER JOIN listings AS l
+                                    WHERE r.listing == l.rowid""")
+    reviews_listings = [ v for v in read_list_cur.fetchall() ]
+
+    written, progress, tot = 0, 0, len(reviews_listings)
+    for r in reviews_listings:
+
+        progress = progress + 1
+
+        # Find the listing
+        try:
+            listing_id = listing_names_clean.index(clean(r[1]).replace(' ', '').lower())
+        except ValueError, e:
+            continue
+
+        # Find the vendor
+        try:
+            write_cur.execute("SELECT vendor FROM listings AS l WHERE l.rowid == {0}".format(listing_id))
+            temp = write_cur.fetchall()[0][0]
+        except ValueError, e:
+            continue
+        except IndexError, e:
+            continue
+
+        # Check to see if there's already a corresponding listing
+        write_cur.execute("""SELECT (count(*) > 0)
+                                FROM reviews AS r
+                             WHERE
+                                r.dat == {0} AND
+                                r.scraped_at != {1} AND
+                                r.listing == {2} AND
+                                r.vendor == {3} AND
+                                r.val == {4} AND
+                                r.content == '{5}'""".format(r[0], r[5], listing_id, vendor_id, r[3], clean(r[2])))
+        test = write_cur.fetchall()[0][0]
+
+        if test == 0:
+            # Insert into database
+            write_cur.execute("""INSERT INTO reviews
+                                 VALUES({0}, {1}, {2}, {3}, '{4}', {5}, {6}, {7}, {8})""".format(vendor_id,
+                                                                                                 listing_id,
+                                                                                                 r[3],
+                                                                                                 r[0],
+                                                                                                 clean(r[2]),
+                                                                                                 r[6] or "'null'",
+                                                                                                 "'null'",
+                                                                                                 "'null'",
+                                                                                                 r[5]))
+        else:
+            continue
+
+        written = written + 1
+        update_progress(progress, tot)
+
+    write.commit()
+    print_progress("Listing reviews cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%')
 
 except lite.Error, e:
 	print "Error %s:" % e.args[0]
