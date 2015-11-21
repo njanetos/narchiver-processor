@@ -34,7 +34,7 @@ try:
 			if t == 'No feedbacks found.':
 				continue
 			# If it's a review, add on a new review row
-			elif '55' == t or '45' == t or '35' == t or '25' == t or '15' == t or '05' == t:
+			elif '5s5' == t or '4s5' == t or '3s5' == t or '2s5' == t or '1s5' == t or '0s5' == t:
 				reviews.append([])
 				reviews[-1].append(t[0])
 				continue
@@ -50,20 +50,30 @@ try:
 
 		# Write to database
 		for r in reviews:
+
 			dates = [s for s in r if "days ago" in s]
 			if len(dates) != 1:
 				# print_progress("Malformed review date")
 				continue
 			dates = int(re.sub('[a-zA-Z ]', '', dates[0]))
-			# Subtract to estimate days since
+			# Subtract to estimate days at which it was left
 			date = days_since - dates
+
+			# Find the number of deals
+			deals = [s for s in r if "deals" in s]
+			if len(deals) != 1:
+				deals = 'null'
+			else:
+				deals = deals[0]
+				deals = int(re.sub('[a-zA-Z ]', '', deals))
 
 			if len(r) > 1:
 				review_text = clean(r[1]);
 			else:
 				review_text = "N/A"
 
-			write_cur.execute("INSERT INTO reviews VALUES({0}, {1}, '{2}', {3}, {4}, {5})".format(date, listing_id, review_text, int(r[0]), 0, days_since))
+			# dat INT, listing INT, review TEXT, val INT, price REAL, scraped_at INT, user_rating REAL, user_deals INT
+			write_cur.execute("INSERT INTO reviews VALUES({0}, {1}, '{2}', {3}, {4}, {5}, {6}, {7})".format(date, listing_id, review_text, int(r[0]), 'null', days_since, 'null', deals))
 			buf = buf + 1
 			if buf > buffer_limit:
 				write.commit()

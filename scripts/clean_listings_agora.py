@@ -95,7 +95,8 @@ try:
             continue
 
         # Clean up reviews -- remove spaces, remove special characters, remove 'Feedback' from every listings.
-        reviews = clean(re.sub("  +", ", ", reviews[0].text_content())[11:])
+        text = reviews[0].text_content().replace('/', 's')
+        reviews = clean(re.sub("  +", ", ", text)[11:])
 
         # Get origin, destination
         ships = tree.xpath('//div[@class="product-page-ships"]/text()')

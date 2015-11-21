@@ -31,7 +31,7 @@ try:
     write_cur = write.cursor()
     write_cur.execute('CREATE TABLE vendors(name TEXT)')
     write_cur.execute('CREATE TABLE listings(title TEXT, vendor INT, category INT, ships_from INT, ships_to INT, units TEXT, amount REAL, quantity INT)')
-    write_cur.execute('CREATE TABLE reviews(vendor INT, listing INT, val INT, dat INT)')
+    write_cur.execute('CREATE TABLE reviews(vendor INT, listing INT, val INT, dat INT, content TEXT, user_rating REAL, user_min_sales INT, user_max_sales INT, scraped_at INT)')
     write_cur.execute('CREATE TABLE categories(category TEXT)')
     write_cur.execute('CREATE TABLE ships_from(location TEXT)')
     write_cur.execute('CREATE TABLE ships_to(location TEXT)')
@@ -132,9 +132,23 @@ try:
     write.commit()
     print_progress("Categories cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%')
 
-
     # Reviews
-    # TODO Fill this in
+    # vendor INT, listing INT, val INT, dat INT, content TEXT, user_rating REAL, user_min_sales INT, user_max_sales INT, scraped_at INT
+
+    # Listing review format:
+    #
+    # Vendor review format:
+    #
+    # print_progress("Cross-referencing reviews...")
+    # read_list_cur.execute('SELECT * FROM reviews')
+    #reviews_listings = [ v[0] for v in read_list_cur.fetchall() ]
+
+    # Add each review to the database.
+
+    # read_ven_cur.execute('SELECT * FROM reviews')
+    # reviews_vendors = [ v[0] for v in read_list_ven.fetchall() ]
+
+    # print_progress("Categories cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%')
 
 except lite.Error, e:
 	print "Error %s:" % e.args[0]
