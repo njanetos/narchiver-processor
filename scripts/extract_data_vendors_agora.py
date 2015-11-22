@@ -110,7 +110,10 @@ try:
 
         # Find day on which it was scraped (in days since 1970)
         scraped_on_days_since_1970 = date//86400
-        review_date = [scraped_on_days_since_1970 - int(r) for r in review_date]
+        try:
+            review_date = [scraped_on_days_since_1970 - int(r) for r in review_date]
+        except:
+            review_date = "'null'"
 
         # Find the user's rating
         review_user_rating = [re.findall('[0-9\.]+s5', r) for r in review_user]
@@ -125,15 +128,15 @@ try:
         review_user_min_sales, review_user_max_sales = [0]*len(review_user_sales), [0]*len(review_user_sales)
         for i in range(0, len(review_user_sales)):
             if len(review_user_sales[i]) == 0:
-                review_user_min_sales[i] = 'null'
-                review_user_max_sales[i] = 'null'
+                review_user_min_sales[i] = "'null'"
+                review_user_max_sales[i] = "'null'"
             else:
                 try:
                     review_user_min_sales[i] = int(review_user_sales[i][0].split(' ')[1])
                     review_user_max_sales[i] = int(review_user_sales[i][0].split(' ')[2])
                 except:
-                    review_user_min_sales[i] = 'null'
-                    review_user_max_sales[i] = 'null'
+                    review_user_min_sales[i] = "'null'"
+                    review_user_max_sales[i] = "'null'"
 
         # Insert reviews
         for i in range(1, len(review_rating)):
