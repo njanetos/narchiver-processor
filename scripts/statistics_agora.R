@@ -1,6 +1,6 @@
 list.of.packages <- c("sqldf", "data.table", "plm", "texreg", "dummies", "relaimpo")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages)
+if(length(new.packages)) install.packages(new.packages, repos='http://cran.us.r-project.org')
 
 library(sqldf)
 library(data.table)
@@ -77,7 +77,8 @@ prices_her = subset(prices_[prices_$category == 17 & (prices_$units == 'mg' | pr
 prices_her[prices_her$units == 'mg']$amount = prices_her[prices_her$units == 'mg']$amount/1000
 prices_her[prices_her$units == 'kg']$amount = prices_her[prices_her$units == 'kg']$amount*1000
 
-options(scipen=5)
+options(scipen=2)
+options(digits=2)
 sink(paste(getwd(), "/regressions/", 'agora_output.txt', sep = ''))
 print("")
 print("-----------------------------------------------------------------------------------")

@@ -113,7 +113,7 @@ try:
         try:
             review_date = [scraped_on_days_since_1970 - int(r) for r in review_date]
         except:
-            review_date = ["'null'"]*length(review_date)
+            review_date = ["'null'"]*len(review_date)
 
         # Find the user's rating
         review_user_rating = [re.findall('[0-9\.]+s5', r) for r in review_user]
