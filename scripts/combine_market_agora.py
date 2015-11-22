@@ -161,7 +161,7 @@ try:
     #   a) Was scraped on a different day.
     #   b) Has the same text
     #   c) Was left on the same day
-    written, progress, duplicates, tot = 0, 0, 0, len(reviews_vendors)
+    written, progress, tot = 0, 0, len(reviews_vendors)
     for r in reviews_vendors:
 
         progress = progress + 1
@@ -178,21 +178,9 @@ try:
         except ValueError, e:
             continue
 
-        # Check to see if there's already a corresponding listing
-        write_cur.execute("""SELECT (count(*) > 0)
-                                FROM reviews AS r
-                             WHERE
-                                r.dat == {0} AND
-                                r.scraped_at != {1} AND
-                                r.listing == {2} AND
-                                r.vendor == {3} AND
-                                r.val == {4} AND
-                                r.content == '{5}'""".format(r[4], r[5], listing_id, vendor_id, r[1], clean(r[2])))
-        test = write_cur.fetchall()[0][0]
-        if test == 0:
-            # Add in the review
-            write_cur.execute("""INSERT INTO reviews
-                                 VALUES({0}, {1}, {2}, {3}, '{4}', {5}, {6}, {7}, {8})""".format(vendor_id,
+        # Add in the review
+        write_cur.execute("""INSERT INTO reviews
+                             VALUES({0}, {1}, {2}, {3}, '{4}', {5}, {6}, {7}, {8})""".format(vendor_id,
                                                                                                  listing_id,
                                                                                                  r[1],
                                                                                                  r[4],
@@ -201,14 +189,13 @@ try:
                                                                                                  r[7] or "'null'",
                                                                                                  r[8] or "'null'",
                                                                                                  r[5]))
-        else:
-            duplicates = duplicates + 1
 
         written = written + 1
         update_progress(progress, tot)
 
     write.commit()
-    print_progress("Vendor reviews cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%. Of those, ' + str(round(100*(float(duplicates)/float(written)), 2)) + '% found to be duplicates.')
+
+    print_progress("Vendor reviews cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)))
 
     # Reviews
     # vendor INT, listing INT, val INT, dat INT, content TEXT, user_rating REAL, user_min_sales INT, user_max_sales INT, scraped_at INT
@@ -225,7 +212,7 @@ try:
                                     WHERE r.listing == l.rowid""")
     reviews_listings = [ v for v in read_list_cur.fetchall() ]
 
-    written, progress, duplicates, tot = 0, 0, 0, len(reviews_listings)
+    written, progress, tot = 0, 0, len(reviews_listings)
     for r in reviews_listings:
 
         progress = progress + 1
@@ -246,38 +233,25 @@ try:
         except IndexError, e:
             continue
 
-        # Check to see if there's already a corresponding listing
-        write_cur.execute("""SELECT (count(*) > 0)
-                                FROM reviews AS r
-                             WHERE
-                                r.dat == {0} AND
-                                r.scraped_at != {1} AND
-                                r.listing == {2} AND
-                                r.vendor == {3} AND
-                                r.val == {4} AND
-                                r.content == '{5}'""".format(r[0], r[5], listing_id, vendor_id, r[3], clean(r[2])))
-        test = write_cur.fetchall()[0][0]
-
-        if test == 0:
-            # Insert into database
-            write_cur.execute("""INSERT INTO reviews
-                                 VALUES({0}, {1}, {2}, {3}, '{4}', {5}, {6}, {7}, {8})""".format(vendor_id,
-                                                                                                 listing_id,
-                                                                                                 r[3],
-                                                                                                 r[0],
-                                                                                                 clean(r[2]),
-                                                                                                 r[6] or "'null'",
-                                                                                                 "'null'",
-                                                                                                 "'null'",
-                                                                                                 r[5]))
-        else:
-            duplicates = duplicates + 1
+        write_cur.execute("""INSERT INTO reviews
+                             VALUES({0}, {1}, {2}, {3}, '{4}', {5}, {6}, {7}, {8})""".format(vendor_id,
+                                                                                             listing_id,
+                                                                                             r[3],
+                                                                                             r[0],
+                                                                                             clean(r[2]),
+                                                                                             r[6] or "'null'",
+                                                                                             "'null'",
+                                                                                             "'null'",
+                                                                                             r[5]))
 
         written = written + 1
         update_progress(progress, tot)
 
     write.commit()
     print_progress("Listing reviews cross-referenced, leakage " + str(round(100*(1-float(written)/float(tot)), 2)) + '%. Of those, ' + str(round(100*(float(duplicates)/float(written)), 2)) + '% found to be duplicates.')
+
+    print_progress("Deleting duplicate reviews...")
+    
 
 except lite.Error, e:
 	print "Error %s:" % e.args[0]
