@@ -119,7 +119,7 @@ dev.off()
 
 m = matrix(c(1:64), nrow = 8, ncol = 8, byrow = TRUE)
 for (c in 1:length(categories_$category)) {
-    pdf(paste("regressions/", "listing_prices_", gsub("//", "", categories_$category[c]), ".pdf", sep = ""), width = 32, height = 32)
+    pdf(paste("regressions/", "listing_prices_", gsub("/", "", categories_$category[c]), ".pdf", sep = ""), width = 32, height = 32)
     par(oma = c(10, 10, 14, 10))
     layout(mat = m)
     prices_t = prices_[prices_$category == c,]
