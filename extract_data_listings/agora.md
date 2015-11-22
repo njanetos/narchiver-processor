@@ -1,62 +1,164 @@
-# Documentation for dataset extract_data_listings/agora
+# Documentation for dataset `extract_data_listings/agora`
 
 [MISSING DATABASE DESCRIPTION]
 
 ## Tables
 
-### ships_from
+### Table: `ships_from`
 
 [MISSING TABLE: ships_from]
 
-* __location__: [MISSING COLUMN: ships_from.location]
+#### First 10 rows of table `ships_from`
 
-### listings
+| category                 |
+|:-------------------------|
+| Drugs.Stimulants.Cocaine |
+| Drugs.Ecstasy.Pills      |
+| Drugs.RCs                |
+| Weapons.Fireworks        |
+| Data.Software            |
+| Drugs.Prescription       |
+| Drugs.Other              |
+| Drugs.Stimulants.Speed   |
+| Drugs.Ecstasy.MDMA       |
+| Services.Other           |
+
+#### Column descriptions for table `ships_from`
+
+* `location`: [MISSING COLUMN: ships_from.location]
+
+### Table: `listings`
 
 [MISSING TABLE: listings]
 
-* __category__: [MISSING COLUMN: listings.category]
-* __vendor__: [MISSING COLUMN: listings.vendor]
-* __ships_from__: [MISSING COLUMN: listings.ships_from]
-* __title__: [MISSING COLUMN: listings.title]
-* __ships_to__: [MISSING COLUMN: listings.ships_to]
-* __amount__: [MISSING COLUMN: listings.amount]
-* __units__: [MISSING COLUMN: listings.units]
-* __quantity__: [MISSING COLUMN: listings.quantity]
+#### First 10 rows of table `listings`
 
-### reviews
+| title                                                                        | vendor          |   category |   ships_from |   ships_to | units   |   amount |   quantity |
+|:-----------------------------------------------------------------------------|:----------------|-----------:|-------------:|-----------:|:--------|---------:|-----------:|
+| KILLA COKE 1G                                                                | thepillguyAUS   |          1 |            1 |          1 | g       |      1   |          1 |
+| One 115mg Capsule of Rolling Buddha MDMA Sassafras Extract Escrow            | TheBestCannabis |          2 |            2 |          2 | mg      |    115   |          1 |
+| 500g APHP                                                                    | starlight       |          3 |            1 |          1 | g       |    500   |          1 |
+| Potassium chlorate 40g                                                       | TorChem         |          4 |            1 |          1 | g       |     40   |          1 |
+| Tails Preloaded Bootable USB Flash Drive Current 1.0.1 version FREE SHIPPING | Peddler         |          5 |            1 |          1 |         |      0   |          1 |
+| 500 Pills Rivotril 2 MG                                                      | Meds2Buy        |          6 |            3 |          3 | mg      |      2   |        500 |
+| 250g of 99.8 PURE METHYLONE.  250 grams                                      | MrGuapo         |          3 |            4 |          4 | g       |    250   |          1 |
+| MDMA Pills 200mg 5stk SUPERMANN gelb                                         | MIcasa-SUcasa   |          2 |            5 |          5 | mg      |    200   |        200 |
+| USA ONLY  Clonodine .2mg                                                     | canadasunshine  |          7 |            1 |          1 | mg      |      0.2 |          1 |
+| STHOMPSONSPEED PASTE 1gHIGH QUALITY                                          | huntersthompson |          8 |            5 |          6 | g       |      1   |          1 |
+
+#### Column descriptions for table `listings`
+
+* `category`: [MISSING COLUMN: listings.category]
+* `vendor`: [MISSING COLUMN: listings.vendor]
+* `ships_from`: [MISSING COLUMN: listings.ships_from]
+* `title`: [MISSING COLUMN: listings.title]
+* `ships_to`: [MISSING COLUMN: listings.ships_to]
+* `amount`: [MISSING COLUMN: listings.amount]
+* `units`: [MISSING COLUMN: listings.units]
+* `quantity`: [MISSING COLUMN: listings.quantity]
+
+### Table: `reviews`
 
 [MISSING TABLE: reviews]
 
-* __user_rating__: [MISSING COLUMN: reviews.user_rating]
-* __user_deals__: [MISSING COLUMN: reviews.user_deals]
-* __val__: [MISSING COLUMN: reviews.val]
-* __price__: [MISSING COLUMN: reviews.price]
-* __listing__: [MISSING COLUMN: reviews.listing]
-* __dat__: [MISSING COLUMN: reviews.dat]
-* __review__: [MISSING COLUMN: reviews.review]
-* __scraped_at__: [MISSING COLUMN: reviews.scraped_at]
+#### First 10 rows of table `reviews`
 
-### prices
+|        dat |   listing |     pricel |   rating |   min_sales |   max_sales | url               |
+|-----------:|----------:|-----------:|---------:|------------:|------------:|:------------------|
+| 1437562495 |         1 |  244.991   |    5     |          25 |          40 | %2Fp%2FCPRtFYaJd0 |
+| 1426577697 |         2 |   14.3     |    4.957 |         500 |        1000 | %2Fp%2FXUd0DsSVMZ |
+| 1441547341 |         3 | 2140       |    4.88  |         500 |        1000 | %2Fp%2FXUqqMG0FGU |
+| 1430619342 |         4 |    9.99957 |    4.67  |          55 |          70 | %2Fp%2Fcv6GtuTYWw |
+| 1430858829 |         5 |   19.9991  |    5     |          25 |          40 | %2Fp%2FremaSAdDA1 |
+| 1416052591 |         6 |  460       |    5     |          25 |          40 | %2Fp%2FVnWuCbTNbJ |
+| 1435913399 |         7 |  933.963   |    5     |          25 |          40 | %2Fp%2FpxR41eiJgn |
+| 1441111488 |         8 |   22.849   |    4.96  |         200 |         300 | %2Fp%2FTaaCjhyM7f |
+| 1417312912 |         9 |    5       |    4.95  |         500 |        1000 | %2Fp%2Fsgh64kWaUh |
+| 1416112378 |        10 |   12.6     |    5     |         150 |         200 | %2Fp%2FiSRtBbfSdS |
+
+#### Column descriptions for table `reviews`
+
+* `user_rating`: [MISSING COLUMN: reviews.user_rating]
+* `user_deals`: [MISSING COLUMN: reviews.user_deals]
+* `val`: [MISSING COLUMN: reviews.val]
+* `price`: [MISSING COLUMN: reviews.price]
+* `listing`: [MISSING COLUMN: reviews.listing]
+* `dat`: [MISSING COLUMN: reviews.dat]
+* `review`: [MISSING COLUMN: reviews.review]
+* `scraped_at`: [MISSING COLUMN: reviews.scraped_at]
+
+### Table: `prices`
 
 [MISSING TABLE: prices]
 
-* __rating__: [MISSING COLUMN: prices.rating]
-* __pricel__: [MISSING COLUMN: prices.pricel]
-* __url__: [MISSING COLUMN: prices.url]
-* __dat__: [MISSING COLUMN: prices.dat]
-* __max_sales__: [MISSING COLUMN: prices.max_sales]
-* __listing__: [MISSING COLUMN: prices.listing]
-* __min_sales__: [MISSING COLUMN: prices.min_sales]
+#### First 10 rows of table `prices`
 
-### ships_to
+|   dat |   listing | review                                   |   val |   price |   scraped_at |   user_rating |   user_deals |
+|------:|----------:|:-----------------------------------------|------:|--------:|-------------:|--------------:|-------------:|
+| 16556 |         1 | great stealth                            |     5 |         |        16638 |               |         1525 |
+| 16495 |         4 | Thx                                      |     5 |         |        16558 |               |         1525 |
+| 16429 |         5 | Great Vendor                             |     5 |         |        16560 |               |         2540 |
+| 16662 |         8 | Fast shippingbonus                       |     5 |         |        16679 |               |         1015 |
+| 16654 |         8 | Arrived after 2 days domestic            |     5 |         |        16679 |               |          610 |
+| 16389 |        10 | Alles Super... Danke                     |     5 |         |        16390 |               |         1015 |
+| 16385 |        10 | 5 days ship international                |     5 |         |        16390 |               |           35 |
+| 16384 |        10 | 6 days ago                               |     5 |         |        16390 |               |          610 |
+| 16382 |        10 | 8 days ago                               |     5 |         |        16390 |               |          610 |
+| 16374 |        10 | Unbeatable Shipped in less than 24 hours |     5 |         |        16390 |               |           12 |
+
+#### Column descriptions for table `prices`
+
+* `rating`: [MISSING COLUMN: prices.rating]
+* `pricel`: [MISSING COLUMN: prices.pricel]
+* `url`: [MISSING COLUMN: prices.url]
+* `dat`: [MISSING COLUMN: prices.dat]
+* `max_sales`: [MISSING COLUMN: prices.max_sales]
+* `listing`: [MISSING COLUMN: prices.listing]
+* `min_sales`: [MISSING COLUMN: prices.min_sales]
+
+### Table: `ships_to`
 
 [MISSING TABLE: ships_to]
 
-* __location__: [MISSING COLUMN: ships_to.location]
+#### First 10 rows of table `ships_to`
 
-### categories
+| location           |
+|:-------------------|
+|                    |
+| USA                |
+| UK,USA,Philippines |
+| China              |
+| Germany            |
+| Canada             |
+| EU                 |
+| Europe             |
+| bluerave           |
+| Australia          |
+
+#### Column descriptions for table `ships_to`
+
+* `location`: [MISSING COLUMN: ships_to.location]
+
+### Table: `categories`
 
 [MISSING TABLE: categories]
 
-* __category__: [MISSING COLUMN: categories.category]
+#### First 10 rows of table `categories`
+
+| location      |
+|:--------------|
+|               |
+| USA           |
+| Worldwide     |
+| World         |
+| Germany       |
+| worldwide     |
+| you           |
+| Australia     |
+| Scandinaviaww |
+| WORLDWIDE     |
+
+#### Column descriptions for table `categories`
+
+* `category`: [MISSING COLUMN: categories.category]
 

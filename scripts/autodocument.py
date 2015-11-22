@@ -6,6 +6,7 @@ import json
 import copy
 from update_progress import update_progress
 from update_progress import print_progress
+from tabulate import tabulate
 
 if len(sys.argv) == 1:
     print("Missing arguments")
@@ -57,6 +58,7 @@ if extension == 'db':
     # Check that all the tables are there
     names = []
     schemas = []
+    preview = []
 
     for r in results:
         name = r[0]
@@ -64,9 +66,15 @@ if extension == 'db':
         schema = re.search('(?<=\()(.*)(?=\))', re.sub('[A-Z ]', '', r[1])).group(0).split(',')
         schemas.append(schema)
 
+        # Add some Markdown formatted preview stuff
+        read_cur.execute("SELECT * FROM {0} LIMIT 10".format(name))
+        previews = read_cur.fetchall()
+        preview.append(tabulate(previews, tablefmt="pipe", headers = schema))
+
         if name not in doc_json:
             doc_json[name] = {}
             doc_json[name]['table_doc'] = "[MISSING TABLE: " + name + "]"
+
             for s in schema:
                 doc_json[name][s] = "[MISSING COLUMN: " + name + '.' + s + "]"
         else:
@@ -117,7 +125,7 @@ else:
 # Write to Markdown
 with open(markdown_file, "w") as file:
 
-    file.write("# Documentation for dataset " + markdown_file.split('.')[0])
+    file.write("# Documentation for dataset `" + markdown_file.split('.')[0] + "`")
     file.write("\n\n")
 
     file.write(doc_json['data_doc'])
@@ -126,11 +134,16 @@ with open(markdown_file, "w") as file:
     file.write("## Tables")
     file.write("\n\n")
 
+    i = 0
     for d in [d for d in doc_json if d != 'data_doc']:
-        file.write("### " + d)
+        file.write("### Table: `" + d + "`")
         file.write("\n\n")
         file.write(doc_json[d]['table_doc'])
         file.write("\n\n")
+        file.write("#### First 10 rows of table `" + d + "`\n\n")
+        file.write(preview[i] + "\n\n")
+        file.write("#### Column descriptions for table `" + d + "`\n\n")
+        i = i + 1
         for s in [s for s in doc_json[d] if s != 'table_doc']:
-            file.write("* " + "__" + s + "__: " + doc_json[d][s] + '\n')
+            file.write("* " + "`" + s + "`: " + doc_json[d][s] + '\n')
         file.write('\n')
