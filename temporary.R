@@ -19,7 +19,7 @@ if (length(args) > 0) {
 rf <- colorRampPalette(rev(brewer.pal(11,'Spectral')))
 r <- rf(32)
 
-path = paste("~/Google Drive/Programming/narchiver-processor/combined_market/", market, ".db", sep = "")
+path = paste(getwd(), "/combined_market/", market, ".db", sep = "")
 
 if (!file.exists(path)) {
     warning("Database missing.")
