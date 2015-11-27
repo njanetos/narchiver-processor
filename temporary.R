@@ -74,6 +74,8 @@ prices_$days = floor(prices_$dat / 86400)
 reviews_$days_ago = reviews_$dat - 10
 reviews_ = reviews_[order(reviews_$dat),]
 
+i = 3
+
 pri = prices_[prices_$category == i,]
 pri$dat = pri$dat / 86400
 
