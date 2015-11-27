@@ -2,7 +2,7 @@
 title: 'Reputation dynamics on the Agora marketplace'
 author: "Nick Janetos"
 date: "November 27, 2015"
-output: 
+output:
     html_document:
         toc: true
         theme: readable
@@ -41,13 +41,13 @@ if (!file.exists(path)) {
 
 ```{r, echo = FALSE, cache = TRUE, message = FALSE}
 # Load data
-prices_ = as.data.table(sqldf("SELECT p.dat AS dat, 
-                                      p.price AS price, 
-                                      p.rating AS rating, 
-                                      p.min_sales AS min_sales, 
-                                      p.max_sales AS max_sales, 
-                                      sf.location AS ships_from, 
-                                      st.location AS ships_to, 
+prices_ = as.data.table(sqldf("SELECT p.dat AS dat,
+                                      p.price AS price,
+                                      p.rating AS rating,
+                                      p.min_sales AS min_sales,
+                                      p.max_sales AS max_sales,
+                                      sf.location AS ships_from,
+                                      st.location AS ships_to,
                                       l.amount AS amount,
                                       l.quantity AS quantity,
                                       l.units AS units,
@@ -55,12 +55,12 @@ prices_ = as.data.table(sqldf("SELECT p.dat AS dat,
                                       l.vendor AS vendor,
                                       l.rowid AS listing,
                                       p.rowid AS id
-                                FROM prices AS p 
-                                    LEFT JOIN listings AS l 
-                                        ON p.listing = l.rowid 
-                                    LEFT JOIN ships_from AS sf 
-                                        ON sf.rowid = l.ships_from 
-                                    LEFT JOIN ships_to AS st 
+                                FROM prices AS p
+                                    LEFT JOIN listings AS l
+                                        ON p.listing = l.rowid
+                                    LEFT JOIN ships_from AS sf
+                                        ON sf.rowid = l.ships_from
+                                    LEFT JOIN ships_to AS st
                                         ON st.rowid = l.ships_to", dbname = path))
 categories_ = as.data.table(sqldf("SELECT * FROM categories", dbname = path))
 reviews_ = as.data.table(sqldf("SELECT * FROM reviews", dbname = path))
@@ -136,9 +136,9 @@ $$
 $$
 where
 
- * $p_{it}$ is the price of good $i$ at time $t$ when a review was left, 
+ * $p_{it}$ is the price of good $i$ at time $t$ when a review was left,
  * $r_{it}$ is the seller rating at that time,
- * $x_{it}$ is a vector of seller characteristics -- net sales up to time $t$, whether the seller requires that buyers pay up front, and the location to which the seller ships. 
+ * $x_{it}$ is a vector of seller characteristics -- net sales up to time $t$, whether the seller requires that buyers pay up front, and the location to which the seller ships.
 
 ```{r corr, message = FALSE, echo = FALSE, cache = TRUE, anchor="figure", fig.align='center'}
 int = c(2, 3, 4, 7, 9, 17, 19, 20, 22, 23, 26, 33, 35, 38, 43, 46, 47, 48, 51, 54, 59, 60, 65, 68, 88, 89, 90, 91, 92, 94, 96, 97, 99)
@@ -173,11 +173,11 @@ bxp(bxp.data, show.names = TRUE, horizontal = TRUE, las = 2)
 title("Fig. 1: Correlation between log price and seller rating")
 ```
 
-Figure  shows the values of $\alpha$, by listing type. Most values are clustered around 1. Since most ratings are in the 4.8 - 5.0 range, this implies that, roughly, a 1% increase in a seller's rating is correlated with a roughly 5% increase in the price, a finding consistent with earlier literature. (citation) Unlike earlier literature, here the effect is strongly significant.
+Figure  shows the values of $\alpha$, by listing type. Most values are clustered around 1. Since most ratings are in the 4.8 - 5.0 range, this implies that, roughly, a 1% increase in a seller's rating is correlated with a roughly 5% increase in the price.
 
 ## Effect of rating on sales growth
 
-Does the rating of a seller have an effect on sales growth? To construct sales growth, I use reviews as a proxy for sales.
+Does the rating of a seller have an effect on sales growth? Let's find out! To construct sales growth, I use reviews as a proxy for sales.
 
 ```{r corr, message = FALSE, echo = FALSE, cache = TRUE, anchor="figure", fig.align='center'}
 
@@ -226,7 +226,7 @@ for (i in 1:length(names(x))) {
             x[[i]]$smooth_behind_7[j] = mean(behind)
             x[[i]]$smooth_ahead_7[j] = mean(ahead)
         }
-        
+
     }, error = function(e) {})
     cat('\r')
     cat(i)
