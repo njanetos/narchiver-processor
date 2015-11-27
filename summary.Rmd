@@ -1,0 +1,244 @@
+---
+title: 'Reputation dynamics on the Agora marketplace'
+author: "Nick Janetos"
+date: "November 27, 2015"
+output: 
+    html_document:
+        toc: true
+        theme: readable
+        highlight: tango
+---
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE}
+list.of.packages <- c("sqldf", "data.table", "texreg", "MASS", "RColorBrewer", "dummy", "kfigr", "plm")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages, repos='http://cran.us.r-project.org')
+
+for (p in list.of.packages) {
+    library(p, character.only = TRUE)
+}
+
+args <- commandArgs(trailingOnly = TRUE)
+
+if (length(args) > 0) {
+    market = args[1]
+} else {
+    market = "agora"
+}
+
+# Colors
+
+rf <- colorRampPalette(rev(brewer.pal(11,'Spectral')))
+r <- rf(32)
+
+path = paste(getwd(), "/combined_market/", market, ".db", sep = "")
+
+if (!file.exists(path)) {
+    warning("Database missing.")
+}
+
+```
+
+```{r, echo = FALSE, cache = TRUE, message = FALSE}
+# Load data
+prices_ = as.data.table(sqldf("SELECT p.dat AS dat, 
+                                      p.price AS price, 
+                                      p.rating AS rating, 
+                                      p.min_sales AS min_sales, 
+                                      p.max_sales AS max_sales, 
+                                      sf.location AS ships_from, 
+                                      st.location AS ships_to, 
+                                      l.amount AS amount,
+                                      l.quantity AS quantity,
+                                      l.units AS units,
+                                      l.category AS category,
+                                      l.vendor AS vendor,
+                                      l.rowid AS listing,
+                                      p.rowid AS id
+                                FROM prices AS p 
+                                    LEFT JOIN listings AS l 
+                                        ON p.listing = l.rowid 
+                                    LEFT JOIN ships_from AS sf 
+                                        ON sf.rowid = l.ships_from 
+                                    LEFT JOIN ships_to AS st 
+                                        ON st.rowid = l.ships_to", dbname = path))
+categories_ = as.data.table(sqldf("SELECT * FROM categories", dbname = path))
+reviews_ = as.data.table(sqldf("SELECT * FROM reviews", dbname = path))
+vendors_ = as.data.table(sqldf("SELECT v.name, COUNT(r.dat) AS size, v.rowid AS id FROM vendors AS v LEFT OUTER JOIN reviews_ AS r ON r.vendor == v.rowid GROUP BY v.rowid", dbname = path))
+listings_ = as.data.table(sqldf("SELECT * FROM listings", dbname = path))
+
+# Construct average sales
+prices_$sales = (prices_$max_sales + prices_$min_sales)/2
+
+# Drop impossible values
+prices_ = prices_[prices_$amount != 0 | prices_$quantity != 0,]
+
+# Log prices
+prices_$log = log(prices_$price)
+
+prices_ = prices_[order(prices_$vendor, prices_$dat),]
+reviews_ = reviews_[order(reviews_$vendor, reviews_$dat),]
+
+
+# Normalized prices
+prices_$normalized = prices_$price / (prices_$amount + prices_$quantity)
+prices_$log_normalized = log(prices_$normalized)
+prices_$log_rating = log(prices_$rating)
+
+prices_$days = floor(prices_$dat / 86400)
+reviews_$days_ago = reviews_$dat - 10
+reviews_ = reviews_[order(reviews_$dat),]
+
+tmp = sqldf("SELECT r.vendor, r.listing, r.val, p.days AS dat FROM reviews_ AS r LEFT JOIN prices_ AS p ON p.days < r.days_ago AND p.listing == r.listing AND p.vendor == r.vendor GROUP BY r.dat, r.listing, r.vendor, r.val, r.content")
+
+dr = sqldf("SELECT r.dat, r.vendor, r.listing, r.val, p.price, p.sales, p.ships_from, p.ships_to, p.amount, p.quantity, p.units, p.category, p.sales, p.log_normalized, p.normalized, p.rating FROM tmp AS r
+            JOIN prices_ AS p
+                ON p.days == r.dat AND p.listing == r.listing AND p.vendor == r.vendor")
+
+# Try to put as many things in the same units as possible
+dr$normalized[dr$units == 'g'] = dr$normalized[dr$units == 'g']/1000
+dr$normalized[dr$units == 'kg'] = dr$normalized[dr$units == 'kg']/1000000
+dr$normalized[dr$units == 'ug'] = dr$normalized[dr$units == 'ug']*1000
+dr$normalized[dr$units == 'oz'] = dr$normalized[dr$units == 'oz']/28349.5
+dr$normalized[dr$units == 'lb'] = dr$normalized[dr$units == 'lb']/453592
+dr$log_normalized = log(dr$normalized)
+dr = dr[dr$units == 'mg' | dr$units == 'g' | dr$units == 'kg' | dr$units == 'ug' | dr$units == 'oz' | dr$units == 'lb',]
+
+remove(tmp)
+```
+
+# Introduction
+
+# Data
+
+```{r, message = FALSE, warning = FALSE, echo = FALSE, cache = TRUE, anchor = "figure", fig.align='center'}
+# Vendor size
+hist(log10(vendors_$size[vendors_$size >= 10]), breaks = 20, main = "Distribution of sellers by number of reviews", xlab = "log base 10 of total reviews")
+```
+
+```{r, message = FALSE, warning = FALSE, echo = FALSE, cache = TRUE, anchor = "figure", fig.align='center'}
+# Count max sales
+vendors_$max = vendors_$size
+for (i in 1:length(vendors_$name)) {
+    vendors_$max[i] = max(prices_$max_sales[prices_$vendor == i])
+}
+
+size = vendors_$max[vendors_$max != -Inf]
+hist(log10(size), breaks = 20, main = "Distribution of sellers by max recorded sales", xlab = "log base 10 of total sales")
+```
+
+# How are prices and sales growth related to rating?
+
+As an initial step, let's begin by running a hedonic regression of price against seller ratings, of the following form:
+
+$$
+\log(p_{it}) = const + \alpha r_{it} + \beta x_{it} + \varepsilon_{it},
+$$
+where
+
+ * $p_{it}$ is the price of good $i$ at time $t$ when a review was left, 
+ * $r_{it}$ is the seller rating at that time,
+ * $x_{it}$ is a vector of seller characteristics -- net sales up to time $t$, whether the seller requires that buyers pay up front, and the location to which the seller ships. 
+
+```{r corr, message = FALSE, echo = FALSE, cache = TRUE, anchor="figure", fig.align='center'}
+int = c(2, 3, 4, 7, 9, 17, 19, 20, 22, 23, 26, 33, 35, 38, 43, 46, 47, 48, 51, 54, 59, 60, 65, 68, 88, 89, 90, 91, 92, 94, 96, 97, 99)
+int = int[c(1, 2, 3, 4, 5, 6, 7, 9, 13, 14, 15, 20)]
+boxdata = data.table(name = character(), coeff = as.numeric(character()), std = as.numeric(character()))
+for (i in int) {
+    tryCatch({
+    sub = dr[dr$category == i,]
+    med = median(sub$normalized)
+    v = sqrt(var(sub$normalized))
+    #sub = sub[abs(sub$normalized - med) < v,]
+    q = quantile(sub$normalized, 0.9)
+    sub = sub[sub$normalized < q,]
+
+    mod = summary(lm(log_normalized ~ rating, data = sub))
+    name = strsplit(categories_$category[i], "\\.")
+    name = name[[1]][length(name[[1]])]
+    boxdata = rbind(boxdata, list(name, mod$coefficients[,1]['rating'], mod$coefficients[,2]['rating']))})
+}
+boxdata = boxdata[order(boxdata$coeff),]
+boxdata$lower = boxdata$coeff - boxdata$std
+boxdata$upper = boxdata$coeff + boxdata$std
+
+dat = c()
+for (i in 1:length(boxdata$name)) {
+    dat = rbind(dat, boxdata$lower[i], boxdata$coeff[i], boxdata$coeff[i], boxdata$coeff[i], boxdata$upper[i])
+}
+
+bxp.data = list(stats = matrix(dat, nrow = 5, ncol = length(boxdata$name)), n = rep(1, length(boxdata$name)), names = boxdata$name)
+par(mar=c(3, 7, 3, 3))
+bxp(bxp.data, show.names = TRUE, horizontal = TRUE, las = 2)
+title("Fig. 1: Correlation between log price and seller rating")
+```
+
+Figure  shows the values of $\alpha$, by listing type. Most values are clustered around 1. Since most ratings are in the 4.8 - 5.0 range, this implies that, roughly, a 1% increase in a seller's rating is correlated with a roughly 5% increase in the price, a finding consistent with earlier literature. (citation) Unlike earlier literature, here the effect is strongly significant.
+
+## Effect of rating on sales growth
+
+Does the rating of a seller have an effect on sales growth? To construct sales growth, I use reviews as a proxy for sales.
+
+```{r corr, message = FALSE, echo = FALSE, cache = TRUE, anchor="figure", fig.align='center'}
+
+i = 2
+
+pri = prices_[prices_$category == i,]
+pri$dat = pri$dat / 86400
+
+rev = sqldf("SELECT r.dat, r.listing, l.category FROM reviews_ AS r LEFT JOIN listings_ AS l ON l.rowid == r.listing")
+
+fin = as.data.table(sqldf("SELECT *, COUNT(r.rowid) AS prev FROM pri AS p LEFT JOIN rev AS r ON r.dat <= p.dat AND r.listing == p.listing GROUP BY p.id"))
+
+fin = fin[order(fin$dat),]
+
+x = split(fin, f = as.factor(fin$listing))
+for (i in 1:length(names(x))) {
+    x[[i]]$raw_change = c(NA, diff(x[[i]]$prev))
+    x[[i]]$smooth_change = NA
+    tryCatch({
+        mod = smooth.spline(y = x[[i]]$prev, x = x[[i]]$dat, spar = 0.6)
+        x[[i]]$smooth_change = predict(mod, deriv = 1)$y
+        x[[i]]$smooth_ahead_1 = x[[i]]$smooth_change
+        x[[i]]$smooth_behind_1 = x[[i]]$smooth_change
+        x[[i]]$smooth_ahead_3 = x[[i]]$smooth_change
+        x[[i]]$smooth_behind_3 = x[[i]]$smooth_change
+        x[[i]]$smooth_ahead_5 = x[[i]]$smooth_change
+        x[[i]]$smooth_behind_5 = x[[i]]$smooth_change
+        x[[i]]$smooth_ahead_7 = x[[i]]$smooth_change
+        x[[i]]$smooth_behind_7 = x[[i]]$smooth_change
+        for (j in 1:length(x[[i]]$smooth_change)) {
+            d = x[[i]]$dat[j]
+            behind = x[[i]]$smooth_change[x[[i]]$dat > d - 7 & x[[i]]$dat <= d]
+            ahead = x[[i]]$smooth_change[x[[i]]$dat < d + 7 & x[[i]]$dat >= d]
+            x[[i]]$smooth_behind_1[j] = mean(behind)
+            x[[i]]$smooth_ahead_1[j] = mean(ahead)
+            behind = x[[i]]$smooth_change[x[[i]]$dat > d - 21 & x[[i]]$dat <= d]
+            ahead = x[[i]]$smooth_change[x[[i]]$dat < d + 21 & x[[i]]$dat >= d]
+            x[[i]]$smooth_behind_3[j] = mean(behind)
+            x[[i]]$smooth_ahead_3[j] = mean(ahead)
+            behind = x[[i]]$smooth_change[x[[i]]$dat > d - 35 & x[[i]]$dat <= d]
+            ahead = x[[i]]$smooth_change[x[[i]]$dat < d + 35 & x[[i]]$dat >= d]
+            x[[i]]$smooth_behind_5[j] = mean(behind)
+            x[[i]]$smooth_ahead_5[j] = mean(ahead)
+            behind = x[[i]]$smooth_change[x[[i]]$dat > d - 42 & x[[i]]$dat <= d]
+            ahead = x[[i]]$smooth_change[x[[i]]$dat < d + 42 & x[[i]]$dat >= d]
+            x[[i]]$smooth_behind_7[j] = mean(behind)
+            x[[i]]$smooth_ahead_7[j] = mean(ahead)
+        }
+        
+    }, error = function(e) {})
+    cat('\r')
+    cat(i)
+}
+fin = as.data.table(unsplit(x, f = as.factor(fin$listing)))
+
+finpd = pdata.frame(fin, index = c("listing", "dat"))
+
+finpd$smooth_change_lag = lag(finpd$smooth_change, k = )
+
+```
+
+# Estimating returns to reputation
+
+# Conclusion
