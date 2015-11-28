@@ -181,61 +181,69 @@ Does the rating of a seller have an effect on sales growth? Let's find out! To c
 
 ```{r corr, message = FALSE, echo = FALSE, cache = TRUE, anchor="figure", fig.align='center'}
 
-i = 2
+int = c(2, 3, 4, 7, 9, 17, 19, 20, 22, 23, 26, 33, 35, 38, 43, 46, 47, 48, 51, 54, 59, 60, 65, 68, 88, 89, 90, 91, 92, 94, 96, 97, 99)
+int = int[c(1, 2, 3, 4, 5, 6, 7, 9, 13, 14, 15, 20)]
+boxdata = data.table(name = character(), coeff = as.numeric(character()), std = as.numeric(character()))
 
-pri = prices_[prices_$category == i,]
-pri$dat = pri$dat / 86400
+for (k in int) {
+  
+  pri = prices_[prices_$category == k,]
+  pri$dat = pri$dat / 86400
+  
+  rev = sqldf("SELECT r.dat, r.listing, l.category FROM reviews_ AS r LEFT JOIN listings_ AS l ON l.rowid == r.listing")
+  
+  fin = as.data.table(sqldf("SELECT *, COUNT(r.rowid) AS prev FROM pri AS p LEFT JOIN rev AS r ON r.dat <= p.dat AND r.listing == p.listing GROUP BY p.id"))
+  
+  fin = fin[order(fin$dat),]
+  
+  x = split(fin, f = as.factor(fin$listing))
+  for (i in 1:length(names(x))) {
+      x[[i]]$raw_change = c(NA, diff(x[[i]]$prev))
+      x[[i]]$smooth_change = NA
+      tryCatch({
+          mod = smooth.spline(y = x[[i]]$prev, x = x[[i]]$dat, spar = 0.6)
+          x[[i]]$smooth_change = predict(mod, deriv = 1)$y
+          x[[i]]$smooth_ahead_3 = x[[i]]$smooth_change
+          #x[[i]]$smooth_behind_3 = x[[i]]$smooth_change
+          for (j in 1:length(x[[i]]$smooth_change)) {
+              d = x[[i]]$dat[j]
+              #behind = x[[i]]$smooth_change[x[[i]]$dat > d - 21 & x[[i]]$dat <= d]
+              ahead = x[[i]]$smooth_change[x[[i]]$dat < d + 21 & x[[i]]$dat >= d]
+              #x[[i]]$smooth_behind_3[j] = mean(behind)
+              x[[i]]$smooth_ahead_3[j] = mean(ahead)
+          }
+  
+      }, error = function(e) {})
+      cat('\r')
+      cat(i)
+  }
+  fin = as.data.table(unsplit(x, f = as.factor(fin$listing)))
+  
+  fin$smooth = fin$smooth_ahead_3
+  
+  dat = pdata.frame(subset(fin, select = c("dat", "rating", "vendor", "smooth")), index = c("vendor", "dat"))
+  
+  mod = summary(plm(smooth ~ rating, data = dat, model = "within"))
+  name = strsplit(categories_$category[k], "\\.")
+  name = name[[1]][length(name[[1]])]
 
-rev = sqldf("SELECT r.dat, r.listing, l.category FROM reviews_ AS r LEFT JOIN listings_ AS l ON l.rowid == r.listing")
-
-fin = as.data.table(sqldf("SELECT *, COUNT(r.rowid) AS prev FROM pri AS p LEFT JOIN rev AS r ON r.dat <= p.dat AND r.listing == p.listing GROUP BY p.id"))
-
-fin = fin[order(fin$dat),]
-
-x = split(fin, f = as.factor(fin$listing))
-for (i in 1:length(names(x))) {
-    x[[i]]$raw_change = c(NA, diff(x[[i]]$prev))
-    x[[i]]$smooth_change = NA
-    tryCatch({
-        mod = smooth.spline(y = x[[i]]$prev, x = x[[i]]$dat, spar = 0.6)
-        x[[i]]$smooth_change = predict(mod, deriv = 1)$y
-        x[[i]]$smooth_ahead_1 = x[[i]]$smooth_change
-        x[[i]]$smooth_behind_1 = x[[i]]$smooth_change
-        x[[i]]$smooth_ahead_3 = x[[i]]$smooth_change
-        x[[i]]$smooth_behind_3 = x[[i]]$smooth_change
-        x[[i]]$smooth_ahead_5 = x[[i]]$smooth_change
-        x[[i]]$smooth_behind_5 = x[[i]]$smooth_change
-        x[[i]]$smooth_ahead_7 = x[[i]]$smooth_change
-        x[[i]]$smooth_behind_7 = x[[i]]$smooth_change
-        for (j in 1:length(x[[i]]$smooth_change)) {
-            d = x[[i]]$dat[j]
-            behind = x[[i]]$smooth_change[x[[i]]$dat > d - 7 & x[[i]]$dat <= d]
-            ahead = x[[i]]$smooth_change[x[[i]]$dat < d + 7 & x[[i]]$dat >= d]
-            x[[i]]$smooth_behind_1[j] = mean(behind)
-            x[[i]]$smooth_ahead_1[j] = mean(ahead)
-            behind = x[[i]]$smooth_change[x[[i]]$dat > d - 21 & x[[i]]$dat <= d]
-            ahead = x[[i]]$smooth_change[x[[i]]$dat < d + 21 & x[[i]]$dat >= d]
-            x[[i]]$smooth_behind_3[j] = mean(behind)
-            x[[i]]$smooth_ahead_3[j] = mean(ahead)
-            behind = x[[i]]$smooth_change[x[[i]]$dat > d - 35 & x[[i]]$dat <= d]
-            ahead = x[[i]]$smooth_change[x[[i]]$dat < d + 35 & x[[i]]$dat >= d]
-            x[[i]]$smooth_behind_5[j] = mean(behind)
-            x[[i]]$smooth_ahead_5[j] = mean(ahead)
-            behind = x[[i]]$smooth_change[x[[i]]$dat > d - 42 & x[[i]]$dat <= d]
-            ahead = x[[i]]$smooth_change[x[[i]]$dat < d + 42 & x[[i]]$dat >= d]
-            x[[i]]$smooth_behind_7[j] = mean(behind)
-            x[[i]]$smooth_ahead_7[j] = mean(ahead)
-        }
-
-    }, error = function(e) {})
-    cat('\r')
-    cat(i)
+  boxdata = rbind(boxdata, list(name, mod$coefficients[1], mod$coefficients[2]))
+  
 }
-fin = as.data.table(unsplit(x, f = as.factor(fin$listing)))
 
-finpd = pdata.frame(fin, index = c("listing", "dat"))
+boxdata = boxdata[order(boxdata$coeff),]
+boxdata$lower = boxdata$coeff - boxdata$std
+boxdata$upper = boxdata$coeff + boxdata$std
 
-finpd$smooth_change_lag = lag(finpd$smooth_change, k = )
+dat = c()
+for (i in 1:length(boxdata$name)) {
+    dat = rbind(dat, boxdata$lower[i], boxdata$coeff[i], boxdata$coeff[i], boxdata$coeff[i], boxdata$upper[i])
+}
+
+bxp.data = list(stats = matrix(dat, nrow = 5, ncol = length(boxdata$name)), n = rep(1, length(boxdata$name)), names = boxdata$name)
+par(mar=c(3, 7, 3, 3))
+bxp(bxp.data, show.names = TRUE, horizontal = TRUE, las = 2)
+title("Fig. 3: Correlation between sales and price")
 
 ```
 
