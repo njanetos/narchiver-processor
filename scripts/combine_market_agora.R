@@ -20,12 +20,12 @@ vendors_ = unique(rbind(vend_vendors, list_vendors))
 
 # Load all categories
 # This is the final ordering of categories
-cat('[combine_market_agora.R]: Sorted categories')
+cat('[combine_market_agora.R]: Sorted categories\n')
 categories_ = as.data.table(sqldf("SELECT * FROM categories", dbname = dblist))
 
 # Load shipping from, to locations
 # Final ordering
-cat('[combine_market_agora.R]: Sorted shipping locations')
+cat('[combine_market_agora.R]: Sorted shipping locations\n')
 ships_from_ = as.data.table(sqldf("SELECT * FROM ships_from", dbname = dblist))
 ships_to_ = as.data.table(sqldf("SELECT * FROM ships_to", dbname = dblist))
 
@@ -49,7 +49,7 @@ if (tmp != 0) {
     warning("Something went wrong in the listings.")
 }
 listings_ = subset(listings_, select = -c(ind))
-cat('[combine_market_agora.R]: Sorted listings')
+cat('[combine_market_agora.R]: Sorted listings\n')
 
 # Load all prices
 # Cross reference with listing titles
@@ -99,7 +99,7 @@ reviews = rbind(reviews_listings, reviews_vendors)
 reviews_ = sqldf("SELECT dat, vendor, listing, val, content, user_rating, user_deals, scraped_at, MAX(scraped_at) AS max FROM reviews GROUP BY dat, vendor, listing, val, content")
 reviews_ = subset(reviews_, select = -c(max, scraped_at))
 rm(reviews)
-cat('[combine_market_agora.R]: Sorted reviews')
+cat('[combine_market_agora.R]: Sorted reviews\n')
 
 # Build smoothed estimates of daily sales rate from reviews
 prices_temp = sqldf("SELECT *, p.rowid AS id FROM prices AS p")
@@ -112,33 +112,23 @@ prices_temp = as.data.table(sqldf("SELECT *, COUNT(r.rowid) AS prev FROM prices_
 prices_temp = prices_temp[order(prices_temp$dat),]
 
 # Fit a smooth spline to every listing
-# Fit 4 week ahead / behind averages of the growth rate
 prices_temp$smooth_change = prices_temp$dat*NA
-prices_temp$smooth_ahead_4 = prices_temp$dat*NA
-prices_temp$smooth_behind_4 = prices_temp$dat*NA
 x = split(prices_temp, f = as.factor(prices_temp$listing))
 tot = length(names(x))
-cat('Fitting smooth splines...')
+cat('Fitting smooth splines...\n')
 for (i in 1:length(names(x))) {
     tryCatch({
         # Fit a smooth spline to review rate
         mod = smooth.spline(y = x[[i]]$prev, x = x[[i]]$dat, spar = 0.6)
         x[[i]]$smooth_change = predict(mod, deriv = 1)$y
-        # Compute averages
-        for (j in 1:length(x[[i]]$smooth_change)) {
-            d = x[[i]]$dat[j]
-            behind = x[[i]]$smooth_change[x[[i]]$dat > d - 28 & x[[i]]$dat <= d]
-            ahead = x[[i]]$smooth_change[x[[i]]$dat < d + 28 & x[[i]]$dat >= d]
-            x[[i]]$smooth_behind_4[j] = mean(behind)
-            x[[i]]$smooth_ahead_4[j] = mean(ahead)
-        }
     }, error = function(e) {})
     cat('\r')
     cat(paste('Progress: ', 100*round(i / tot, digits = 1), '%'), sep = '')
 }
 prices_ = as.data.table(unsplit(x, f = as.factor(prices_temp$listing)))
-prices_ = subset(prices_, select = c("dat", "listing", "vendor", "max_sales", "min_sales", "price", "rating", "smooth_change", "smooth_behind_4", "smooth_ahead_4"))
-cat('[combine_market_agora.R]: Sorted prices')
+prices_$reviews_per_day = prices_$smooth_change
+prices_ = subset(prices_, select = c("dat", "listing", "vendor", "max_sales", "min_sales", "price", "rating", "reviews_per_day"))
+cat('[combine_market_agora.R]: Sorted prices\n')
 
 # Write everything to the database
 
@@ -156,7 +146,7 @@ sqldf("INSERT INTO categories SELECT * FROM categories_", dbname = dbout)
 sqldf("CREATE TABLE listings(title TEXT, category INT, vendor INT, units TEXT, amount REAL, quantity INT, ships_from INT, ships_to INT)", dbname = dbout)
 sqldf("INSERT INTO listings SELECT * FROM listings_", dbname = dbout)
 
-sqldf("CREATE TABLE prices(dat INT, listing INT, vendor INT, max_sales INT, min_sales INT, price REAL, rating REAL, smooth_change REAL, smooth_behind_4 REAL, smooth_ahead_4 REAL)", dbname = dbout)
+sqldf("CREATE TABLE prices(dat INT, listing INT, vendor INT, max_sales INT, min_sales INT, price REAL, rating REAL, reviews_per_day REAL)", dbname = dbout)
 sqldf("INSERT INTO prices SELECT * FROM prices_", dbname = dbout)
 
 sqldf("CREATE TABLE reviews(dat INT, vendor INT, listing INT, val INT, content TEXT, user_rating REAL, user_deals INT)", dbname = dbout)
