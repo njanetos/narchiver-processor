@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "[pipe finder]: Running $1"
+
 if [ -f "scripts/""$1""."* ]; then
 
 	scriptname=`echo scripts/$1.*`
