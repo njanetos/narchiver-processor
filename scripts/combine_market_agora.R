@@ -15,14 +15,17 @@ list_vendors = as.data.table(sqldf("SELECT vendor AS name FROM listings", dbname
 
 # Compile them together and remove duplicates
 # This is the final ordering of vendors
+cat('[combine_market_agora.R]: Sorted vendors')
 vendors_ = unique(rbind(vend_vendors, list_vendors))
 
 # Load all categories
 # This is the final ordering of categories
+cat('[combine_market_agora.R]: Sorted categories')
 categories_ = as.data.table(sqldf("SELECT * FROM categories", dbname = dblist))
 
 # Load shipping from, to locations
 # Final ordering
+cat('[combine_market_agora.R]: Sorted shipping locations')
 ships_from_ = as.data.table(sqldf("SELECT * FROM ships_from", dbname = dblist))
 ships_to_ = as.data.table(sqldf("SELECT * FROM ships_to", dbname = dblist))
 
@@ -46,6 +49,7 @@ if (tmp != 0) {
     warning("Something went wrong in the listings.")
 }
 listings_ = subset(listings_, select = -c(ind))
+cat('[combine_market_agora.R]: Sorted listings')
 
 # Load all prices
 # Cross reference with listing titles
@@ -95,6 +99,7 @@ reviews = rbind(reviews_listings, reviews_vendors)
 reviews_ = sqldf("SELECT dat, vendor, listing, val, content, user_rating, user_deals, scraped_at, MAX(scraped_at) AS max FROM reviews GROUP BY dat, vendor, listing, val, content")
 reviews_ = subset(reviews_, select = -c(max, scraped_at))
 rm(reviews)
+cat('[combine_market_agora.R]: Sorted reviews')
 
 # Build smoothed estimates of daily sales rate from reviews
 prices_temp = sqldf("SELECT *, p.rowid AS id FROM prices AS p")
@@ -133,6 +138,8 @@ for (i in 1:length(names(x))) {
 }
 prices_ = as.data.table(unsplit(x, f = as.factor(prices_temp$listing)))
 prices_ = subset(prices_, select = c("dat", "listing", "vendor", "max_sales", "min_sales", "price", "rating", "smooth_change", "smooth_behind_4", "smooth_ahead_4"))
+cat('[combine_market_agora.R]: Sorted prices')
+
 # Write everything to the database
 
 # Create the output path
