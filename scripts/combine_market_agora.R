@@ -98,7 +98,7 @@ reviews_ = sqldf("SELECT dat, vendor, listing, val, content, user_rating, scrape
 reviews_ = subset(reviews_, select = -c(max, scraped_at))
 old_len = length(reviews$dat)
 rm(reviews)
-cat(paste('[combine_market_agora.R]: Sorted reviews ', 100 - 100*round(length(reviews_$dat)/old_len, digits = 2), '% were found to be duplicates.', sep = ''))
+cat(paste('[combine_market_agora.R]: Sorted reviews, ', 100 - 100*round(length(reviews_$dat)/old_len, digits = 2), '% were found to be duplicates.', sep = ''))
 
 # Build smoothed estimates of daily sales rate from reviews
 prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.rowid AS id FROM prices_ AS p"))
@@ -119,7 +119,7 @@ prices_temp$reviews_average_month = prices_temp$dat*NA
 prices_temp$net_reviews = prices_temp$dat*NA
 x = split(prices_temp, f = as.factor(prices_temp$listing))
 tot = length(names(x))
-cat('Fitting smooth splines...\n')
+cat('[combine_market_agora.R]: Fitting smooth splines...\n')
 
 for (i in 1:length(names(x))) {
     tryCatch({
@@ -159,7 +159,7 @@ for (i in 1:length(names(x))) {
 prices_temp = as.data.table(unsplit(x, f = as.factor(prices_temp$listing)))
 
 # Re-create prices
-prices_ = as.data.table(sqldf("SELECT p.dat, p.listing, q.vendor, q.max_sales, q.min_sales, q.price, q.rating, p.reviews_per_dat, p.reviews_average_week, p.reviews_average_month, p.net_reviews, p.net_reviews_smooth FROM prices_temp AS p
+prices_ = as.data.table(sqldf("SELECT p.dat, p.listing, q.vendor, q.max_sales, q.min_sales, q.price, q.rating, p.reviews_per_day, p.reviews_average_week, p.reviews_average_month, p.net_reviews, p.net_reviews_smooth FROM prices_temp AS p
                                     JOIN prices_ AS q ON q.rowid == p.id"))
 cat('[combine_market_agora.R]: Sorted prices\n')
 
@@ -183,7 +183,7 @@ try({
     sqldf("INSERT INTO listings SELECT * FROM listings_", dbname = dbout)
     
     sqldf("DROP TABLE IF EXISTS prices")
-    sqldf("CREATE TABLE prices(dat INT, listing INT, vendor INT, max_sales INT, min_sales INT, price REAL, rating REAL, reviews_per_day REAL)", dbname = dbout)
+    sqldf("CREATE TABLE prices(dat INT, listing INT, vendor INT, max_sales INT, min_sales INT, price REAL, rating REAL, reviews_per_day REAL, reviews_average_week REAL, reviews_average_month REAL, net_reviews INT, net_reviews_smooth REAL)", dbname = dbout)
     sqldf("INSERT INTO prices SELECT * FROM prices_", dbname = dbout)
     
     sqldf("DROP TABLE IF EXISTS reviews")
