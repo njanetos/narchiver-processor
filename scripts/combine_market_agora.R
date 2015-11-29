@@ -140,24 +140,31 @@ file.remove(dbout)
 
 db <- dbConnect(SQLite(), dbname = dbout)
 
+sqldf("DROP TABLE IF EXISTS categories")
 sqldf("CREATE TABLE categories(category TEXT)", dbname = dbout)
 sqldf("INSERT INTO categories SELECT * FROM categories_", dbname = dbout)
 
+sqldf("DROP TABLE IF EXISTS listings")
 sqldf("CREATE TABLE listings(title TEXT, category INT, vendor INT, units TEXT, amount REAL, quantity INT, ships_from INT, ships_to INT)", dbname = dbout)
 sqldf("INSERT INTO listings SELECT * FROM listings_", dbname = dbout)
 
+sqldf("DROP TABLE IF EXISTS prices")
 sqldf("CREATE TABLE prices(dat INT, listing INT, vendor INT, max_sales INT, min_sales INT, price REAL, rating REAL, reviews_per_day REAL)", dbname = dbout)
 sqldf("INSERT INTO prices SELECT * FROM prices_", dbname = dbout)
 
+sqldf("DROP TABLE IF EXISTS reviews")
 sqldf("CREATE TABLE reviews(dat INT, vendor INT, listing INT, val INT, content TEXT, user_rating REAL, user_deals INT)", dbname = dbout)
 sqldf("INSERT INTO reviews SELECT * FROM reviews_", dbname = dbout)
 
+sqldf("DROP TABLE IF EXISTS ships_from")
 sqldf("CREATE TABLE ships_from(location TEXT)", dbname = dbout)
 sqldf("INSERT INTO ships_from SELECT * FROM ships_from_", dbname = dbout)
 
+sqldf("DROP TABLE IF EXISTS ships_to")
 sqldf("CREATE TABLE ships_to(location TEXT)", dbname = dbout)
 sqldf("INSERT INTO ships_to SELECT * FROM ships_to_", dbname = dbout)
 
+sqldf("DROP TABLE IF EXISTS vendors")
 sqldf("CREATE TABLE vendors(name TEXT)", dbname = dbout)
 sqldf("INSERT INTO vendors SELECT * FROM vendors_", dbname = dbout)
 
