@@ -1,4 +1,4 @@
-list.of.packages <- c("sqldf", "data.table")
+list.of.packages <- c("sqldf", "data.table", "zoo")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages, repos='http://cran.us.r-project.org')
 
@@ -54,7 +54,7 @@ cat('[combine_market_agora.R]: Sorted listings\n')
 # Load all prices
 # Cross reference with listing titles
 # If everything went right with the listings, this should almost be the final ordering.
-prices = as.data.table(sqldf("SELECT p.dat, p.listing, l.vendor, p.max_sales, p.min_sales, p.price, p.rating FROM prices AS p
+prices_ = as.data.table(sqldf("SELECT p.dat, p.listing, l.vendor, p.max_sales, p.min_sales, p.price, p.rating FROM prices AS p
                                LEFT JOIN listings as l
                                    ON l.rowid == p.listing", dbname = dblist))
 
@@ -79,14 +79,12 @@ if (sqldf("SELECT Count(*) FROM reviews", dbname = dbvend) != length(reviews_ven
     warning("Error with reviews!")
 }
 
-# Average the user sales
-reviews_vendors$user_deals = (as.numeric(reviews_vendors$min_user_sales) + as.numeric(reviews_vendors$max_user_sales))/2
 # Re-order so it's nice
-reviews_vendors = subset(reviews_vendors, select = c(dat, vendor, listing, val, content, user_rating, user_deals, scraped_at))
+reviews_vendors = subset(reviews_vendors, select = c(dat, vendor, listing, val, content, user_rating, scraped_at))
 
 # Load reviews from the listings
 # If everything went right with the listing, we can use the same rowids
-reviews_listings = as.data.table(sqldf("SELECT r.dat, l.vendor, r.listing, r.val, r.review AS content, r.user_rating, r.user_deals, r.scraped_at FROM reviews AS r
+reviews_listings = as.data.table(sqldf("SELECT r.dat, l.vendor, r.listing, r.val, r.review AS content, r.user_rating, r.scraped_at FROM reviews AS r
                                         LEFT JOIN listings_ AS l
                                             WHERE l.rowid == r.listing", dbname = dblist))
 
@@ -96,38 +94,73 @@ reviews = rbind(reviews_listings, reviews_vendors)
 # Remove duplicates
 # Sort by date, date scraped at, content, and value.
 # Delete everything which is on the same date, was scraped at different dates, and has the same value and content
-reviews_ = sqldf("SELECT dat, vendor, listing, val, content, user_rating, user_deals, scraped_at, MAX(scraped_at) AS max FROM reviews GROUP BY dat, vendor, listing, val, content")
+reviews_ = sqldf("SELECT dat, vendor, listing, val, content, user_rating, scraped_at, MAX(scraped_at) AS max FROM reviews GROUP BY dat, vendor, listing, val, content")
 reviews_ = subset(reviews_, select = -c(max, scraped_at))
+old_len = length(reviews$dat)
 rm(reviews)
-cat('[combine_market_agora.R]: Sorted reviews\n')
+cat(paste('[combine_market_agora.R]: Sorted reviews ', 100 - 100*round(length(reviews_$dat)/old_len, digits = 2), '% were found to be duplicates.', sep = ''))
 
 # Build smoothed estimates of daily sales rate from reviews
-prices_temp = sqldf("SELECT *, p.rowid AS id FROM prices AS p")
+prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.rowid AS id FROM prices_ AS p"))
 prices_temp$dat = floor(prices_temp$dat / 86400)
-reviews_temp = sqldf("SELECT r.dat, r.listing, l.category FROM reviews_ AS r LEFT JOIN listings_ AS l ON l.rowid == r.listing")
+reviews_temp = as.data.table(sqldf("SELECT r.dat, r.listing, l.category FROM reviews_ AS r LEFT JOIN listings_ AS l ON l.rowid == r.listing"))
 # Build estimate of aggregate reviews up to the time the price was scraped
-prices_temp = as.data.table(sqldf("SELECT *, COUNT(r.rowid) AS prev FROM prices_temp AS p LEFT JOIN reviews_temp AS r ON r.dat <= p.dat AND r.listing == p.listing GROUP BY p.id"))
+prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.id, COUNT(r.rowid) AS prev FROM prices_temp AS p LEFT JOIN reviews_temp AS r ON r.dat <= p.dat AND r.listing == p.listing GROUP BY p.id"))
 
 # Order the prices
 prices_temp = prices_temp[order(prices_temp$dat),]
+prices_temp = prices_temp[order(prices_temp$id),]
 
-# Fit a smooth spline to every listing
-prices_temp$smooth_change = prices_temp$dat*NA
+# Fit a smooth spline to every listing, compute averages looking ahead
+prices_temp$net_reviews_smooth = prices_temp$dat*NA
+prices_temp$reviews_per_day = prices_temp$dat*NA
+prices_temp$reviews_average_week = prices_temp$dat*NA
+prices_temp$reviews_average_month = prices_temp$dat*NA
+prices_temp$net_reviews = prices_temp$dat*NA
 x = split(prices_temp, f = as.factor(prices_temp$listing))
 tot = length(names(x))
 cat('Fitting smooth splines...\n')
+
 for (i in 1:length(names(x))) {
     tryCatch({
-        # Fit a smooth spline to review rate
+        # Put in a data table and sort
+        setkey(x[[i]], id)
+        temp = x[[i]]
+        temp = temp[order(temp$dat),]
+        x[[i]] = temp
+        
+        # Eliminate duplicate entries
+        x[[i]] = x[[i]][!duplicated(subset(x[[i]], select = c(listing, dat)))]
+        
+        # Fit a smooth spline
         mod = smooth.spline(y = x[[i]]$prev, x = x[[i]]$dat, spar = 0.6)
-        x[[i]]$smooth_change = predict(mod, deriv = 1)$y
+        
+        # Read in the spline values
+        x[[i]]$net_reviews_smooth = predict(mod, x[[i]]$dat, deriv = 0)$y
+        x[[i]]$reviews_per_day = predict(mod, x[[i]]$dat, deriv = 1)$y
+        x[[i]]$net_reviews = x[[i]]$prev
+        
+        # Do the horrids
+        by_listing = zoo(c(NA, diff(x[[i]]$net_reviews, lag = 1)), as.Date(x[[i]]$dat))
+        g = zoo(, seq(start(by_listing), end(by_listing), "day"))
+        regular_by_listing = merge(by_listing, g)
+        # Get week average
+        temp = rollapply(regular_by_listing, 7, mean, align = "right", na.rm = TRUE, fill = NA)
+        temp = merge(temp, by_listing, all = FALSE)
+        x[[i]]$reviews_average_week = temp$temp
+        # Get month average
+        temp = rollapply(regular_by_listing, 28, mean, align = "right", na.rm = TRUE, fill = NA)
+        temp = merge(temp, by_listing, all = FALSE)
+        x[[i]]$reviews_average_month = temp$temp
     }, error = function(e) {})
     cat('\r')
-    cat(paste('Progress: ', 100*round(i / tot, digits = 1), '%'), sep = '')
+    cat(paste('Progress: ', 100*round(i / tot, digits = 4), '%'), sep = '')
 }
-prices_ = as.data.table(unsplit(x, f = as.factor(prices_temp$listing)))
-prices_$reviews_per_day = prices_$smooth_change
-prices_ = subset(prices_, select = c("dat", "listing", "vendor", "max_sales", "min_sales", "price", "rating", "reviews_per_day"))
+prices_temp = as.data.table(unsplit(x, f = as.factor(prices_temp$listing)))
+
+# Re-create prices
+prices_ = as.data.table(sqldf("SELECT p.dat, p.listing, q.vendor, q.max_sales, q.min_sales, q.price, q.rating, p.reviews_per_dat, p.reviews_average_week, p.reviews_average_month, p.net_reviews, p.net_reviews_smooth FROM prices_temp AS p
+                                    JOIN prices_ AS q ON q.rowid == p.id"))
 cat('[combine_market_agora.R]: Sorted prices\n')
 
 # Write everything to the database
@@ -140,32 +173,34 @@ file.remove(dbout)
 
 db <- dbConnect(SQLite(), dbname = dbout)
 
-sqldf("DROP TABLE IF EXISTS categories")
-sqldf("CREATE TABLE categories(category TEXT)", dbname = dbout)
-sqldf("INSERT INTO categories SELECT * FROM categories_", dbname = dbout)
-
-sqldf("DROP TABLE IF EXISTS listings")
-sqldf("CREATE TABLE listings(title TEXT, category INT, vendor INT, units TEXT, amount REAL, quantity INT, ships_from INT, ships_to INT)", dbname = dbout)
-sqldf("INSERT INTO listings SELECT * FROM listings_", dbname = dbout)
-
-sqldf("DROP TABLE IF EXISTS prices")
-sqldf("CREATE TABLE prices(dat INT, listing INT, vendor INT, max_sales INT, min_sales INT, price REAL, rating REAL, reviews_per_day REAL)", dbname = dbout)
-sqldf("INSERT INTO prices SELECT * FROM prices_", dbname = dbout)
-
-sqldf("DROP TABLE IF EXISTS reviews")
-sqldf("CREATE TABLE reviews(dat INT, vendor INT, listing INT, val INT, content TEXT, user_rating REAL, user_deals INT)", dbname = dbout)
-sqldf("INSERT INTO reviews SELECT * FROM reviews_", dbname = dbout)
-
-sqldf("DROP TABLE IF EXISTS ships_from")
-sqldf("CREATE TABLE ships_from(location TEXT)", dbname = dbout)
-sqldf("INSERT INTO ships_from SELECT * FROM ships_from_", dbname = dbout)
-
-sqldf("DROP TABLE IF EXISTS ships_to")
-sqldf("CREATE TABLE ships_to(location TEXT)", dbname = dbout)
-sqldf("INSERT INTO ships_to SELECT * FROM ships_to_", dbname = dbout)
-
-sqldf("DROP TABLE IF EXISTS vendors")
-sqldf("CREATE TABLE vendors(name TEXT)", dbname = dbout)
-sqldf("INSERT INTO vendors SELECT * FROM vendors_", dbname = dbout)
+try({
+    sqldf("DROP TABLE IF EXISTS categories")
+    sqldf("CREATE TABLE categories(category TEXT)", dbname = dbout)
+    sqldf("INSERT INTO categories SELECT * FROM categories_", dbname = dbout)
+    
+    sqldf("DROP TABLE IF EXISTS listings")
+    sqldf("CREATE TABLE listings(title TEXT, category INT, vendor INT, units TEXT, amount REAL, quantity INT, ships_from INT, ships_to INT)", dbname = dbout)
+    sqldf("INSERT INTO listings SELECT * FROM listings_", dbname = dbout)
+    
+    sqldf("DROP TABLE IF EXISTS prices")
+    sqldf("CREATE TABLE prices(dat INT, listing INT, vendor INT, max_sales INT, min_sales INT, price REAL, rating REAL, reviews_per_day REAL)", dbname = dbout)
+    sqldf("INSERT INTO prices SELECT * FROM prices_", dbname = dbout)
+    
+    sqldf("DROP TABLE IF EXISTS reviews")
+    sqldf("CREATE TABLE reviews(dat INT, vendor INT, listing INT, val INT, content TEXT, user_rating REAL, user_deals INT)", dbname = dbout)
+    sqldf("INSERT INTO reviews SELECT * FROM reviews_", dbname = dbout)
+    
+    sqldf("DROP TABLE IF EXISTS ships_from")
+    sqldf("CREATE TABLE ships_from(location TEXT)", dbname = dbout)
+    sqldf("INSERT INTO ships_from SELECT * FROM ships_from_", dbname = dbout)
+    
+    sqldf("DROP TABLE IF EXISTS ships_to")
+    sqldf("CREATE TABLE ships_to(location TEXT)", dbname = dbout)
+    sqldf("INSERT INTO ships_to SELECT * FROM ships_to_", dbname = dbout)
+    
+    sqldf("DROP TABLE IF EXISTS vendors")
+    sqldf("CREATE TABLE vendors(name TEXT)", dbname = dbout)
+    sqldf("INSERT INTO vendors SELECT * FROM vendors_", dbname = dbout)
+})
 
 dbDisconnect(db)
