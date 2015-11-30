@@ -117,11 +117,11 @@ prices_temp$reviews_per_day = prices_temp$dat*NA
 prices_temp$reviews_average_week = prices_temp$dat*NA
 prices_temp$reviews_average_month = prices_temp$dat*NA
 prices_temp$net_reviews = prices_temp$dat*NA
-x = split(prices_temp, f = as.factor(prices_temp$listing))
+x = split(prices_temp, f = prices_temp$listing)
 tot = length(names(x))
 cat('[combine_market_agora.R]: Fitting smooth splines...\n')
 
-for (i in 1:length(names(x))) {
+for (i in 1:1000) {
     tryCatch({
         # Put in a data table and sort
         setkey(x[[i]], id)
@@ -156,7 +156,7 @@ for (i in 1:length(names(x))) {
     cat('\r')
     cat(paste('Progress: ', 100*round(i / tot, digits = 4), '%'), sep = '')
 }
-prices_temp = as.data.table(unsplit(x, f = as.factor(prices_temp$listing)))
+prices_temp = as.data.table(do.call(rbind, x))
 
 # Re-create prices
 prices_ = as.data.table(sqldf("SELECT p.dat, p.listing, q.vendor, q.max_sales, q.min_sales, q.price, q.rating, p.reviews_per_day, p.reviews_average_week, p.reviews_average_month, p.net_reviews, p.net_reviews_smooth FROM prices_temp AS p
