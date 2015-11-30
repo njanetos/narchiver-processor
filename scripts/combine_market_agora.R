@@ -123,12 +123,6 @@ cat('[combine_market_agora.R]: Fitting smooth splines...\n')
 
 for (i in 1:1000) {
     tryCatch({
-        # Put in a data table and sort
-        setkey(x[[i]], id)
-        temp = x[[i]]
-        temp = temp[order(temp$dat),]
-        x[[i]] = temp
-        
         # Eliminate duplicate entries
         x[[i]] = x[[i]][!duplicated(subset(x[[i]], select = c(listing, dat)))]
         
@@ -147,11 +141,11 @@ for (i in 1:1000) {
         # Get week average
         temp = rollapply(regular_by_listing, 7, mean, align = "right", na.rm = TRUE, fill = NA)
         temp = merge(temp, by_listing, all = FALSE)
-        x[[i]]$reviews_average_week = temp$temp
+        x[[i]]$reviews_average_week = as.data.table(temp$temp)
         # Get month average
         temp = rollapply(regular_by_listing, 28, mean, align = "right", na.rm = TRUE, fill = NA)
         temp = merge(temp, by_listing, all = FALSE)
-        x[[i]]$reviews_average_month = temp$temp
+        x[[i]]$reviews_average_month = as.data.table(temp$temp)
     }, error = function(e) {})
     cat('\r')
     cat(paste('Progress: ', 100*round(i / tot, digits = 4), '%'), sep = '')
