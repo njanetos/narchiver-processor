@@ -181,7 +181,7 @@ try({
     sqldf("INSERT INTO prices SELECT * FROM prices_", dbname = dbout)
     
     sqldf("DROP TABLE IF EXISTS reviews")
-    sqldf("CREATE TABLE reviews(dat INT, vendor INT, listing INT, val INT, content TEXT, user_rating REAL, user_deals INT)", dbname = dbout)
+    sqldf("CREATE TABLE reviews(dat INT, vendor INT, listing INT, val INT, content TEXT, user_rating REAL)", dbname = dbout)
     sqldf("INSERT INTO reviews SELECT * FROM reviews_", dbname = dbout)
     
     sqldf("DROP TABLE IF EXISTS ships_from")
