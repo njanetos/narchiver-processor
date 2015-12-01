@@ -146,6 +146,6 @@ with open(markdown_file, "w") as file:
         file.write(doc_json[d]['preview'] + "\n\n")
         file.write("#### Column descriptions for table `" + d + "`\n\n")
         i = i + 1
-        for s in [s for s in doc_json[d] if s != 'table_doc']:
+        for s in [s for s in doc_json[d] if s != 'table_doc' and s != 'preview']:
             file.write("* " + "`" + s + "`: " + doc_json[d][s] + '\n')
         file.write('\n')
