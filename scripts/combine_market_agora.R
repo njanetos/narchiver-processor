@@ -139,11 +139,11 @@ for (i in 1:length(prices_temp$listing)) {
         g = zoo(, seq(start(by_listing), end(by_listing), "day"))
         regular_by_listing = merge(by_listing, g)
         # Get week average
-        temp = rollapply(regular_by_listing, 7, mean, align = "right", na.rm = TRUE, fill = NA)
+        temp = rollapply(regular_by_listing, 7, mean, align = "left", na.rm = TRUE, fill = NA)
         temp = merge(temp, by_listing, all = FALSE)
         x[[i]]$reviews_average_week = as.data.table(temp$temp)
         # Get month average
-        temp = rollapply(regular_by_listing, 28, mean, align = "right", na.rm = TRUE, fill = NA)
+        temp = rollapply(regular_by_listing, 28, mean, align = "left", na.rm = TRUE, fill = NA)
         temp = merge(temp, by_listing, all = FALSE)
         x[[i]]$reviews_average_month = as.data.table(temp$temp)
     }, error = function(e) {})
