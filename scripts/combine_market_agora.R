@@ -15,7 +15,7 @@ list_vendors = as.data.table(sqldf("SELECT vendor AS name FROM listings", dbname
 
 # Compile them together and remove duplicates
 # This is the final ordering of vendors
-cat('[combine_market_agora.R]: Sorted vendors')
+cat('[combine_market_agora.R]: Sorted vendors\n')
 vendors_ = unique(rbind(vend_vendors, list_vendors))
 
 # Load all categories
@@ -98,7 +98,7 @@ reviews_ = sqldf("SELECT dat, vendor, listing, val, content, user_rating, scrape
 reviews_ = subset(reviews_, select = -c(max, scraped_at))
 old_len = length(reviews$dat)
 rm(reviews)
-cat(paste('[combine_market_agora.R]: Sorted reviews, ', 100 - 100*round(length(reviews_$dat)/old_len, digits = 2), '% were found to be duplicates.', sep = ''))
+cat(paste('[combine_market_agora.R]: Sorted reviews, ', 100 - 100*round(length(reviews_$dat)/old_len, digits = 2), '% were found to be duplicates.\n', sep = ''))
 
 # Build smoothed estimates of daily sales rate from reviews
 prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.rowid AS id FROM prices_ AS p"))
@@ -181,7 +181,7 @@ try({
     sqldf("INSERT INTO prices SELECT * FROM prices_", dbname = dbout)
     
     sqldf("DROP TABLE IF EXISTS reviews")
-    sqldf("CREATE TABLE reviews(dat INT, vendor INT, listing INT, val INT, content TEXT, user_rating REAL, user_deals INT)", dbname = dbout)
+    sqldf("CREATE TABLE reviews(dat INT, vendor INT, listing INT, val INT, content TEXT, user_rating REAL)", dbname = dbout)
     sqldf("INSERT INTO reviews SELECT * FROM reviews_", dbname = dbout)
     
     sqldf("DROP TABLE IF EXISTS ships_from")
