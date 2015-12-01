@@ -10,18 +10,18 @@
 
 #### First 10 rows of table `ships_from`
 
-| category                 |
-|:-------------------------|
-| Drugs.Stimulants.Cocaine |
-| Drugs.Ecstasy.Pills      |
-| Drugs.RCs                |
-| Weapons.Fireworks        |
-| Data.Software            |
-| Drugs.Prescription       |
-| Drugs.Other              |
-| Drugs.Stimulants.Speed   |
-| Drugs.Ecstasy.MDMA       |
-| Services.Other           |
+| category                      |
+|:------------------------------|
+| Jewelry                       |
+| Drugs.Stimulants.Meth         |
+| Drugs.Dissociatives.Ketamine  |
+| Drugs.Cannabis.Weed           |
+| Drugs.Weightloss              |
+| Drugs.Steroids                |
+| Drugs.Ecstasy.MDMA            |
+| Drugs.Stimulants.Prescription |
+| Drugs.Benzos                  |
+| Information.eBooks            |
 
 #### Column descriptions for table `ships_from`
 
@@ -33,18 +33,18 @@
 
 #### First 10 rows of table `listings`
 
-| title                                                                        | vendor          |   category |   ships_from |   ships_to | units   |   amount |   quantity |
-|:-----------------------------------------------------------------------------|:----------------|-----------:|-------------:|-----------:|:--------|---------:|-----------:|
-| KILLA COKE 1G                                                                | thepillguyAUS   |          1 |            1 |          1 | g       |      1   |          1 |
-| One 115mg Capsule of Rolling Buddha MDMA Sassafras Extract Escrow            | TheBestCannabis |          2 |            2 |          2 | mg      |    115   |          1 |
-| 500g APHP                                                                    | starlight       |          3 |            1 |          1 | g       |    500   |          1 |
-| Potassium chlorate 40g                                                       | TorChem         |          4 |            1 |          1 | g       |     40   |          1 |
-| Tails Preloaded Bootable USB Flash Drive Current 1.0.1 version FREE SHIPPING | Peddler         |          5 |            1 |          1 |         |      0   |          1 |
-| 500 Pills Rivotril 2 MG                                                      | Meds2Buy        |          6 |            3 |          3 | mg      |      2   |        500 |
-| 250g of 99.8 PURE METHYLONE.  250 grams                                      | MrGuapo         |          3 |            4 |          4 | g       |    250   |          1 |
-| MDMA Pills 200mg 5stk SUPERMANN gelb                                         | MIcasa-SUcasa   |          2 |            5 |          5 | mg      |    200   |        200 |
-| USA ONLY  Clonodine .2mg                                                     | canadasunshine  |          7 |            1 |          1 | mg      |      0.2 |          1 |
-| STHOMPSONSPEED PASTE 1gHIGH QUALITY                                          | huntersthompson |          8 |            5 |          6 | g       |      1   |          1 |
+| title                                                                             | vendor           |   category |   ships_from |   ships_to | units   |   amount |   quantity |
+|:----------------------------------------------------------------------------------|:-----------------|-----------:|-------------:|-----------:|:--------|---------:|-----------:|
+| Dior Logo Necklace Replica                                                        | foxygirl         |          1 |            1 |          1 |         |      0   |          1 |
+| Chanel Sunglasses CHL5171 Replica blackblack frame white legs burgundy beige c952 | Bigdeal100       |          1 |            1 |          1 |         |      0   |          1 |
+| Ice Crystal Meth 8 OZ 224 Grams  599 OZ .   Escrow  Stealth                       | VerdeLimon       |          2 |            1 |          1 | oz      |      8   |          1 |
+| 2.5gr. Ketamine Risomer                                                           | Apotheke         |          3 |            1 |          1 | g       |      2.5 |          1 |
+| 1.0 gram Risomer KETAMINE                                                         | Alex-Sosa        |          3 |            2 |          2 | g       |      1   |          1 |
+| 12 oz AlienTrain                                                                  | UrLocalBudTender |          4 |            1 |          1 | oz      |     12   |          1 |
+| Yohimbine Hydrochloride HCL 10g                                                   | Overdos3d        |          5 |            1 |          1 | g       |     10   |          1 |
+| Bayer Dbol Dianabol Methandrostenolone 10mg x 100 tablets From EU                 | ThreeKings       |          6 |            3 |          3 | mg      |     10   |        100 |
+| MDMA 5g                                                                           | MarcelKetman     |          7 |            1 |          1 | g       |      5   |          1 |
+| FE SPECIAL 20 x 30mg Adderall IR Pills TEVABARRCheapest on Agora                  | FOCUSED          |          8 |            4 |          4 | mg      |     30   |         20 |
 
 #### Column descriptions for table `listings`
 
@@ -63,18 +63,18 @@
 
 #### First 10 rows of table `reviews`
 
-|        dat |   listing |     pricel |   rating |   min_sales |   max_sales | url               |
-|-----------:|----------:|-----------:|---------:|------------:|------------:|:------------------|
-| 1437562495 |         1 |  244.991   |    5     |          25 |          40 | %2Fp%2FCPRtFYaJd0 |
-| 1426577697 |         2 |   14.3     |    4.957 |         500 |        1000 | %2Fp%2FXUd0DsSVMZ |
-| 1441547341 |         3 | 2140       |    4.88  |         500 |        1000 | %2Fp%2FXUqqMG0FGU |
-| 1430619342 |         4 |    9.99957 |    4.67  |          55 |          70 | %2Fp%2Fcv6GtuTYWw |
-| 1430858829 |         5 |   19.9991  |    5     |          25 |          40 | %2Fp%2FremaSAdDA1 |
-| 1416052591 |         6 |  460       |    5     |          25 |          40 | %2Fp%2FVnWuCbTNbJ |
-| 1435913399 |         7 |  933.963   |    5     |          25 |          40 | %2Fp%2FpxR41eiJgn |
-| 1441111488 |         8 |   22.849   |    4.96  |         200 |         300 | %2Fp%2FTaaCjhyM7f |
-| 1417312912 |         9 |    5       |    4.95  |         500 |        1000 | %2Fp%2Fsgh64kWaUh |
-| 1416112378 |        10 |   12.6     |    5     |         150 |         200 | %2Fp%2FiSRtBbfSdS |
+|        dat |   listing |    pricel |   rating |   min_sales |   max_sales | url               |
+|-----------:|----------:|----------:|---------:|------------:|------------:|:------------------|
+| 1436372350 |         1 |   50      |    5     |          40 |          55 | %2Fp%2Fn1ocApPnl0 |
+| 1416638199 |         2 |   49.9986 |    4.98  |         100 |         150 | %2Fp%2FTc1SKeEUUD |
+| 1439522202 |         3 | 4784.82   |    4.67  |         300 |         500 | %2Fp%2FeS1KmiWTLT |
+| 1437264919 |         4 |  123.76   |    4.941 |        1000 |        1500 | %2Fp%2FL82Scxmx9N |
+| 1412403260 |         5 |   59.9983 |    4.87  |          40 |          55 | %2Fp%2FXd9DLogYLn |
+| 1437550313 |         6 |  129.995  |    4.93  |         500 |        1000 | %2Fp%2FoCy539A2EY |
+| 1438407888 |         7 |   60      |    5     |         150 |         200 | %2Fp%2Fx4CSu7V2kg |
+| 1438864023 |         8 |   27      |    4.949 |        1000 |        1500 | %2Fp%2Fgb1KuDqojl |
+| 1426218434 |         9 |  160.995  |    4.952 |        1000 |        2000 | %2Fp%2FRgJFuPWG63 |
+| 1430883821 |        10 |  275      |    4.07  |          55 |          70 | %2Fp%2FGgqrv4MtP6 |
 
 #### Column descriptions for table `reviews`
 
@@ -93,18 +93,18 @@
 
 #### First 10 rows of table `prices`
 
-|   dat |   listing | review                                   |   val |   price |   scraped_at |   user_rating |   user_deals |
-|------:|----------:|:-----------------------------------------|------:|--------:|-------------:|--------------:|-------------:|
-| 16556 |         1 | great stealth                            |     5 |         |        16638 |               |         1525 |
-| 16495 |         4 | Thx                                      |     5 |         |        16558 |               |         1525 |
-| 16429 |         5 | Great Vendor                             |     5 |         |        16560 |               |         2540 |
-| 16662 |         8 | Fast shippingbonus                       |     5 |         |        16679 |               |         1015 |
-| 16654 |         8 | Arrived after 2 days domestic            |     5 |         |        16679 |               |          610 |
-| 16389 |        10 | Alles Super... Danke                     |     5 |         |        16390 |               |         1015 |
-| 16385 |        10 | 5 days ship international                |     5 |         |        16390 |               |           35 |
-| 16384 |        10 | 6 days ago                               |     5 |         |        16390 |               |          610 |
-| 16382 |        10 | 8 days ago                               |     5 |         |        16390 |               |          610 |
-| 16374 |        10 | Unbeatable Shipped in less than 24 hours |     5 |         |        16390 |               |           12 |
+|   dat |   listing | review                                                            |   val |   price |   scraped_at |   user_rating |   user_deals |
+|------:|----------:|:------------------------------------------------------------------|------:|--------:|-------------:|--------------:|-------------:|
+| 16630 |         4 | Update because of FE.no problems                                  |     5 |         |        16635 |               |          610 |
+| 16625 |         4 | FE will update after product has arrived                          |     5 |         |        16635 |               |          610 |
+| 16624 |         4 | FE  did arrive                                                    |     5 |         |        16635 |               |           35 |
+| 16617 |         4 | FE for apotheke                                                   |     5 |         |        16635 |               |         1015 |
+| 16617 |         4 | Excellent service and product  couldnt be any better              |     5 |         |        16635 |               |         1015 |
+| 16597 |         4 | Good vendor                                                       |     5 |         |        16635 |               |          610 |
+| 16596 |         4 | update product okthank                                            |     5 |         |        16635 |               |         1015 |
+| 16595 |         4 | Very safe stealth... the k is very good will order more soon  Thx |     5 |         |        16635 |               |         1015 |
+| 16589 |         4 | as always amazing vendor                                          |     5 |         |        16635 |               |         1525 |
+| 16589 |         4 | alles super                                                       |     5 |         |        16635 |               |          610 |
 
 #### Column descriptions for table `prices`
 
@@ -122,18 +122,18 @@
 
 #### First 10 rows of table `ships_to`
 
-| location           |
-|:-------------------|
-|                    |
-| USA                |
-| UK,USA,Philippines |
-| China              |
-| Germany            |
-| Canada             |
-| EU                 |
-| Europe             |
-| bluerave           |
-| Australia          |
+| location    |
+|:------------|
+|             |
+| Netherlands |
+| EU          |
+| USA         |
+| Canada      |
+| Germany     |
+| UK          |
+| Internet    |
+| China       |
+| Sweden      |
 
 #### Column descriptions for table `ships_to`
 
@@ -145,18 +145,18 @@
 
 #### First 10 rows of table `categories`
 
-| location      |
-|:--------------|
-|               |
-| USA           |
-| Worldwide     |
-| World         |
-| Germany       |
-| worldwide     |
-| you           |
-| Australia     |
-| Scandinaviaww |
-| WORLDWIDE     |
+| location                |
+|:------------------------|
+|                         |
+| WorldWideexceptUSA      |
+| Worldwide               |
+| USA                     |
+| EU                      |
+| WorldWide               |
+| EU,UK,CH,SWE,DK         |
+| WorldwideExeptAUSTRALIA |
+| UK,Euro,Worldwide       |
+| WORLDWIDE               |
 
 #### Column descriptions for table `categories`
 

@@ -16,12 +16,17 @@
         "vendor": "The id of the vendor who offers this listing. See `vendors` for a complete listing of vendors."
     },
     "prices": {
-        "dat": "The date at which this price was observed, in seconds since 1970.",
+        "dat": "The date at which this price was observed, in days since 1970.",
         "listing": "The id of the listing to which this price belongs.",
         "max_sales": "The upper number of sales the vendor offering the listing to which this price belongs had made, at the time this price was scraped.",
         "min_sales": "The lower number of sales the vendor offering the listing to which this price belongs had made, at the time this price was scraped.",
-        "pricel": "The price (in USD, converted from BTC).",
+        "net_reviews": "The total number of reviews observed up to and including the date at which this listing was scraped.",
+        "net_reviews_smooth": "A smooth spline fitted to the reviews.",
+        "price": "The price of the listing, in USD.",
         "rating": "The aggregate rating of the vendor offering the listing to which this price belongs, at the time it was scraped. It ranges from 0 to 5.",
+        "reviews_average_month": "Average number of new reviews received, per day, over the next month, for this listing.",
+        "reviews_average_week": "Average number of new reviews received, per day, over the next week, for this listing.",
+        "reviews_per_day": "Estimate of the number of reviews this listing was receiving per day at the time this listing was scraped.",
         "table_doc": "A complete listing of all price, sales, and rating observations for each listing. The name `prices` is a misnomer, and should be changed, since this table also contains seller characteristics as well.",
         "vendor": "The id of the vendor who offers this listing. See `vendors` for a complete listing of vendors."
     },

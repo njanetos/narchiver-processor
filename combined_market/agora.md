@@ -10,18 +10,18 @@ Complete list of locations listings ship from, the rowid is the id.
 
 #### First 10 rows of table `ships_from`
 
-| category                 |
-|:-------------------------|
-| Drugs.Stimulants.Cocaine |
-| Drugs.Ecstasy.Pills      |
-| Drugs.RCs                |
-| Weapons.Fireworks        |
-| Data.Software            |
-| Drugs.Prescription       |
-| Drugs.Other              |
-| Drugs.Stimulants.Speed   |
-| Drugs.Ecstasy.MDMA       |
-| Services.Other           |
+| category                      |
+|:------------------------------|
+| Jewelry                       |
+| Drugs.Stimulants.Meth         |
+| Drugs.Dissociatives.Ketamine  |
+| Drugs.Cannabis.Weed           |
+| Drugs.Weightloss              |
+| Drugs.Steroids                |
+| Drugs.Ecstasy.MDMA            |
+| Drugs.Stimulants.Prescription |
+| Drugs.Benzos                  |
+| Information.eBooks            |
 
 #### Column descriptions for table `ships_from`
 
@@ -33,18 +33,18 @@ Each row of this table corresponds to a single listing, by title. For example, a
 
 #### First 10 rows of table `listings`
 
-| title                                                                        |   vendor |   category |   ships_from |   ships_to | units   |   amount |   quantity |
-|:-----------------------------------------------------------------------------|---------:|-----------:|-------------:|-----------:|:--------|---------:|-----------:|
-| KILLA COKE 1G                                                                |      145 |          1 |            1 |          1 | g       |      1   |          1 |
-| One 115mg Capsule of Rolling Buddha MDMA Sassafras Extract Escrow            |      146 |          2 |            2 |          2 | mg      |    115   |          1 |
-| 500g APHP                                                                    |       85 |          3 |            1 |          1 | g       |    500   |          1 |
-| Potassium chlorate 40g                                                       |      147 |          4 |            1 |          1 | g       |     40   |          1 |
-| Tails Preloaded Bootable USB Flash Drive Current 1.0.1 version FREE SHIPPING |      148 |          5 |            1 |          1 |         |      0   |          1 |
-| 500 Pills Rivotril 2 MG                                                      |      149 |          6 |            3 |          3 | mg      |      2   |        500 |
-| 250g of 99.8 PURE METHYLONE.  250 grams                                      |      150 |          3 |            4 |          4 | g       |    250   |          1 |
-| MDMA Pills 200mg 5stk SUPERMANN gelb                                         |      151 |          2 |            5 |          5 | mg      |    200   |        200 |
-| USA ONLY  Clonodine .2mg                                                     |      152 |          7 |            1 |          1 | mg      |      0.2 |          1 |
-| STHOMPSONSPEED PASTE 1gHIGH QUALITY                                          |      153 |          8 |            5 |          6 | g       |      1   |          1 |
+| title                                                                             |   category |   vendor | units   |   amount |   quantity |   ships_from |   ships_to |
+|:----------------------------------------------------------------------------------|-----------:|---------:|:--------|---------:|-----------:|-------------:|-----------:|
+| Dior Logo Necklace Replica                                                        |          1 |     1277 |         |      0   |          1 |            1 |          1 |
+| Chanel Sunglasses CHL5171 Replica blackblack frame white legs burgundy beige c952 |          1 |      808 |         |      0   |          1 |            1 |          1 |
+| Ice Crystal Meth 8 OZ 224 Grams  599 OZ .   Escrow  Stealth                       |          2 |      860 | oz      |      8   |          1 |            1 |          1 |
+| 2.5gr. Ketamine Risomer                                                           |          3 |      977 | g       |      2.5 |          1 |            1 |          1 |
+| 1.0 gram Risomer KETAMINE                                                         |          3 |      748 | g       |      1   |          1 |            2 |          2 |
+| 12 oz AlienTrain                                                                  |          4 |      129 | oz      |     12   |          1 |            1 |          1 |
+| Yohimbine Hydrochloride HCL 10g                                                   |          5 |      612 | g       |     10   |          1 |            1 |          1 |
+| Bayer Dbol Dianabol Methandrostenolone 10mg x 100 tablets From EU                 |          6 |       74 | mg      |     10   |        100 |            3 |          3 |
+| MDMA 5g                                                                           |          7 |     1499 | g       |      5   |          1 |            1 |          1 |
+| FE SPECIAL 20 x 30mg Adderall IR Pills TEVABARRCheapest on Agora                  |          8 |     2266 | mg      |     30   |         20 |            4 |          4 |
 
 #### Column descriptions for table `listings`
 
@@ -63,18 +63,18 @@ A complete listing of all reviews for each listing.
 
 #### First 10 rows of table `reviews`
 
-|        dat |   listing |   vendor |     pricel |   rating |   min_sales |   max_sales |
-|-----------:|----------:|---------:|-----------:|---------:|------------:|------------:|
-| 1437562495 |         1 |     1126 |  244.991   |    5     |          25 |          40 |
-| 1426577697 |         2 |     1126 |   14.3     |    4.957 |         500 |        1000 |
-| 1441547341 |         3 |     1126 | 2140       |    4.88  |         500 |        1000 |
-| 1430619342 |         4 |     1126 |    9.99957 |    4.67  |          55 |          70 |
-| 1430858829 |         5 |     1126 |   19.9991  |    5     |          25 |          40 |
-| 1416052591 |         6 |     1126 |  460       |    5     |          25 |          40 |
-| 1435913399 |         7 |     1126 |  933.963   |    5     |          25 |          40 |
-| 1441111488 |         8 |     1126 |   22.849   |    4.96  |         200 |         300 |
-| 1417312912 |         9 |     1126 |    5       |    4.95  |         500 |        1000 |
-| 1416112378 |        10 |     1126 |   12.6     |    5     |         150 |         200 |
+|   dat |   listing | vendor   |   max_sales |   min_sales |   price |   rating |   reviews_per_day |   reviews_average_week |   reviews_average_month |   net_reviews |   net_reviews_smooth |
+|------:|----------:|:---------|------------:|------------:|--------:|---------:|------------------:|-----------------------:|------------------------:|--------------:|---------------------:|
+| 16624 |         1 | foxygirl |          55 |          40 | 50      |     5    |                 0 |                        |                         |             0 |                    0 |
+| 16576 |         1 | foxygirl |          10 |           6 | 50      |     5    |                 0 |                      0 |                         |             0 |                    0 |
+| 16616 |         1 | foxygirl |          40 |          25 | 49.998  |     5    |                 0 |                      0 |                         |             0 |                    0 |
+| 16596 |         1 | foxygirl |          25 |          15 | 50      |     4.58 |                 0 |                      0 |                         |             0 |                    0 |
+| 16684 |         1 | foxygirl |         150 |         100 | 50      |     4.9  |                 0 |                      0 |                         |             0 |                    0 |
+| 16593 |         1 | foxygirl |          10 |           6 | 50      |     5    |                 0 |                      0 |                         |             0 |                    0 |
+| 16591 |         1 | foxygirl |          10 |           6 | 49.9978 |     5    |                 0 |                      0 |                         |             0 |                    0 |
+| 16649 |         1 | foxygirl |         100 |          70 | 49.9982 |     4.98 |                 0 |                      0 |                         |             0 |                    0 |
+| 16651 |         1 | foxygirl |         100 |          70 | 49.9982 |     4.98 |                 0 |                      0 |                         |             0 |                    0 |
+| 16589 |         1 | foxygirl |          10 |           6 | 50      |     5    |                 0 |                      0 |                       0 |             0 |                    0 |
 
 #### Column descriptions for table `reviews`
 
@@ -94,18 +94,18 @@ Complete list of vendors, the rowid is the id.
 
 #### First 10 rows of table `vendors`
 
-|   vendor |   listing |   val |   dat | content                                                                             | user_rating   |   user_min_sales |   user_max_sales |   scraped_at |
-|---------:|----------:|------:|------:|:------------------------------------------------------------------------------------|:--------------|-----------------:|-----------------:|-------------:|
-|       13 |      1603 |     5 | 16420 | FE for very trusted vendor.                                                         | null          |                  |                  |        16420 |
-|       13 |      1603 |     5 | 16418 | FE for best domestic vendor                                                         | 3.0           |                6 |               10 |        16420 |
-|       17 |       970 |     5 | 16372 | Good stuff, super fast delivery, quality vendor                                     | 5.0           |               70 |              100 |        16376 |
-|       17 |       970 |     5 | 16365 | Decent price, gear and quick shipping. Another successful transaction.              | null          |                  |                  |        16376 |
-|       17 |       970 |     5 | 16365 | Average but ok for price                                                            | null          |                  |                  |        16376 |
-|       17 |       970 |     5 | 16363 | perfect  5                                                                          | 5.0           |               40 |               55 |        16376 |
-|       17 |       970 |     5 | 16360 | Shipped quickly as promised. Stealth good. Product great and price is good also. 55 | null          |                  |                  |        16376 |
-|       17 |       970 |     5 | 16359 | Fed                                                                                 | 5.0           |               70 |              100 |        16376 |
-|       17 |       970 |     5 | 16357 | A will be back.                                                                     | 5.0           |                6 |               10 |        16376 |
-|       19 |       738 |     5 | 16624 | FE trusted vendor                                                                   | null          |                  |                  |        16624 |
+|   dat |   vendor |   listing |   val | content                                                                                                                         |   user_rating |
+|------:|---------:|----------:|------:|:--------------------------------------------------------------------------------------------------------------------------------|--------------:|
+|     0 |      320 |     15507 |     5 | Quick delivery thanks                                                                                                           |             5 |
+|     0 |      320 |     15507 |     5 | fast shipping, ideal                                                                                                            |             5 |
+|     0 |      320 |     17065 |     5 | 100 Delicious chocolates with a euphoric high Also received a yummy brownie, thanks again.                                      |             5 |
+|     0 |      320 |     17065 |     5 | Excellent. Superb chocs, good packaging and speedy delivery. Great vendor.                                                      |             5 |
+|     0 |      320 |     17065 |     5 | Professional and prompt seller, highly recommended. Good packaging. 1 choc gives nice mellow high.                              |             5 |
+|     0 |      320 |     17065 |     5 | Sorry for delay, had family issues. Really tasty, incredible buzz and stone, matching if not better quality to edibles I have e |             5 |
+|     0 |      320 |     31614 |     5 | Arrived next day after shipping Thanks once again A                                                                             |             5 |
+|     0 |      320 |     31614 |     5 | Excellent vendor. Cookies were perfect and the communication was amazing. Thanks                                                |             5 |
+|     0 |      320 |     31614 |     5 | Good packaging, decent stealth and NDD. Cookies look good  will update once Ive tried them.                                     |             5 |
+|     0 |      320 |     31614 |     5 | Great vendor Friendly comms and great products.                                                                                 |             5 |
 
 #### Column descriptions for table `vendors`
 
@@ -117,28 +117,33 @@ A complete listing of all price, sales, and rating observations for each listing
 
 #### First 10 rows of table `prices`
 
-| location           |
-|:-------------------|
-|                    |
-| USA                |
-| UK,USA,Philippines |
-| China              |
-| Germany            |
-| Canada             |
-| EU                 |
-| Europe             |
-| bluerave           |
-| Australia          |
+| location    |
+|:------------|
+|             |
+| Netherlands |
+| EU          |
+| USA         |
+| Canada      |
+| Germany     |
+| UK          |
+| Internet    |
+| China       |
+| Sweden      |
 
 #### Column descriptions for table `prices`
 
 * `rating`: The aggregate rating of the vendor offering the listing to which this price belongs, at the time it was scraped. It ranges from 0 to 5.
 * `vendor`: The id of the vendor who offers this listing. See `vendors` for a complete listing of vendors.
-* `pricel`: The price (in USD, converted from BTC).
-* `dat`: The date at which this price was observed, in seconds since 1970.
+* `net_reviews`: The total number of reviews observed up to and including the date at which this listing was scraped.
+* `price`: The price of the listing, in USD.
+* `reviews_average_week`: Average number of new reviews received, per day, over the next week, for this listing.
+* `dat`: The date at which this price was observed, in days since 1970.
 * `max_sales`: The upper number of sales the vendor offering the listing to which this price belongs had made, at the time this price was scraped.
+* `reviews_per_day`: Estimate of the number of reviews this listing was receiving per day at the time this listing was scraped.
+* `net_reviews_smooth`: A smooth spline fitted to the reviews.
 * `listing`: The id of the listing to which this price belongs.
 * `min_sales`: The lower number of sales the vendor offering the listing to which this price belongs had made, at the time this price was scraped.
+* `reviews_average_month`: Average number of new reviews received, per day, over the next month, for this listing.
 
 ### Table: `ships_to`
 
@@ -146,18 +151,18 @@ Complete list of locations listings ship to, the rowid is the id.
 
 #### First 10 rows of table `ships_to`
 
-| location      |
-|:--------------|
-|               |
-| USA           |
-| Worldwide     |
-| World         |
-| Germany       |
-| worldwide     |
-| you           |
-| Australia     |
-| Scandinaviaww |
-| WORLDWIDE     |
+| location                |
+|:------------------------|
+|                         |
+| WorldWideexceptUSA      |
+| Worldwide               |
+| USA                     |
+| EU                      |
+| WorldWide               |
+| EU,UK,CH,SWE,DK         |
+| WorldwideExeptAUSTRALIA |
+| UK,Euro,Worldwide       |
+| WORLDWIDE               |
 
 #### Column descriptions for table `ships_to`
 
@@ -169,18 +174,18 @@ Contains a list of the categories to which listings might belong. The `rowid` is
 
 #### First 10 rows of table `categories`
 
-| name            |
-|:----------------|
-| HumboldtFarms   |
-| itewqq          |
-| MILF            |
-| panacea         |
-| RU18YET         |
-| Weedy           |
-| ferrisbueller   |
-| The-Dabbler     |
-| REALDEAL        |
-| only-dmt-fromtj |
+| name                  |
+|:----------------------|
+| Dr.Prof.Med.Apotheker |
+| Big_Boy               |
+| NAPP                  |
+| DrawkwarD             |
+| TheRoyalOil           |
+| juliabela_original    |
+| laWnmoWermAn          |
+| kriminale2            |
+| cashflow              |
+| PureHeaven-Agora      |
 
 #### Column descriptions for table `categories`
 

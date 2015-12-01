@@ -12,16 +12,16 @@
 
 |   vendor |   val |        dat |
 |---------:|------:|-----------:|
-|        1 | 4.909 | 1436985990 |
-|        2 | 4.99  | 1413671083 |
-|        4 | 4.874 | 1422023303 |
-|        5 | 4.94  | 1437416474 |
-|        6 | 4.96  | 1423935613 |
-|        7 | 5     | 1414249973 |
-|        8 | 5     | 1434728722 |
-|        9 | 4.96  | 1433361041 |
-|       10 | 5     | 1436170652 |
-|       11 | 4.959 | 1425325506 |
+|        1 | 4.99  | 1436852870 |
+|        2 | 5     | 1425387085 |
+|        3 | 5     | 1438658040 |
+|        4 | 4.982 | 1423658785 |
+|        5 | 4.65  | 1435809595 |
+|        6 | 5     | 1434205208 |
+|        7 | 4.98  | 1421626161 |
+|        8 | 4.95  | 1420181060 |
+|        9 | 4.93  | 1426578615 |
+|       10 | 5     | 1418028159 |
 
 #### Column descriptions for table `reviews`
 
@@ -41,18 +41,18 @@
 
 #### First 10 rows of table `ratings`
 
-|   vendor |   val | content                                                                                                                         | product                                               |   dat |   scraped_at |   user_rating | min_user_sales   | max_user_sales   |
-|---------:|------:|:--------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------|------:|-------------:|--------------:|:-----------------|:-----------------|
-|        1 |     5 | Looks awesome, flawless transaction 55                                                                                          | 3g Sour OG BHO Crumble Wax                            | 16631 |        16631 |             5 | 15               | 25               |
-|        1 |     5 | got it really quickly, seems like good stuff so far. thanks humboldt                                                            | 28g Granddaddy Purple A Premium Weed                  | 16631 |        16631 |               | null             | null             |
-|        1 |     5 | Great stuff, fast shipping  Thanks                                                                                              | 1g Sour OG BHO Crumble Wax                            | 16631 |        16631 |               | null             | null             |
-|        1 |     5 | Zip came overweight, thanks                                                                                                     | 28g Cali Orange Krush  Grade A Weed 1oz               | 16631 |        16631 |               | null             | null             |
-|        1 |     5 | Lots of sticks, truly trim. A few buds. Still good for the price.                                                               | 56g Medium Quality Trim  Northern Lights grade A Weed | 16631 |        16631 |               | null             | null             |
-|        1 |     5 | fantastic customer service. these guys are kings my btc only goes to Humboldt farms.                                            | 28g Cali Orange Krush  Grade A Weed 1oz               | 16631 |        16631 |               | null             | null             |
-|        1 |     5 | Another perfect order, thanks HF                                                                                                | 14g Cali Orange Krush  Grade A  Weed 12 oz            | 16631 |        16631 |             5 | 40               | 55               |
-|        1 |     5 | weighed over. Smoked good.                                                                                                      | 3.5g PickAStrain Grade A Weed 18th                    | 16631 |        16631 |             5 | 6                | 10               |
-|        1 |     5 | Sent the wrong thing the first time but immediately fixed the problem and all is well. Shipping was fast both times and with gr | 7g Shatter  Skywalker OG  Ultra Pure BHO              | 16631 |        16631 |             3 | 25               | 40               |
-|        1 |     5 | FEd for trusted vendor                                                                                                          | 3.5g Hash  Blue Dream                                 | 16631 |        16631 |             5 | 6                | 10               |
+|   vendor |   val | content                                                                                               | product                             |   dat |   scraped_at |   user_rating | min_user_sales   | max_user_sales   |
+|---------:|------:|:------------------------------------------------------------------------------------------------------|:------------------------------------|------:|-------------:|--------------:|:-----------------|:-----------------|
+|        1 |     5 | AAA Vendor                                                                                            | 10g Pure Speed Paste                | 16630 |        16630 |               | null             | null             |
+|        1 |     5 | Ein Knaller                                                                                           | 5 x Red Supermans MDMA Pills 220mg  | 16629 |        16630 |          5    | 25               | 40               |
+|        1 |     5 | Also this speed could convience me, but the Samples you sent out at the beginning, were even stronger | 10g Pure Speed Paste                | 16629 |        16630 |          5    | 25               | 40               |
+|        1 |     5 | FE                                                                                                    | 5g Pure Speed Paste                 | 16629 |        16630 |          5    | 6                | 10               |
+|        1 |     5 | super fast delivery, havent tried yet. But looks great                                                | 10 x Red Supermans MDMA Pills 220mg | 16629 |        16630 |               | null             | null             |
+|        1 |     5 | Very Strong Stuff Stealth 100 Shipping time ok                                                        | 100g Pure Speed Paste               | 16629 |        16630 |          5    | 25               | 40               |
+|        1 |     5 |                                                                                                       | 10 x Red Supermans MDMA Pills 220mg | 16628 |        16630 |          4.71 | 25               | 40               |
+|        1 |     5 | Did my third order, always different speed, but always best quality. Very recommend                   | 250g Pure Speed Paste               | 16628 |        16630 |          5    | 70               | 100              |
+|        1 |     5 | 55                                                                                                    | 25g Pure Speed Paste                | 16628 |        16630 |          5    | 15               | 25               |
+|        1 |     5 | Great VendorThanks                                                                                    | 25g Pure Speed Paste                | 16628 |        16630 |               | null             | null             |
 
 #### Column descriptions for table `ratings`
 
@@ -68,16 +68,16 @@
 
 |   vendor |   val |        dat |
 |---------:|------:|-----------:|
-|        1 |  5000 | 1436985990 |
-|        2 |   400 | 1413671083 |
-|        4 |   750 | 1422023303 |
-|        5 |   125 | 1437416474 |
-|        6 |    32 | 1423935613 |
-|        7 |   125 | 1414249973 |
-|        8 |    47 | 1434728722 |
-|        9 |   250 | 1433361041 |
-|       10 |     4 | 1436170652 |
-|       11 |  1500 | 1425325506 |
+|        1 |   175 | 1436852870 |
+|        2 |    32 | 1425387085 |
+|        3 |    12 | 1438658040 |
+|        4 |  5000 | 1423658785 |
+|        5 |   250 | 1435809595 |
+|        6 |     1 | 1434205208 |
+|        7 |   400 | 1421626161 |
+|        8 |   400 | 1420181060 |
+|        9 |   175 | 1426578615 |
+|       10 |     4 | 1418028159 |
 
 #### Column descriptions for table `vendors`
 
@@ -89,18 +89,18 @@
 
 #### First 10 rows of table `sales`
 
-| name            |
-|:----------------|
-| HumboldtFarms   |
-| itewqq          |
-| MILF            |
-| panacea         |
-| RU18YET         |
-| Weedy           |
-| ferrisbueller   |
-| The-Dabbler     |
-| REALDEAL        |
-| only-dmt-fromtj |
+| name                  |
+|:----------------------|
+| Dr.Prof.Med.Apotheker |
+| Big_Boy               |
+| NAPP                  |
+| DrawkwarD             |
+| TheRoyalOil           |
+| juliabela_original    |
+| laWnmoWermAn          |
+| kriminale2            |
+| cashflow              |
+| PureHeaven-Agora      |
 
 #### Column descriptions for table `sales`
 
