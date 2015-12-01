@@ -82,6 +82,8 @@ if extension == 'db':
                 if s not in doc_json[name]:
                     doc_json[name][s] = "[MISSING COLUMN: " + name + '.' + s + "]"
 
+	doc_json[name]['preview'] = preview[-1]
+
     # Check if database documentation is there
     if 'data_doc' not in doc_json:
         doc_json['data_doc'] = "[MISSING DATABASE DESCRIPTION]"
@@ -141,7 +143,7 @@ with open(markdown_file, "w") as file:
         file.write(doc_json[d]['table_doc'])
         file.write("\n\n")
         file.write("#### First 10 rows of table `" + d + "`\n\n")
-        file.write(preview[i] + "\n\n")
+        file.write(doc_json[d]['preview'] + "\n\n")
         file.write("#### Column descriptions for table `" + d + "`\n\n")
         i = i + 1
         for s in [s for s in doc_json[d] if s != 'table_doc']:
