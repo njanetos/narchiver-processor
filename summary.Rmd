@@ -53,7 +53,12 @@ prices_ = as.data.table(sqldf("SELECT p.dat AS dat,
                                       l.units AS units,
                                       l.category AS category,
                                       l.vendor AS vendor,
-                                      l.rowid AS listing,
+                                      p.listing AS listing,
+                                      p.reviews_per_day AS reviews_per_day,
+                                      p.reviews_average_week AS reviews_average_week,
+                                      p.reviews_average_month AS reviews_average_month,
+                                      p.net_reviews AS net_reviews,
+                                      p.net_reviews_smooth AS net_reviews_smooth,
                                       p.rowid AS id
                                 FROM prices AS p
                                     LEFT JOIN listings AS l
@@ -66,9 +71,6 @@ categories_ = as.data.table(sqldf("SELECT * FROM categories", dbname = path))
 reviews_ = as.data.table(sqldf("SELECT * FROM reviews", dbname = path))
 vendors_ = as.data.table(sqldf("SELECT v.name, COUNT(r.dat) AS size, v.rowid AS id FROM vendors AS v LEFT OUTER JOIN reviews_ AS r ON r.vendor == v.rowid GROUP BY v.rowid", dbname = path))
 listings_ = as.data.table(sqldf("SELECT * FROM listings", dbname = path))
-
-# Construct average sales
-prices_$sales = (prices_$max_sales + prices_$min_sales)/2
 
 # Drop impossible values
 prices_ = prices_[prices_$amount != 0 | prices_$quantity != 0,]
@@ -85,7 +87,6 @@ prices_$normalized = prices_$price / (prices_$amount + prices_$quantity)
 prices_$log_normalized = log(prices_$normalized)
 prices_$log_rating = log(prices_$rating)
 
-prices_$days = floor(prices_$dat / 86400)
 reviews_$days_ago = reviews_$dat - 10
 reviews_ = reviews_[order(reviews_$dat),]
 
@@ -184,65 +185,10 @@ Does the rating of a seller have an effect on sales growth? Let's find out! To c
 int = c(2, 3, 4, 7, 9, 17, 19, 20, 22, 23, 26, 33, 35, 38, 43, 46, 47, 48, 51, 54, 59, 60, 65, 68, 88, 89, 90, 91, 92, 94, 96, 97, 99)
 int = int[c(1, 2, 3, 4, 5, 6, 7, 9, 13, 14, 15, 20)]
 
-pri = prices_[prices_$category %in% int,]
-pri$dat = pri$dat / 86400
-  
-rev = sqldf("SELECT r.dat, r.listing, l.category FROM reviews_ AS r LEFT JOIN listings_ AS l ON l.rowid == r.listing")
-  
-fin = as.data.table(sqldf("SELECT *, COUNT(r.rowid) AS prev FROM pri AS p LEFT JOIN rev AS r ON r.dat <= p.dat AND r.listing == p.listing GROUP BY p.id"))
-  
-fin = fin[order(fin$dat),]
-  
-x = split(fin, f = as.factor(fin$listing))
-tot = length(names(x))
-for (i in 1:length(names(x))) {
-  x[[i]]$raw_change = c(NA, diff(x[[i]]$prev))
-  x[[i]]$smooth_change = NA
-  tryCatch({
-      mod = smooth.spline(y = x[[i]]$prev, x = x[[i]]$dat, spar = 0.6)
-      x[[i]]$smooth_change = predict(mod, deriv = 1)$y
-      x[[i]]$smooth_ahead_3 = x[[i]]$smooth_change
-      #x[[i]]$smooth_behind_3 = x[[i]]$smooth_change
-      for (j in 1:length(x[[i]]$smooth_change)) {
-          d = x[[i]]$dat[j]
-          #behind = x[[i]]$smooth_change[x[[i]]$dat > d - 21 & x[[i]]$dat <= d]
-          ahead = x[[i]]$smooth_change[x[[i]]$dat < d + 21 & x[[i]]$dat >= d]
-          #x[[i]]$smooth_behind_3[j] = mean(behind)
-          x[[i]]$smooth_ahead_3[j] = mean(ahead)
-      }
+pri = prices_[prices_$category == 2 & prices_$reviews_per_day > 0.1,]
 
-  }, error = function(e) {})
-  cat('\r')
-  cat(i / tot)
-}
-final = as.data.table(unsplit(x, f = as.factor(fin$listing)))
-  
-boxdata = data.table(name = character(), coeff = as.numeric(character()), std = as.numeric(character()))
-boxdata2 = data.table(name = character(), coeff = as.numeric(character()), std = as.numeric(character()))
-for (i in int) {
-    
-    mod = summary(lm(smooth_ahead_3 ~ rating, data = final[final$category == i,]))
-    name = strsplit(categories_$category[i], "\\.")
-    name = name[[1]][length(name[[1]])]
-    boxdata = rbind(boxdata, list(name, mod$coefficients[2, 1], mod$coefficients[2, 2]))
-    #pdat = pdata.frame(final[final$category == i,], index = c("vendor", "dat"))
-    #mod = summary(plm(smooth ~ rating, data = final[final$category == i,], model = "within"))
-    #boxdata2 = rbind(boxdata, list(name, mod$coefficients[1], mod$coefficients[2]))
-}
+summary(lm(pri$reviews_average_month ~ pri$rating))
 
-boxdata = boxdata[order(boxdata$coeff),]
-boxdata$lower = boxdata$coeff - boxdata$std
-boxdata$upper = boxdata$coeff + boxdata$std
-
-dat = c()
-for (i in 1:length(boxdata$name)) {
-    dat = rbind(dat, boxdata$lower[i], boxdata$coeff[i], boxdata$coeff[i], boxdata$coeff[i], boxdata$upper[i])
-}
-
-bxp.data = list(stats = matrix(dat, nrow = 5, ncol = length(boxdata$name)), n = rep(1, length(boxdata$name)), names = boxdata$name)
-par(mar=c(3, 7, 3, 3))
-bxp(bxp.data, show.names = TRUE, horizontal = TRUE, las = 2)
-title("Fig. 3: Correlation between sales and rating")
 ```
 
 # Estimating returns to reputation
