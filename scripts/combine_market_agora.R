@@ -120,7 +120,7 @@ x = split(prices_temp, f = prices_temp$listing)
 tot = length(names(x))
 cat('[combine_market_agora.R]: Fitting smooth splines...\n')
 
-for (i in 1:length(prices_temp$listing)) {
+for (i in 1:tot) {
     tryCatch({
         # Eliminate duplicate entries
         x[[i]] = x[[i]][!duplicated(subset(x[[i]], select = c(listing, dat)))]
