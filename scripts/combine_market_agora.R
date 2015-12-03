@@ -111,11 +111,15 @@ prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.id, COUNT(r.rowid)
 prices_temp = prices_temp[order(prices_temp$dat),]
 
 # Fit a smooth spline to every listing, compute averages looking ahead
-prices_temp$net_reviews_smooth = prices_temp$dat*NA
 prices_temp$reviews_per_day = prices_temp$dat*NA
-prices_temp$reviews_average_week = prices_temp$dat*NA
-prices_temp$reviews_average_month = prices_temp$dat*NA
+prices_temp$reviews_week_ahead = prices_temp$dat*NA
+prices_temp$reviews_biweek_ahead = prices_temp$dat*NA
+prices_temp$reviews_month_ahead = prices_temp$dat*NA
+prices_temp$reviews_week_behind = prices_temp$dat*NA
+prices_temp$reviews_biweek_behind = prices_temp$dat*NA
+prices_temp$reviews_month_behind = prices_temp$dat*NA
 prices_temp$net_reviews = prices_temp$dat*NA
+prices_temp$net_reviews_smooth = prices_temp$dat*NA
 x = split(prices_temp, f = prices_temp$listing)
 tot = length(names(x))
 cat('[combine_market_agora.R]: Fitting smooth splines...\n')
@@ -140,11 +144,27 @@ for (i in 1:tot) {
         # Get week average
         temp = rollapply(regular_by_listing, 7, sum, align = "left", na.rm = TRUE, fill = NA)
         temp = merge(temp, by_listing, all = FALSE)
-        x[[i]]$reviews_average_week = as.data.table(temp$temp)
+        x[[i]]$reviews_week_ahead = as.data.table(temp$temp)
+        # Get week average
+        temp = rollapply(regular_by_listing, 14, sum, align = "left", na.rm = TRUE, fill = NA)
+        temp = merge(temp, by_listing, all = FALSE)
+        x[[i]]$reviews_biweek_ahead = as.data.table(temp$temp)
         # Get month average
         temp = rollapply(regular_by_listing, 28, sum, align = "left", na.rm = TRUE, fill = NA)
         temp = merge(temp, by_listing, all = FALSE)
-        x[[i]]$reviews_average_month = as.data.table(temp$temp)
+        x[[i]]$reviews_month_ahead = as.data.table(temp$temp)
+        # Get week average
+        temp = rollapply(regular_by_listing, 7, sum, align = "right", na.rm = TRUE, fill = NA)
+        temp = merge(temp, by_listing, all = FALSE)
+        x[[i]]$reviews_week_behind = as.data.table(temp$temp)
+        # Get week average
+        temp = rollapply(regular_by_listing, 14, sum, align = "right", na.rm = TRUE, fill = NA)
+        temp = merge(temp, by_listing, all = FALSE)
+        x[[i]]$reviews_biweek_behind = as.data.table(temp$temp)
+        # Get month average
+        temp = rollapply(regular_by_listing, 28, sum, align = "right", na.rm = TRUE, fill = NA)
+        temp = merge(temp, by_listing, all = FALSE)
+        x[[i]]$reviews_month_behind = as.data.table(temp$temp)
     }, error = function(e) {})
     cat('\r')
     cat(paste('Progress: ', 100*round(i / tot, digits = 4), '%'), sep = '')
@@ -152,7 +172,22 @@ for (i in 1:tot) {
 prices_temp = as.data.table(do.call(rbind, x))
 
 # Re-create prices
-prices_ = as.data.table(sqldf("SELECT p.dat, p.listing, q.vendor, q.max_sales, q.min_sales, q.price, q.rating, p.reviews_per_day, p.reviews_average_week, p.reviews_average_month, p.net_reviews, p.net_reviews_smooth FROM prices_temp AS p
+prices_ = as.data.table(sqldf("SELECT p.dat, 
+                                        p.listing, 
+                                        q.vendor, 
+                                        q.max_sales, 
+                                        q.min_sales, 
+                                        q.price, 
+                                        q.rating, 
+                                        p.reviews_per_day, 
+                                        p.reviews_week_ahead, 
+                                        p.reviews_biweek_ahead, 
+                                        p.reviews_month_ahead, 
+                                        p.reviews_week_behind, 
+                                        p.reviews_biweek_behind, 
+                                        p.reviews_month_behind, 
+                                        p.net_reviews, 
+                                        p.net_reviews_smooth FROM prices_temp AS p
                                     JOIN prices_ AS q ON q.rowid == p.id"))
 cat('[combine_market_agora.R]: Sorted prices\n')
 
@@ -176,7 +211,22 @@ try({
     sqldf("INSERT INTO listings SELECT * FROM listings_", dbname = dbout)
     
     sqldf("DROP TABLE IF EXISTS prices")
-    sqldf("CREATE TABLE prices(dat INT, listing INT, vendor INT, max_sales INT, min_sales INT, price REAL, rating REAL, reviews_per_day REAL, reviews_average_week REAL, reviews_average_month REAL, net_reviews INT, net_reviews_smooth REAL)", dbname = dbout)
+    sqldf("CREATE TABLE prices(dat INT, 
+                              listing INT, 
+                              vendor INT, 
+                              max_sales INT, 
+                              min_sales INT, 
+                              price REAL, 
+                              rating REAL, 
+                              reviews_per_day REAL, 
+                              reviews_week_ahead REAL, 
+                              reviews_biweek_ahead REAL,
+                              reviews_month_ahead REAL, 
+                              reviews_week_behind REAL, 
+                              reviews_biweek_behind REAL,
+                              reviews_month_behind REAL, 
+                              net_reviews INT, 
+                              net_reviews_smooth REAL)", dbname = dbout)
     sqldf("INSERT INTO prices SELECT * FROM prices_", dbname = dbout)
     
     sqldf("DROP TABLE IF EXISTS reviews")
