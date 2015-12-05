@@ -99,11 +99,11 @@ reviews_ = subset(reviews_, select = -c(max, scraped_at))
 old_len = length(reviews$dat)
 rm(reviews)
 cat(paste('[combine_market_agora.R]: Sorted reviews, ', 100 - 100*round(length(reviews_$dat)/old_len, digits = 2), '% were found to be duplicates.\n', sep = ''))
-
+cat(paste('[combine_market_agora.R]: Cross-referencing reviews with the price 1 week before the review was left.\n'))
 # Find an estimate for each review of the price at the time it was left
 reviews_$days_ago = reviews_$dat - 7
 reviews_ = reviews_[order(reviews_$dat),]
-
+old_len = length(reviews_$dat)
 tmp = sqldf("SELECT r.vendor, r.listing, r.val, p.days AS dat FROM reviews_ AS r LEFT JOIN prices_ AS p ON p.days < r.days_ago AND p.listing == r.listing AND p.vendor == r.vendor GROUP BY r.dat, r.listing, r.vendor, r.val, r.content")
 
 reviews_ = sqldf("SELECT r.dat, r.vendor, r.listing, r.val, r.content, r.user_rating, p.rowid FROM tmp AS r
@@ -111,6 +111,7 @@ reviews_ = sqldf("SELECT r.dat, r.vendor, r.listing, r.val, r.content, r.user_ra
                         ON p.days == r.dat AND p.listing == r.listing AND p.vendor == r.vendor")
 
 rm(tmp)
+cat(paste('[combine_market_agora.R]: Cross-referenced reviews. Discrepancy: ', 100 - 100*round(length(reviews_$dat)/old_len, digits = 2), '. If this number is not very close to 1, then something is wrong.\n', sep = ''))
 
 # Build smoothed estimates of daily sales rate from reviews
 prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.rowid AS id FROM prices_ AS p"))
