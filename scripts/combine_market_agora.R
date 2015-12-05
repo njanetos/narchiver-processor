@@ -110,6 +110,7 @@ reviews_ = sqldf("SELECT r.dat, r.vendor, r.listing, r.val, r.content, r.user_ra
                     JOIN prices_ AS p
                         ON p.days == r.dat AND p.listing == r.listing AND p.vendor == r.vendor")
 
+rm(tmp)
 
 # Build smoothed estimates of daily sales rate from reviews
 prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.rowid AS id FROM prices_ AS p"))
