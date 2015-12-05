@@ -101,7 +101,7 @@ rm(reviews)
 cat(paste('[combine_market_agora.R]: Sorted reviews, ', 100 - 100*round(length(reviews_$dat)/old_len, digits = 2), '% were found to be duplicates.\n', sep = ''))
 
 # Find an estimate for each review of the price at the time it was left
-reviews_$days_ago = reviews_$dat - 10
+reviews_$days_ago = reviews_$dat - 7
 reviews_ = reviews_[order(reviews_$dat),]
 
 tmp = sqldf("SELECT r.vendor, r.listing, r.val, p.days AS dat FROM reviews_ AS r LEFT JOIN prices_ AS p ON p.days < r.days_ago AND p.listing == r.listing AND p.vendor == r.vendor GROUP BY r.dat, r.listing, r.vendor, r.val, r.content")
