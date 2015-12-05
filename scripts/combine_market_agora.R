@@ -100,6 +100,17 @@ old_len = length(reviews$dat)
 rm(reviews)
 cat(paste('[combine_market_agora.R]: Sorted reviews, ', 100 - 100*round(length(reviews_$dat)/old_len, digits = 2), '% were found to be duplicates.\n', sep = ''))
 
+# Find an estimate for each review of the price at the time it was left
+reviews_$days_ago = reviews_$dat - 10
+reviews_ = reviews_[order(reviews_$dat),]
+
+tmp = sqldf("SELECT r.vendor, r.listing, r.val, p.days AS dat FROM reviews_ AS r LEFT JOIN prices_ AS p ON p.days < r.days_ago AND p.listing == r.listing AND p.vendor == r.vendor GROUP BY r.dat, r.listing, r.vendor, r.val, r.content")
+
+reviews_ = sqldf("SELECT r.dat, r.vendor, r.listing, r.val, r.content, r.user_rating, p.rowid FROM tmp AS r
+                    JOIN prices_ AS p
+                        ON p.days == r.dat AND p.listing == r.listing AND p.vendor == r.vendor")
+
+
 # Build smoothed estimates of daily sales rate from reviews
 prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.rowid AS id FROM prices_ AS p"))
 prices_temp$dat = floor(prices_temp$dat / 86400)
@@ -230,7 +241,7 @@ try({
     sqldf("INSERT INTO prices SELECT * FROM prices_", dbname = dbout)
     
     sqldf("DROP TABLE IF EXISTS reviews")
-    sqldf("CREATE TABLE reviews(dat INT, vendor INT, listing INT, val INT, content TEXT, user_rating REAL)", dbname = dbout)
+    sqldf("CREATE TABLE reviews(dat INT, vendor INT, listing INT, val INT, content TEXT, user_rating REAL, matched_price INT)", dbname = dbout)
     sqldf("INSERT INTO reviews SELECT * FROM reviews_", dbname = dbout)
     
     sqldf("DROP TABLE IF EXISTS ships_from")
