@@ -153,19 +153,6 @@ for (i in 1:tot) {
         x[[i]]$net_reviews_smooth = predict(mod, x[[i]]$dat, deriv = 0)$y
         x[[i]]$reviews_per_day = predict(mod, x[[i]]$dat, deriv = 1)$y
         x[[i]]$net_reviews = x[[i]]$prev
-        
-        # Do the horrids
-        by_listing = zoo(c(NA, diff(x[[i]]$net_reviews, lag = 1)), as.Date(x[[i]]$dat))
-        g = zoo(, seq(start(by_listing), end(by_listing), "day"))
-        regular_by_listing = merge(by_listing, g)
-        # Get week average
-        temp = rollapply(regular_by_listing, 14, sum, align = "left", na.rm = TRUE, fill = NA)
-        temp = merge(temp, by_listing, all = FALSE)
-        x[[i]]$reviews_biweek_ahead = as.data.table(temp$temp)
-        # Get week average
-        temp = rollapply(regular_by_listing, 14, sum, align = "right", na.rm = TRUE, fill = NA)
-        temp = merge(temp, by_listing, all = FALSE)
-        x[[i]]$reviews_biweek_behind = as.data.table(temp$temp)
     }, error = function(e) {})
     cat('\r')
     cat(paste('Progress: ', 100*round(i / tot, digits = 4), '%'), sep = '')
@@ -216,8 +203,6 @@ try({
                               price REAL, 
                               rating REAL, 
                               reviews_per_day REAL, 
-                              reviews_biweek_ahead REAL,
-                              reviews_biweek_behind REAL,
                               net_reviews INT, 
                               net_reviews_smooth REAL)", dbname = dbout)
     sqldf("INSERT INTO prices SELECT * FROM prices_", dbname = dbout)
