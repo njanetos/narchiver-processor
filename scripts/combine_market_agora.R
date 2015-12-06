@@ -94,25 +94,30 @@ reviews = rbind(reviews_listings, reviews_vendors)
 # Remove duplicates
 # Sort by date, date scraped at, content, and value.
 # Delete everything which is on the same date, was scraped at different dates, and has the same value and content
-reviews_ = sqldf("SELECT dat, vendor, listing, val, content, user_rating, scraped_at, MAX(scraped_at) AS max FROM reviews GROUP BY dat, vendor, listing, val, content")
-reviews_ = subset(reviews_, select = -c(max, scraped_at))
+reviews_ = sqldf("SELECT dat, vendor, listing, val, content, user_rating, rowid AS id, scraped_at, MAX(scraped_at) AS max FROM reviews GROUP BY dat, vendor, listing, val, content")
+reviews_ = subset(reviews_, select = -c(max))
 old_len = length(reviews$dat)
 rm(reviews)
 cat(paste('[combine_market_agora.R]: Sorted reviews, ', 100 - 100*round(length(reviews_$dat)/old_len, digits = 2), '% were found to be duplicates.\n', sep = ''))
 cat(paste('[combine_market_agora.R]: Cross-referencing reviews with the price 1 week before the review was left.\n'))
 # Find an estimate for each review of the price at the time it was left
 prices_$days = floor(prices_$dat / 86400)
-reviews_$days_ago = reviews_$dat - 7
+reviews_$days_ago = reviews_$dat
 reviews_ = reviews_[order(reviews_$dat),]
 
 old_len = length(reviews_$dat)
 
-tmp = as.data.table(sqldf("SELECT r.dat, r.vendor, r.listing, r.val, r.content, r.user_rating, p.rowid FROM reviews_ AS r
-                           JOIN prices_ AS p
-                               ON p.days < r.days_ago AND p.listing == r.listing
-                           GROUP BY r.id"))
+tmp = as.data.table(sqldf("SELECT m.dat, m.vendor, m.listing, m.val, m.content, m.user_rating, r.rowid AS matched_price
+                           FROM (
+                            SELECT MAX(r.dat) AS max, r.id, p.rowid AS rowid
+                              FROM reviews_ AS r
+                            JOIN prices_ AS p
+                              ON p.days <= r.days_ago AND p.listing == r.listing
+                            GROUP BY r.id
+                          ) AS r
+                          INNER JOIN reviews_ AS m ON m.id = r.id"))
 
-
+reviews_ = tmp
 rm(tmp)
 cat(paste('[combine_market_agora.R]: Cross-referenced reviews. Discrepancy: ', 100*round(length(reviews_$dat)/old_len, digits = 2), '%. If this number is not very close to 100, then something is wrong.\n', sep = ''))
 
