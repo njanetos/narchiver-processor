@@ -133,8 +133,6 @@ prices_temp = prices_temp[order(prices_temp$dat),]
 
 # Fit a smooth spline to every listing, compute averages looking ahead
 prices_temp$reviews_per_day = prices_temp$dat*NA
-prices_temp$reviews_biweek_ahead = prices_temp$dat*NA
-prices_temp$reviews_biweek_behind = prices_temp$dat*NA
 prices_temp$net_reviews = prices_temp$dat*NA
 prices_temp$net_reviews_smooth = prices_temp$dat*NA
 x = split(prices_temp, f = prices_temp$listing)
@@ -168,8 +166,6 @@ prices_ = as.data.table(sqldf("SELECT p.dat,
                                         q.price, 
                                         q.rating, 
                                         p.reviews_per_day, 
-                                        p.reviews_biweek_ahead, 
-                                        p.reviews_biweek_behind, 
                                         p.net_reviews, 
                                         p.net_reviews_smooth FROM prices_temp AS p
                                     JOIN prices_ AS q ON q.rowid == p.id"))
