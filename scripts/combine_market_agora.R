@@ -134,9 +134,7 @@ prices_temp = prices_temp[order(prices_temp$dat),]
 # Fit a smooth spline to every listing, compute averages looking ahead
 prices_temp$reviews_per_day = prices_temp$dat*NA
 prices_temp$reviews_biweek_ahead = prices_temp$dat*NA
-prices_temp$reviews_month_ahead = prices_temp$dat*NA
 prices_temp$reviews_biweek_behind = prices_temp$dat*NA
-prices_temp$reviews_month_behind = prices_temp$dat*NA
 prices_temp$net_reviews = prices_temp$dat*NA
 prices_temp$net_reviews_smooth = prices_temp$dat*NA
 x = split(prices_temp, f = prices_temp$listing)
@@ -164,18 +162,10 @@ for (i in 1:tot) {
         temp = rollapply(regular_by_listing, 14, sum, align = "left", na.rm = TRUE, fill = NA)
         temp = merge(temp, by_listing, all = FALSE)
         x[[i]]$reviews_biweek_ahead = as.data.table(temp$temp)
-        # Get month average
-        temp = rollapply(regular_by_listing, 28, sum, align = "left", na.rm = TRUE, fill = NA)
-        temp = merge(temp, by_listing, all = FALSE)
-        x[[i]]$reviews_month_ahead = as.data.table(temp$temp)
         # Get week average
         temp = rollapply(regular_by_listing, 14, sum, align = "right", na.rm = TRUE, fill = NA)
         temp = merge(temp, by_listing, all = FALSE)
         x[[i]]$reviews_biweek_behind = as.data.table(temp$temp)
-        # Get month average
-        temp = rollapply(regular_by_listing, 28, sum, align = "right", na.rm = TRUE, fill = NA)
-        temp = merge(temp, by_listing, all = FALSE)
-        x[[i]]$reviews_month_behind = as.data.table(temp$temp)
     }, error = function(e) {})
     cat('\r')
     cat(paste('Progress: ', 100*round(i / tot, digits = 4), '%'), sep = '')
@@ -191,12 +181,8 @@ prices_ = as.data.table(sqldf("SELECT p.dat,
                                         q.price, 
                                         q.rating, 
                                         p.reviews_per_day, 
-                                        p.reviews_week_ahead, 
                                         p.reviews_biweek_ahead, 
-                                        p.reviews_month_ahead, 
-                                        p.reviews_week_behind, 
                                         p.reviews_biweek_behind, 
-                                        p.reviews_month_behind, 
                                         p.net_reviews, 
                                         p.net_reviews_smooth FROM prices_temp AS p
                                     JOIN prices_ AS q ON q.rowid == p.id"))
@@ -231,9 +217,7 @@ try({
                               rating REAL, 
                               reviews_per_day REAL, 
                               reviews_biweek_ahead REAL,
-                              reviews_month_ahead REAL, 
                               reviews_biweek_behind REAL,
-                              reviews_month_behind REAL, 
                               net_reviews INT, 
                               net_reviews_smooth REAL)", dbname = dbout)
     sqldf("INSERT INTO prices SELECT * FROM prices_", dbname = dbout)
