@@ -70,7 +70,7 @@ if (sqldf("SELECT Count(*) FROM reviews", dbname = dbvend) != length(reviews_ven
 }
 
 # Cross reference with listings
-reviews_vendors = as.data.table(sqldf("SELECT r.dat, r.vendor, l.ind AS listing, r.val, r.content, r.max_user_sales, r.min_user_sales, r.user_rating, r.scraped_at FROM reviews_vendors AS r
+reviews_vendors = as.data.table(sqldf("SELECT r.dat, r.vendor, l.ind AS listing, r.val, r.content, r.max_user_sales, r.min_user_sales, r.user_rating, r.scraped_at, r.rowid AS id FROM reviews_vendors AS r
                                        LEFT JOIN (SELECT vendor, title, rowid AS ind FROM listings_ GROUP BY vendor, title) AS l
                                            ON (l.title == r.product AND l.vendor == r.vendor)"))
 
@@ -80,11 +80,11 @@ if (sqldf("SELECT Count(*) FROM reviews", dbname = dbvend) != length(reviews_ven
 }
 
 # Re-order so it's nice
-reviews_vendors = subset(reviews_vendors, select = c(dat, vendor, listing, val, content, user_rating, scraped_at))
+reviews_vendors = subset(reviews_vendors, select = c(dat, vendor, listing, val, content, user_rating, scraped_at, id))
 
 # Load reviews from the listings
 # If everything went right with the listing, we can use the same rowids
-reviews_listings = as.data.table(sqldf("SELECT r.dat, l.vendor, r.listing, r.val, r.review AS content, r.user_rating, r.scraped_at FROM reviews AS r
+reviews_listings = as.data.table(sqldf("SELECT r.dat, l.vendor, r.listing, r.val, r.review AS content, r.user_rating, r.scraped_at, r.rowid AS id FROM reviews AS r
                                         LEFT JOIN listings_ AS l
                                             WHERE l.rowid == r.listing", dbname = dblist))
 
@@ -101,17 +101,23 @@ rm(reviews)
 cat(paste('[combine_market_agora.R]: Sorted reviews, ', 100 - 100*round(length(reviews_$dat)/old_len, digits = 2), '% were found to be duplicates.\n', sep = ''))
 cat(paste('[combine_market_agora.R]: Cross-referencing reviews with the price 1 week before the review was left.\n'))
 # Find an estimate for each review of the price at the time it was left
+reviews_ = reviews_[order(reviews_$dat),]
+prices_$days = floor(prices_$dat / 86400)
 reviews_$days_ago = reviews_$dat - 7
 reviews_ = reviews_[order(reviews_$dat),]
-old_len = length(reviews_$dat)
-tmp = sqldf("SELECT r.vendor, r.listing, r.val, p.days AS dat FROM reviews_ AS r LEFT JOIN prices_ AS p ON p.days < r.days_ago AND p.listing == r.listing AND p.vendor == r.vendor GROUP BY r.dat, r.listing, r.vendor, r.val, r.content")
 
-reviews_ = sqldf("SELECT r.dat, r.vendor, r.listing, r.val, r.content, r.user_rating, p.rowid FROM tmp AS r
-                    JOIN prices_ AS p
-                        ON p.days == r.dat AND p.listing == r.listing AND p.vendor == r.vendor")
+old_len = length(reviews_$dat)
+
+tmp = sqldf("SELECT r.vendor, r.listing, r.val, r.content, r.user_rating, p.days AS dat FROM reviews_ AS r JOIN prices_ AS p ON p.days < r.days_ago AND p.listing == r.listing AND p.vendor == r.vendor GROUP BY p.days, r.listing, r.vendor, r.val, r.content")
+
+tmp = as.data.table(sqldf("SELECT r.dat, r.vendor, r.listing, r.val, r.content, r.user_rating, p.rowid FROM reviews_ AS r
+                           JOIN prices_ AS p
+                               ON p.days < r.days_ago AND p.listing == r.listing
+                           GROUP BY r.dat, r.vendor, r.listing, r.val, r.content, r.user_rating"))
+
 
 rm(tmp)
-cat(paste('[combine_market_agora.R]: Cross-referenced reviews. Discrepancy: ', 100 - 100*round(length(reviews_$dat)/old_len, digits = 2), '. If this number is not very close to 1, then something is wrong.\n', sep = ''))
+cat(paste('[combine_market_agora.R]: Cross-referenced reviews. Discrepancy: ', 100*round(length(reviews_$dat)/old_len, digits = 2), '%. If this number is not very close to 100, then something is wrong.\n', sep = ''))
 
 # Build smoothed estimates of daily sales rate from reviews
 prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.rowid AS id FROM prices_ AS p"))
@@ -125,10 +131,8 @@ prices_temp = prices_temp[order(prices_temp$dat),]
 
 # Fit a smooth spline to every listing, compute averages looking ahead
 prices_temp$reviews_per_day = prices_temp$dat*NA
-prices_temp$reviews_week_ahead = prices_temp$dat*NA
 prices_temp$reviews_biweek_ahead = prices_temp$dat*NA
 prices_temp$reviews_month_ahead = prices_temp$dat*NA
-prices_temp$reviews_week_behind = prices_temp$dat*NA
 prices_temp$reviews_biweek_behind = prices_temp$dat*NA
 prices_temp$reviews_month_behind = prices_temp$dat*NA
 prices_temp$net_reviews = prices_temp$dat*NA
@@ -155,10 +159,6 @@ for (i in 1:tot) {
         g = zoo(, seq(start(by_listing), end(by_listing), "day"))
         regular_by_listing = merge(by_listing, g)
         # Get week average
-        temp = rollapply(regular_by_listing, 7, sum, align = "left", na.rm = TRUE, fill = NA)
-        temp = merge(temp, by_listing, all = FALSE)
-        x[[i]]$reviews_week_ahead = as.data.table(temp$temp)
-        # Get week average
         temp = rollapply(regular_by_listing, 14, sum, align = "left", na.rm = TRUE, fill = NA)
         temp = merge(temp, by_listing, all = FALSE)
         x[[i]]$reviews_biweek_ahead = as.data.table(temp$temp)
@@ -166,10 +166,6 @@ for (i in 1:tot) {
         temp = rollapply(regular_by_listing, 28, sum, align = "left", na.rm = TRUE, fill = NA)
         temp = merge(temp, by_listing, all = FALSE)
         x[[i]]$reviews_month_ahead = as.data.table(temp$temp)
-        # Get week average
-        temp = rollapply(regular_by_listing, 7, sum, align = "right", na.rm = TRUE, fill = NA)
-        temp = merge(temp, by_listing, all = FALSE)
-        x[[i]]$reviews_week_behind = as.data.table(temp$temp)
         # Get week average
         temp = rollapply(regular_by_listing, 14, sum, align = "right", na.rm = TRUE, fill = NA)
         temp = merge(temp, by_listing, all = FALSE)
@@ -232,10 +228,8 @@ try({
                               price REAL, 
                               rating REAL, 
                               reviews_per_day REAL, 
-                              reviews_week_ahead REAL, 
                               reviews_biweek_ahead REAL,
                               reviews_month_ahead REAL, 
-                              reviews_week_behind REAL, 
                               reviews_biweek_behind REAL,
                               reviews_month_behind REAL, 
                               net_reviews INT, 
