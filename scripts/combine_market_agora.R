@@ -33,7 +33,7 @@ ships_to_ = as.data.table(sqldf("SELECT * FROM ships_to", dbname = dblist))
 # Cross reference with vendors_ (categories, ships_from, ships_to should already be good)
 # This is the final ordering of listings
 tmp_size = sqldf("SELECT Count(*) FROM listings", dbname = dblist)
-listings_ = as.data.table(sqldf("SELECT l.title, l.category, v.rowid AS vendor, l.units, l.amount, l.quantity, l.ships_from, l.ships_to, l.rowid AS ind 
+listings_ = as.data.table(sqldf("SELECT l.title, l.category, v.rowid AS vendor, l.units, l.amount, l.quantity, l.ships_from, l.ships_to, l.rowid AS ind
                                  FROM listings AS l
                                  LEFT JOIN vendors_ AS v
                                     WHERE v.name == l.vendor", dbname = dblist))
@@ -137,16 +137,16 @@ prices_temp$net_reviews = prices_temp$dat*NA
 prices_temp$net_reviews_smooth = prices_temp$dat*NA
 x = split(prices_temp, f = prices_temp$listing)
 tot = length(names(x))
-cat('[combine_market_agora.R]: Fitting smooth splines...\n')
+cat('[combine_market_agora.R]: Fitting smooth splines to listings...\n')
 
 for (i in 1:tot) {
     tryCatch({
         # Eliminate duplicate entries
         x[[i]] = x[[i]][!duplicated(subset(x[[i]], select = c(listing, dat)))]
-        
+
         # Fit a smooth spline
         mod = smooth.spline(y = x[[i]]$prev, x = x[[i]]$dat, spar = 0.6)
-        
+
         # Read in the spline values
         x[[i]]$net_reviews_smooth = predict(mod, x[[i]]$dat, deriv = 0)$y
         x[[i]]$reviews_per_day = predict(mod, x[[i]]$dat, deriv = 1)$y
@@ -157,17 +157,43 @@ for (i in 1:tot) {
 }
 prices_temp = as.data.table(do.call(rbind, x))
 
+# Do the same thing, but by vendor
+prices_temp$vendor_reviews_per_day = prices_temp$dat*NA
+prices_temp$vendor_net_reviews = prices_temp$dat*NA
+prices_temp$vendor_net_reviews_smooth = prices_temp$dat*NA
+x = split(prices_temp, f = prices_temp$vendor)
+tot = length(names(x))
+cat('[combine_market_agora.R]: Fitting smooth splines to vendors...\n')
+for (i in 1:tot) {
+    tryCatch({
+
+                # Fit a smooth spline
+        mod = smooth.spline(y = x[[i]]$prev, x = x[[i]]$dat, spar = 0.6)
+
+        # Read in the spline values
+        x[[i]]$vendor_net_reviews_smooth = predict(mod, x[[i]]$dat, deriv = 0)$y
+        x[[i]]$vendor_reviews_per_day = predict(mod, x[[i]]$dat, deriv = 1)$y
+        x[[i]]$vendor_net_reviews = x[[i]]$prev
+    }, error = function(e) {})
+    cat('\r')
+    cat(paste('Progress: ', 100*round(i / tot, digits = 4), '%'), sep = '')
+}
+prices_temp = as.data.table(do.call(rbind, x))
+
 # Re-create prices
-prices_ = as.data.table(sqldf("SELECT p.dat, 
-                                        p.listing, 
-                                        q.vendor, 
-                                        q.max_sales, 
-                                        q.min_sales, 
-                                        q.price, 
-                                        q.rating, 
-                                        p.reviews_per_day, 
-                                        p.net_reviews, 
-                                        p.net_reviews_smooth FROM prices_temp AS p
+prices_ = as.data.table(sqldf("SELECT p.dat,
+                                        p.listing,
+                                        q.vendor,
+                                        q.max_sales,
+                                        q.min_sales,
+                                        q.price,
+                                        q.rating,
+                                        p.reviews_per_day,
+                                        p.net_reviews,
+                                        p.net_reviews_smooth,
+                                        p.vendor_reviews_per_day,
+                                        p.vendor_net_reviews,
+                                        p.vendor_net_reviews_smooth FROM prices_temp AS p
                                     JOIN prices_ AS q ON q.rowid == p.id"))
 cat('[combine_market_agora.R]: Sorted prices\n')
 
@@ -185,36 +211,39 @@ try({
     sqldf("DROP TABLE IF EXISTS categories")
     sqldf("CREATE TABLE categories(category TEXT)", dbname = dbout)
     sqldf("INSERT INTO categories SELECT * FROM categories_", dbname = dbout)
-    
+
     sqldf("DROP TABLE IF EXISTS listings")
     sqldf("CREATE TABLE listings(title TEXT, category INT, vendor INT, units TEXT, amount REAL, quantity INT, ships_from INT, ships_to INT)", dbname = dbout)
     sqldf("INSERT INTO listings SELECT * FROM listings_", dbname = dbout)
-    
+
     sqldf("DROP TABLE IF EXISTS prices")
-    sqldf("CREATE TABLE prices(dat INT, 
-                              listing INT, 
-                              vendor INT, 
-                              max_sales INT, 
-                              min_sales INT, 
-                              price REAL, 
-                              rating REAL, 
-                              reviews_per_day REAL, 
-                              net_reviews INT, 
-                              net_reviews_smooth REAL)", dbname = dbout)
+    sqldf("CREATE TABLE prices(dat INT,
+                              listing INT,
+                              vendor INT,
+                              max_sales INT,
+                              min_sales INT,
+                              price REAL,
+                              rating REAL,
+                              reviews_per_day REAL,
+                              net_reviews INT,
+                              net_reviews_smooth REAL,
+                              vendor_reviews_per_day REAL,
+                              vendor_net_reviews INT,
+                              vendor_net_reviews_smooth REAL)", dbname = dbout)
     sqldf("INSERT INTO prices SELECT * FROM prices_", dbname = dbout)
-    
+
     sqldf("DROP TABLE IF EXISTS reviews")
     sqldf("CREATE TABLE reviews(dat INT, vendor INT, listing INT, val INT, content TEXT, user_rating REAL, matched_price INT)", dbname = dbout)
     sqldf("INSERT INTO reviews SELECT * FROM reviews_", dbname = dbout)
-    
+
     sqldf("DROP TABLE IF EXISTS ships_from")
     sqldf("CREATE TABLE ships_from(location TEXT)", dbname = dbout)
     sqldf("INSERT INTO ships_from SELECT * FROM ships_from_", dbname = dbout)
-    
+
     sqldf("DROP TABLE IF EXISTS ships_to")
     sqldf("CREATE TABLE ships_to(location TEXT)", dbname = dbout)
     sqldf("INSERT INTO ships_to SELECT * FROM ships_to_", dbname = dbout)
-    
+
     sqldf("DROP TABLE IF EXISTS vendors")
     sqldf("CREATE TABLE vendors(name TEXT)", dbname = dbout)
     sqldf("INSERT INTO vendors SELECT * FROM vendors_", dbname = dbout)
