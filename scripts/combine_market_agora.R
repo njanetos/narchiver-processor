@@ -107,7 +107,7 @@ reviews_ = reviews_[order(reviews_$dat),]
 
 old_len = length(reviews_$dat)
 
-tmp = as.data.table(sqldf("SELECT m.dat, m.vendor, m.listing, m.val, m.content, m.user_rating, r.rowid AS matched_price
+tmp = as.data.table(sqldf("SELECT m.dat, m.listing, m.val, m.content, m.user_rating, r.rowid AS matched_price
                            FROM (
                             SELECT MAX(r.dat) AS max, r.id, p.rowid AS rowid
                               FROM reviews_ AS r
@@ -122,11 +122,11 @@ rm(tmp)
 cat(paste('[combine_market_agora.R]: Cross-referenced reviews. Discrepancy: ', 100*round(length(reviews_$dat)/old_len, digits = 2), '%. If this number is not very close to 100, then something is wrong.\n', sep = ''))
 
 # Build smoothed estimates of daily sales rate from reviews
-prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.rowid AS id FROM prices_ AS p"))
+prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.vendor, p.rowid AS id FROM prices_ AS p"))
 prices_temp$dat = floor(prices_temp$dat / 86400)
 reviews_temp = as.data.table(sqldf("SELECT r.dat, r.listing, l.category FROM reviews_ AS r LEFT JOIN listings_ AS l ON l.rowid == r.listing"))
 # Build estimate of aggregate reviews up to the time the price was scraped
-prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.id, COUNT(r.rowid) AS prev FROM prices_temp AS p LEFT JOIN reviews_temp AS r ON r.dat <= p.dat AND r.listing == p.listing GROUP BY p.id"))
+prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.vendor, p.id, COUNT(r.rowid) AS prev FROM prices_temp AS p LEFT JOIN reviews_temp AS r ON r.dat <= p.dat AND r.listing == p.listing GROUP BY p.id"))
 
 # Order the prices
 prices_temp = prices_temp[order(prices_temp$dat),]
@@ -183,7 +183,6 @@ prices_temp = as.data.table(do.call(rbind, x))
 # Re-create prices
 prices_ = as.data.table(sqldf("SELECT p.dat,
                                         p.listing,
-                                        q.vendor,
                                         q.max_sales,
                                         q.min_sales,
                                         q.price,
@@ -219,7 +218,6 @@ try({
     sqldf("DROP TABLE IF EXISTS prices")
     sqldf("CREATE TABLE prices(dat INT,
                               listing INT,
-                              vendor INT,
                               max_sales INT,
                               min_sales INT,
                               price REAL,
