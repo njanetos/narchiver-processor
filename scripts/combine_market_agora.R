@@ -48,15 +48,14 @@ tmp = sum(abs(listings_$ind - 1:length(listings_$title)))
 if (tmp != 0) {
     warning("Something went wrong in the listings.")
 }
-listings_ = subset(listings_, select = -c(ind))
 cat('[combine_market_agora.R]: Sorted listings\n')
 
 # Load all prices
 # Cross reference with listing titles
 # If everything went right with the listings, this should almost be the final ordering.
 prices_ = as.data.table(sqldf("SELECT p.dat, p.listing, l.vendor, p.max_sales, p.min_sales, p.price, p.rating FROM prices AS p
-                               LEFT JOIN listings as l
-                                   ON l.rowid == p.listing", dbname = dblist))
+                               LEFT JOIN listings_ as l
+                                   ON l.ind == p.listing", dbname = dblist))
 
 # Load reviews from the vendors
 reviews_vendors = as.data.table(sqldf("SELECT r.dat, v.rowid AS vendor, r.val, r.content, r.max_user_sales, r.min_user_sales, r.product, r.scraped_at, r.user_rating FROM reviews AS r
@@ -94,8 +93,7 @@ reviews = rbind(reviews_listings, reviews_vendors)
 # Remove duplicates
 # Sort by date, date scraped at, content, and value.
 # Delete everything which is on the same date, was scraped at different dates, and has the same value and content
-reviews_ = sqldf("SELECT dat, vendor, listing, val, content, user_rating, rowid AS id, scraped_at, MAX(scraped_at) AS max FROM reviews GROUP BY dat, vendor, listing, val, content")
-reviews_ = subset(reviews_, select = -c(max))
+reviews_ = sqldf("SELECT dat, vendor, listing, val, content, user_rating, rowid AS id, scraped_at FROM reviews GROUP BY dat, vendor, listing, val, content")
 old_len = length(reviews$dat)
 rm(reviews)
 cat(paste('[combine_market_agora.R]: Sorted reviews, ', 100 - 100*round(length(reviews_$dat)/old_len, digits = 2), '% were found to be duplicates.\n', sep = ''))
@@ -104,7 +102,7 @@ cat(paste('[combine_market_agora.R]: Cross-referencing reviews with the price 1 
 prices_$days = floor(prices_$dat / 86400)
 reviews_$days_ago = reviews_$dat
 reviews_ = reviews_[order(reviews_$dat),]
-
+reviews_ = reviews_[!is.na(reviews_$listing),]
 old_len = length(reviews_$dat)
 
 tmp = as.data.table(sqldf("SELECT m.dat, m.listing, m.val, m.content, m.user_rating, r.rowid AS matched_price
@@ -124,7 +122,8 @@ cat(paste('[combine_market_agora.R]: Cross-referenced reviews. Discrepancy: ', 1
 # Build smoothed estimates of daily sales rate from reviews
 prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.vendor, p.rowid AS id FROM prices_ AS p"))
 prices_temp$dat = floor(prices_temp$dat / 86400)
-reviews_temp = as.data.table(sqldf("SELECT r.dat, r.listing, l.vendor, l.category FROM reviews_ AS r LEFT JOIN listings_ AS l ON l.rowid == r.listing"))
+reviews_temp = as.data.table(sqldf("SELECT r.dat, r.listing, l.vendor FROM reviews_ AS r LEFT JOIN listings_ AS l ON l.rowid == r.listing"))
+
 # Build estimate of aggregate reviews up to the time the price was scraped
 prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.vendor, p.id, COUNT(r.rowid) AS prev FROM prices_temp AS p LEFT JOIN reviews_temp AS r ON r.dat <= p.dat AND r.listing == p.listing GROUP BY p.id"))
 
@@ -156,26 +155,33 @@ for (i in 1:tot) {
     cat(paste('Progress: ', 100*round(i / tot, digits = 4), '%'), sep = '')
 }
 prices_temp = as.data.table(do.call(rbind, x))
+reviews_temp = reviews_temp[order(reviews_temp$vendor),]
 
-prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.vendor, p.reviews_per_day, p.net_reviews, p.net_reviews_smooth, p.id, COUNT(r.rowid) AS prev FROM prices_temp AS p LEFT JOIN reviews_temp AS r ON r.dat <= p.dat AND r.vendor == p.vendor GROUP BY p.id"))
+# Build estimate of aggregate reviews, for a vendor, up to the time the price was scraped
+prices_temp$vendor_net_reviews_smooth = NA*prices_temp$dat
+prices_temp$vendor_reviews_per_day = NA*prices_temp$dat
 
-# Do the same thing, but by vendor
-prices_temp$vendor_reviews_per_day = prices_temp$dat*NA
-prices_temp$vendor_net_reviews = prices_temp$dat*NA
-prices_temp$vendor_net_reviews_smooth = prices_temp$dat*NA
 x = split(prices_temp, f = prices_temp$vendor)
 tot = length(names(x))
 cat('[combine_market_agora.R]: Fitting smooth splines to vendors...\n')
-for (i in 1:tot) {
+for (i in 1:length(names(x))) {
     tryCatch({
-
-                # Fit a smooth spline
-        mod = smooth.spline(y = x[[i]]$prev, x = x[[i]]$dat, spar = 0.6)
-
+    
+        # Read into temporary variable
+        tmp = x[[i]]
+        tmp_reviews = reviews_temp[reviews_temp$vendor == i]
+        tmp = sqldf(c("CREATE INDEX tmp_ind_p ON tmp(vendor, dat)", "CREATE INDEX tmp_ind_r ON tmp_reviews(vendor, dat)", "SELECT p.listing, p.dat, p.vendor, p.id, COUNT(r.rowid) AS vendor_net_reviews, p.reviews_per_day, p.net_reviews, p.net_reviews_smooth, p.vendor_net_reviews, p.vendor_net_reviews_smooth, p.vendor_reviews_per_day FROM tmp AS p LEFT JOIN tmp_reviews AS r ON r.dat <= p.dat AND r.vendor == p.vendor GROUP BY p.id"))
+        tmp = tmp[order(tmp$dat),]
+        
+        # Read back out
+        x[[i]] = tmp
+        
+        # Fit a smooth spline
+        mod = smooth.spline(y = x[[i]]$vendor_net_reviews, x = x[[i]]$dat, spar = 0.6)
+        
         # Read in the spline values
         x[[i]]$vendor_net_reviews_smooth = predict(mod, x[[i]]$dat, deriv = 0)$y
         x[[i]]$vendor_reviews_per_day = predict(mod, x[[i]]$dat, deriv = 1)$y
-        x[[i]]$vendor_net_reviews = x[[i]]$prev
     }, error = function(e) {})
     cat('\r')
     cat(paste('Progress: ', 100*round(i / tot, digits = 4), '%'), sep = '')
@@ -198,7 +204,8 @@ prices_ = as.data.table(sqldf("SELECT p.dat,
                                     JOIN prices_ AS q ON q.rowid == p.id"))
 cat('[combine_market_agora.R]: Sorted prices\n')
 
-# Write everything to the database
+# Write everything to the database, clean up stuff
+listings_ = subset(listings_, select = -c(ind))
 
 # Create the output path
 dir.create("combined_market", showWarnings = FALSE)
