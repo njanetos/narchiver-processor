@@ -157,6 +157,8 @@ for (i in 1:tot) {
 }
 prices_temp = as.data.table(do.call(rbind, x))
 
+prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.vendor, p.reviews_per_day, p.net_reviews, p.net_reviews_smooth, p.id, COUNT(r.rowid) AS prev FROM prices_temp AS p LEFT JOIN reviews_temp AS r ON r.dat <= p.dat AND r.vendor == p.vendor GROUP BY p.id"))
+
 # Do the same thing, but by vendor
 prices_temp$vendor_reviews_per_day = prices_temp$dat*NA
 prices_temp$vendor_net_reviews = prices_temp$dat*NA
