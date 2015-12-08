@@ -124,7 +124,7 @@ cat(paste('[combine_market_agora.R]: Cross-referenced reviews. Discrepancy: ', 1
 # Build smoothed estimates of daily sales rate from reviews
 prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.vendor, p.rowid AS id FROM prices_ AS p"))
 prices_temp$dat = floor(prices_temp$dat / 86400)
-reviews_temp = as.data.table(sqldf("SELECT r.dat, r.listing, l.category FROM reviews_ AS r LEFT JOIN listings_ AS l ON l.rowid == r.listing"))
+reviews_temp = as.data.table(sqldf("SELECT r.dat, r.listing, l.vendor, l.category FROM reviews_ AS r LEFT JOIN listings_ AS l ON l.rowid == r.listing"))
 # Build estimate of aggregate reviews up to the time the price was scraped
 prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.vendor, p.id, COUNT(r.rowid) AS prev FROM prices_temp AS p LEFT JOIN reviews_temp AS r ON r.dat <= p.dat AND r.listing == p.listing GROUP BY p.id"))
 
