@@ -167,13 +167,14 @@ prices_temp$vendor_net_reviews = NA*prices_temp$dat
 x = split(prices_temp, f = prices_temp$vendor)
 tot = length(names(x))
 cat('[combine_market_agora.R]: Fitting smooth splines to vendors...\n')
+vendors_names = names(x)
 for (i in 1:length(names(x))) {
-    tryCatch({
+    try({
     
         # Read into temporary variable
         tmp = x[[i]]
-        tmp_reviews = reviews_temp[reviews_temp$vendor == i]
-        tmp = sqldf(c("CREATE INDEX tmp_ind_p ON tmp(vendor, dat)", "CREATE INDEX tmp_ind_r ON tmp_reviews(vendor, dat)", "SELECT p.listing, p.dat, p.vendor, p.id, COUNT(r.rowid) AS vendor_net_reviews, p.reviews_per_day, p.net_reviews, p.net_reviews_smooth, p.vendor_net_reviews_smooth, p.vendor_reviews_per_day FROM tmp AS p LEFT JOIN tmp_reviews AS r ON r.dat <= p.dat AND r.vendor == p.vendor GROUP BY p.id"))
+        tmp_reviews = reviews_temp[reviews_temp$vendor == vendors_names[i]]
+        tmp = sqldf("SELECT p.listing, p.dat, p.vendor, p.id, COUNT(r.rowid) AS vendor_net_reviews, p.reviews_per_day, p.net_reviews, p.net_reviews_smooth, p.vendor_net_reviews_smooth, p.vendor_reviews_per_day FROM tmp AS p LEFT JOIN tmp_reviews AS r ON r.dat <= p.dat AND r.vendor == p.vendor GROUP BY p.id")
         tmp = tmp[order(tmp$dat),]
         
         # Read back out
@@ -185,7 +186,7 @@ for (i in 1:length(names(x))) {
         # Read in the spline values
         x[[i]]$vendor_net_reviews_smooth = predict(mod, x[[i]]$dat, deriv = 0)$y
         x[[i]]$vendor_reviews_per_day = predict(mod, x[[i]]$dat, deriv = 1)$y
-    }, error = function(e) {})
+    })
     cat('\r')
     cat(paste('[combine_market_agora.R]: Progress: ', 100*round(i / tot, digits = 4), '%'), sep = '')
 }
