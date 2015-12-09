@@ -169,7 +169,7 @@ tot = length(names(x))
 cat('[combine_market_agora.R]: Fitting smooth splines to vendors...\n')
 vendors_names = names(x)
 for (i in 1:length(names(x))) {
-    try({
+    tryCatch({
     
         # Read into temporary variable
         tmp = x[[i]]
@@ -186,7 +186,7 @@ for (i in 1:length(names(x))) {
         # Read in the spline values
         x[[i]]$vendor_net_reviews_smooth = predict(mod, x[[i]]$dat, deriv = 0)$y
         x[[i]]$vendor_reviews_per_day = predict(mod, x[[i]]$dat, deriv = 1)$y
-    })
+    }, error = function(e) {})
     cat('\r')
     cat(paste('[combine_market_agora.R]: Progress: ', 100*round(i / tot, digits = 4), '%'), sep = '')
 }
