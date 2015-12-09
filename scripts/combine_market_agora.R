@@ -110,7 +110,7 @@ tmp = as.data.table(sqldf("SELECT m.dat, m.listing, m.val, m.content, m.user_rat
                             SELECT MAX(r.dat) AS max, r.id, p.rowid AS rowid
                               FROM reviews_ AS r
                             JOIN prices_ AS p
-                              ON p.days <= r.days_ago AND p.listing == r.listing
+                              ON p.days < r.days_ago - 4 AND p.listing == r.listing
                             GROUP BY r.id
                           ) AS r
                           INNER JOIN reviews_ AS m ON m.id = r.id"))
