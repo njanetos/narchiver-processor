@@ -266,17 +266,6 @@ prices_ = as.data.table(sqldf("SELECT p.dat,
                                     JOIN prices_ AS q ON q.rowid == p.id"))
 cat('[combine_market_agora.R]: Sorted prices\n')
 
-# Write out locations
-locations_ = c("asia", "australia", "canada", "easterneurope", "europe", 
-               "scandinavia", "southafrica", "southerneurope", "uncategorized",
-               "uk", "usa", "westerneurope", "worldwide")
-
-listings_$ships_to_exception = listings_$ships_to
-listings_$ships_to_clean = listings_$ships_to
-listings_$ships_from_clean = listings_$ships_from
-
-
-
 # Write everything to the database, clean up stuff
 listings_ = subset(listings_, select = -c(ind))
 
