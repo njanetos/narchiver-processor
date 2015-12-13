@@ -33,13 +33,71 @@ ships_to_ = as.data.table(sqldf("SELECT * FROM ships_to", dbname = dblist))
 # Cross reference with vendors_ (categories, ships_from, ships_to should already be good)
 # This is the final ordering of listings
 tmp_size = sqldf("SELECT Count(*) FROM listings", dbname = dblist)
-listings_ = as.data.table(sqldf("SELECT l.title, l.category, v.rowid AS vendor, l.units, l.amount, l.quantity, l.ships_from, l.ships_to, l.rowid AS ind
+listings_ = as.data.table(sqldf("SELECT l.title, l.category, v.rowid AS vendor, l.units, l.amount, l.quantity, sf.location AS ships_from, l.ships_to, l.rowid AS ind
                                  FROM listings AS l
-                                 LEFT JOIN vendors_ AS v
-                                    WHERE v.name == l.vendor", dbname = dblist))
+                                 JOIN vendors_ AS v
+                                    ON v.name == l.vendor
+                                 JOIN ships_from AS sf
+                                    ON sf.rowid == l.ships_from
+                                 JOIN ships_to AS st
+                                    ON st.rowid == l.ships_to", dbname = dblist))
 if (tmp_size != length(listings_$title)) {
     warning("Shrinkage in listings!")
 }
+
+# Construct ships_from and ships_to by filtering out weird stuff
+
+# First, make it all lowercase
+listings_$ships_from = tolower(listings_$ships_from)
+listings_$ships_to = tolower(listings_$ships_to)
+
+# Now start to replace as much random crap as possible
+listings_$ships_from[listings_$ships_from == "thehomeofthebodybags,shotty,andmag"] = "usa"
+listings_$ships_from[listings_$ships_from == "thenetherlands"] = "netherlands"
+listings_$ships_from[listings_$ships_from == "thenetherlandsgermany"] = "netherlands"
+listings_$ships_from[listings_$ships_from == "uk,usa,philippines"] = "usa,uk"
+listings_$ships_from[listings_$ships_from == "uk,philippines"] = "uk"
+listings_$ships_from[listings_$ships_from == "theunitedsnakesofcaptivity"] = "usa"
+listings_$ships_from[listings_$ships_from == "uk,usaandworldwide"] = "usa,uk"
+listings_$ships_from[listings_$ships_from == "uk,usa,eu,aus"] = "usa,uk"
+listings_$ships_from[listings_$ships_from == "untiedkingdom"] = "uk"
+listings_$ships_from[listings_$ships_from == "usa,ukandphilippines"] = "usa,uk"
+listings_$ships_from[listings_$ships_from == "latinamericanocolombia"] = "colombia"
+listings_$ships_from[listings_$ships_from == "thehomeofthebodybags,shotty,andmacmakeup"] = "usa"
+listings_$ships_from[listings_$ships_from == "uk,usaworldwide"] = "usa,uk"
+listings_$ships_from[listings_$ships_from == "ukandireland"] = "uk"
+listings_$ships_from[listings_$ships_from == "usa,ukandworldwide"] = "usa,uk"
+listings_$ships_from[listings_$ships_from == "unitedkingdom"] = "uk"
+listings_$ships_from[listings_$ships_from == "usa,uk"] = "usa"
+listings_$ships_from[listings_$ships_from == "worldwide"] = "world"
+listings_$ships_from[listings_$ships_from == "chinaoreu"] = "china"
+listings_$ships_from[listings_$ships_from == "uk,asia"] = "uk"
+
+listings_$ships_from[!(listings_$ships_from %in% c( "netherlands", "eu", "usa", "canada", "germany", "uk", "china", "sweden", "hongkong", 
+                                                    "france", "australia", "belgium", "world", "poland", "ukraine", "europe", "india", 
+                                                    "southafrica", "fiji", "italy", "austria", "philippines", "spain", "switzerland", "pakistan", 
+                                                    "denmark", "finland", "norway", "mexico", "argentina", "ireland", "russianfederation", 
+                                                    "czechrepublic", "cambodia", "colombia", "latvia", "scandinavia", "newzealand", 
+                                                    "swaziland", "singapore", "chinaoreu", "slovakia", "dominicanrepublic", "malaysia", 
+                                                    "bangkok", "uk,asia", "seychelles", "asia", "brazil", "hungary", "serbia",
+                                                    "belarus", "barbados", "peru", "guatemala", "us", "romania",   
+                                                    "thailand", "japan", "chile", "jamaica", "srilanka"))] = ""
+
+# Build a new ships_from table
+ships_from_ = data.frame(location = unique(listings_$ships_from))
+
+# Cross-reference listings on this table
+tmp_size = sqldf("SELECT Count(*) FROM listings", dbname = dblist)
+listings_ = as.data.table(sqldf("SELECT l.title, l.category, l.vendor, l.units, l.amount, l.quantity, sf.rowid AS ships_from, l.ships_to, l.ind
+                                 FROM listings_ AS l
+                                 JOIN ships_from_ AS sf
+                                    ON sf.location == l.ships_from", dbname = dblist))
+if (tmp_size != length(listings_$title)) {
+    warning("Shrinkage in listings!")
+}
+
+# Write out ships_from table
+ships_from_ = sqldf("SELECT * FROM ships_from", dbname = dblist)
 
 # Check to see if there's any difference between the rowid and the original index
 # If so, something's fishy
@@ -158,7 +216,6 @@ cat('\n[combine_market_agora.R]: Fitted smooth splines to listings.\n')
 prices_temp = as.data.table(do.call(rbind, x))
 reviews_temp = reviews_temp[order(reviews_temp$vendor),]
 
-
 # Build estimate of aggregate reviews, for a vendor, up to the time the price was scraped
 prices_temp$vendor_net_reviews_smooth = NA*prices_temp$dat
 prices_temp$vendor_reviews_per_day = NA*prices_temp$dat
@@ -170,19 +227,19 @@ cat('[combine_market_agora.R]: Fitting smooth splines to vendors...\n')
 vendors_names = names(x)
 for (i in 1:length(names(x))) {
     tryCatch({
-    
+
         # Read into temporary variable
         tmp = x[[i]]
         tmp_reviews = reviews_temp[reviews_temp$vendor == vendors_names[i]]
         tmp = sqldf("SELECT p.listing, p.dat, p.vendor, p.id, COUNT(r.rowid) AS vendor_net_reviews, p.reviews_per_day, p.net_reviews, p.net_reviews_smooth, p.vendor_net_reviews_smooth, p.vendor_reviews_per_day FROM tmp AS p LEFT JOIN tmp_reviews AS r ON r.dat <= p.dat AND r.vendor == p.vendor GROUP BY p.id")
         tmp = tmp[order(tmp$dat),]
-        
+
         # Read back out
         x[[i]] = tmp
-        
+
         # Fit a smooth spline
         mod = smooth.spline(y = x[[i]]$vendor_net_reviews, x = x[[i]]$dat, spar = 0.6)
-        
+
         # Read in the spline values
         x[[i]]$vendor_net_reviews_smooth = predict(mod, x[[i]]$dat, deriv = 0)$y
         x[[i]]$vendor_reviews_per_day = predict(mod, x[[i]]$dat, deriv = 1)$y
@@ -208,6 +265,17 @@ prices_ = as.data.table(sqldf("SELECT p.dat,
                                         p.vendor_net_reviews_smooth FROM prices_temp AS p
                                     JOIN prices_ AS q ON q.rowid == p.id"))
 cat('[combine_market_agora.R]: Sorted prices\n')
+
+# Write out locations
+locations_ = c("asia", "australia", "canada", "easterneurope", "europe", 
+               "scandinavia", "southafrica", "southerneurope", "uncategorized",
+               "uk", "usa", "westerneurope", "worldwide")
+
+listings_$ships_to_exception = listings_$ships_to
+listings_$ships_to_clean = listings_$ships_to
+listings_$ships_from_clean = listings_$ships_from
+
+
 
 # Write everything to the database, clean up stuff
 listings_ = subset(listings_, select = -c(ind))
@@ -246,6 +314,60 @@ try({
 
     sqldf("DROP TABLE IF EXISTS reviews")
     sqldf("CREATE TABLE reviews(dat INT, listing INT, val INT, content TEXT, user_rating REAL, matched_price INT)", dbname = dbout)
+    sqldf("INSERT INTO reviews SELECT * FROM reviews_", dbname = dbout)
+
+    sqldf("DROP TABLE IF EXISTS ships_from")
+    sqldf("CREATE TABLE ships_from(location TEXT)", dbname = dbout)
+    sqldf("INSERT INTO ships_from SELECT * FROM ships_from_", dbname = dbout)
+
+    sqldf("DROP TABLE IF EXISTS ships_to")
+    sqldf("CREATE TABLE ships_to(location TEXT)", dbname = dbout)
+    sqldf("INSERT INTO ships_to SELECT * FROM ships_to_", dbname = dbout)
+
+    sqldf("DROP TABLE IF EXISTS vendors")
+    sqldf("CREATE TABLE vendors(name TEXT)", dbname = dbout)
+    sqldf("INSERT INTO vendors SELECT * FROM vendors_", dbname = dbout)
+})
+
+dbDisconnect(db)
+
+# Add the lite version
+
+dbout = "combined_market/agora_lite.db"
+file.remove(dbout)
+
+# Clean stuff up
+listings_ = subset(listings_, select = -c(title))
+reviews_ = subset(reviews_, select = -c(content))
+
+db <- dbConnect(SQLite(), dbname = dbout)
+
+try({
+    sqldf("DROP TABLE IF EXISTS categories")
+    sqldf("CREATE TABLE categories(category TEXT)", dbname = dbout)
+    sqldf("INSERT INTO categories SELECT * FROM categories_", dbname = dbout)
+
+    sqldf("DROP TABLE IF EXISTS listings")
+    sqldf("CREATE TABLE listings(category INT, vendor INT, units TEXT, amount REAL, quantity INT, ships_from INT, ships_to INT)", dbname = dbout)
+    sqldf("INSERT INTO listings SELECT * FROM listings_", dbname = dbout)
+
+    sqldf("DROP TABLE IF EXISTS prices")
+    sqldf("CREATE TABLE prices(dat INT,
+                              listing INT,
+                              max_sales INT,
+                              min_sales INT,
+                              price REAL,
+                              rating REAL,
+                              reviews_per_day REAL,
+                              net_reviews INT,
+                              net_reviews_smooth REAL,
+                              vendor_reviews_per_day REAL,
+                              vendor_net_reviews INT,
+                              vendor_net_reviews_smooth REAL)", dbname = dbout)
+    sqldf("INSERT INTO prices SELECT * FROM prices_", dbname = dbout)
+
+    sqldf("DROP TABLE IF EXISTS reviews")
+    sqldf("CREATE TABLE reviews(dat INT, listing INT, val INT, user_rating REAL, matched_price INT)", dbname = dbout)
     sqldf("INSERT INTO reviews SELECT * FROM reviews_", dbname = dbout)
 
     sqldf("DROP TABLE IF EXISTS ships_from")
