@@ -1,4 +1,5 @@
 import numpy
+from numpy import around
 import pandas
 import statsmodels.api as stats
 import statsmodels.formula.api as smf
@@ -143,5 +144,5 @@ names = ['ID', 'TITLE', 'CATEGORY', 'VENDOR', 'UNITS', 'AMOUNT',
 listings = pandas.DataFrame(listings, columns = names)
 
 # Get min, max dates
-min_date = min(prices['DATE'])*86400
-max_date = max(prices['DATE'])*86400
+min_date = datetime.datetime.fromtimestamp(min(prices['DATE'])*86400)
+max_date = datetime.datetime.fromtimestamp(max(prices['DATE'])*86400)
