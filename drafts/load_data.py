@@ -71,7 +71,7 @@ read_cur.execute("""SELECT v.rowid AS id,
                         JOIN listings AS l
                             ON l.vendor == v.rowid
                         JOIN reviews AS r
-                            ON l.rowid == r.listing
+                            ON r.listing == l.rowid
                     GROUP BY v.rowid""")
 vendors = read_cur.fetchall()
 
