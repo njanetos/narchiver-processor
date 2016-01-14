@@ -38,7 +38,8 @@ read_cur.execute(""" SELECT p.dat AS dat,
 prices = read_cur.fetchall()
 
 # Fetch categories
-read_cur.execute("""SELECT * FROM categories""")
+read_cur.execute("""SELECT * 
+                    FROM categories""")
 categories = read_cur.fetchall()
 
 # Fetch reviews
@@ -63,10 +64,24 @@ read_cur.execute("""SELECT r.dat,
                                 ON p.rowid == r.matched_price""")
 reviews = read_cur.fetchall()
 
-read_cur.execute("""SELECT * FROM vendors""")
+read_cur.execute("""SELECT v.rowid AS id,
+                           v.*,
+                           COUNT(v.rowid) AS num_reviews
+                    FROM vendors AS v
+                        JOIN listings AS l
+                            ON l.vendor == v.rowid
+                        JOIN reviews AS r
+                            ON l.rowid == r.listing
+                    GROUP BY v.rowid""")
 vendors = read_cur.fetchall()
 
-read_cur.execute("""SELECT rowid AS id, * FROM listings""")
+read_cur.execute("""SELECT l.rowid AS id, 
+                           l.*,
+                           COUNT(r.listing) AS num_reviews
+                    FROM listings AS l
+                        JOIN reviews AS r
+                            ON r.listing = l.rowid
+                    GROUP BY r.listing""")
 listings = read_cur.fetchall()
 
 # Close the connection
@@ -140,9 +155,14 @@ reviews = pandas.DataFrame(reviews, columns = names)
 
 # Read listings into panda data frame
 names = ['ID', 'TITLE', 'CATEGORY', 'VENDOR', 'UNITS', 'AMOUNT', 
-         'QUANTITY', 'SHIPS_FROM', 'SHIPS_TO']
+         'QUANTITY', 'SHIPS_FROM', 'SHIPS_TO', 'NUM_REVIEWS']
 listings = pandas.DataFrame(listings, columns = names)
+
+# Read vendors in panda data frame
+names = ['ID', 'NAME', 'NUM_REVIEWS']
+vendors = pandas.DataFrame(vendors, columns = names)
 
 # Get min, max dates
 min_date = datetime.datetime.fromtimestamp(min(prices['DATE'])*86400)
 max_date = datetime.datetime.fromtimestamp(max(prices['DATE'])*86400)
+
