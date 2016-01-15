@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from collections import Counter
 import datetime
 import matplotlib.dates as mdates
+from mpldatacursor import HighlightingDataCursor
 
 pandas.options.mode.chained_assignment = None 
 
