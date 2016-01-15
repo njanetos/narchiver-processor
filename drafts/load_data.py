@@ -31,7 +31,9 @@ read_cur.execute(""" SELECT p.dat AS dat,
                             p.vendor_reviews_per_day AS vendor_reviews_per_day,
                             p.dat AS normalized,
                             p.dat AS log_normalized,
-                            p.rowid AS id
+                            p.rowid AS id,
+                            p.min_sales AS min_sales,
+                            p.max_sales AS max_sales
                         FROM prices AS p
                             LEFT JOIN listings AS l
                                 ON p.listing == l.rowid""")
@@ -56,7 +58,9 @@ read_cur.execute("""SELECT r.dat,
                            p.vendor_reviews_per_day,
                            p.dat AS normalized,
                            p.dat AS log_normalized,
-                           r.rowid AS id
+                           r.rowid AS id,
+                           p.min_sales AS min_sales,
+                           p.max_sales AS max_sales
                         FROM reviews AS r
                             JOIN listings AS l
                                 ON l.rowid == r.listing
@@ -149,7 +153,8 @@ reviews = [ r for r in reviews if 'mg' in r[8] ]
 # Read into panda data frame
 names = ['DATE', 'CATEGORY', 'VENDOR', 'LISTING', 'PRICE', 
          'RATING', 'AMOUNT', 'QUANTITY', 'UNITS', 'REVIEWS_PER_DAY', 
-         'V_REVIEWS_PER_DAY', 'NORMALIZED', 'LOG_NORMALIZED', 'ID']
+         'V_REVIEWS_PER_DAY', 'NORMALIZED', 'LOG_NORMALIZED', 'ID',
+         'MIN_SALES', 'MAX_SALES']
 prices = pandas.DataFrame(prices, columns = names)
 reviews = pandas.DataFrame(reviews, columns = names)
 
@@ -165,4 +170,3 @@ vendors = pandas.DataFrame(vendors, columns = names)
 # Get min, max dates
 min_date = datetime.datetime.fromtimestamp(min(prices['DATE'])*86400)
 max_date = datetime.datetime.fromtimestamp(max(prices['DATE'])*86400)
-
