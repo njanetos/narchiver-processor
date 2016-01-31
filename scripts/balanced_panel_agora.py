@@ -4,10 +4,7 @@ from scipy.stats import norm
 from scipy.optimize import minimize
 from scipy.interpolate import interp2d
 import scipy.stats
-import matplotlib.pyplot as plt
 import matplotlib.lines
-from matplotlib import cm
-from mpl_toolkits.mplot3d import Axes3D
 from IPython.display import Markdown, display
 import time
 from numpy import around
@@ -20,11 +17,13 @@ from math import log
 from collections import Counter
 import datetime
 import matplotlib.dates as mdates
-import warnings
 import copy
-warnings.filterwarnings('ignore')
+from update_progress import update_progress
+from update_progress import print_progress
 
 pandas.options.mode.chained_assignment = None
+
+print_progress('Loading combined_market database...')
 
 # Load the database
 read = sqlite3.connect(os.path.join(os.getcwd(), 'combined_market/agora.db'))
@@ -52,10 +51,14 @@ read_cur.execute(""" SELECT p.dat AS dat,
                                 ON p.listing == l.rowid""")
 prices = read_cur.fetchall()
 
+print_progress('Loaded prices...')
+
 # Fetch categories
 read_cur.execute("""SELECT *
                     FROM categories""")
 categories = read_cur.fetchall()
+
+print_progress('Loaded categories...')
 
 # Fetch reviews
 read_cur.execute("""SELECT r.dat,
@@ -81,6 +84,8 @@ read_cur.execute("""SELECT r.dat,
                                 ON p.rowid == r.matched_price""")
 reviews = read_cur.fetchall()
 
+print_progress('Loaded reviews...')
+
 read_cur.execute("""SELECT v.rowid AS id,
                            v.*,
                            COUNT(v.rowid) AS num_reviews
@@ -92,6 +97,8 @@ read_cur.execute("""SELECT v.rowid AS id,
                     GROUP BY v.rowid""")
 vendors = read_cur.fetchall()
 
+print_progress('Loaded vendors')
+
 read_cur.execute("""SELECT l.rowid AS id,
                            l.*,
                            COUNT(r.listing) AS num_reviews
@@ -101,13 +108,15 @@ read_cur.execute("""SELECT l.rowid AS id,
                     GROUP BY r.listing""")
 listings = read_cur.fetchall()
 
+print_progress('Loaded listings...')
+
 read_cur.execute("SELECT * FROM ships_from")
 ships_from = read_cur.fetchall()
 
 read_cur.execute("SELECT * FROM ships_to")
 ships_to = read_cur.fetchall()
 
-
+print_progress('Loaded shipping information...')
 
 # Close the connection
 if read:
@@ -120,6 +129,8 @@ reviews = [ list(r) for r in reviews ]
 # Drop impossible values
 prices =  [ p for p in prices if p[6] != 0 and p[7] != 0 ]
 reviews = [ r for r in reviews if r[6] != 0 and r[7] != 0 ]
+
+print_progress('Loaded from combined_market')
 
 # Normalize prices and try to put things in the same units
 for p in prices:
@@ -186,34 +197,38 @@ names = ['DATE', 'CATEGORY', 'VENDOR', 'LISTING', 'PRICE',
          'RATING', 'AMOUNT', 'QUANTITY', 'UNITS', 'REVIEWS_PER_DAY',
          'V_REVIEWS_PER_DAY', 'NORMALIZED', 'LOG_NORMALIZED', 'ID',
          'MIN_SALES', 'MAX_SALES']
-prices = pandas.DataFrame(prices, columns = names)
-reviews = pandas.DataFrame(reviews, columns = names)
+_prices = pandas.DataFrame(prices, columns = names)
+_reviews = pandas.DataFrame(reviews, columns = names)
 
 # Read listings into panda data frame
 names = ['ID', 'TITLE', 'CATEGORY', 'VENDOR', 'UNITS', 'AMOUNT',
          'QUANTITY', 'SHIPS_FROM', 'SHIPS_TO', 'NUM_REVIEWS']
-listings = pandas.DataFrame(listings, columns = names)
+_listings = pandas.DataFrame(listings, columns = names)
 
 # Read vendors in panda data frame
 names = ['ID', 'NAME', 'NUM_REVIEWS']
-vendors = pandas.DataFrame(vendors, columns = names)
+_vendors = pandas.DataFrame(vendors, columns = names)
 
-# Get min, max dates
-min_date = datetime.datetime.fromtimestamp(min(reviews['DATE'])*86400)
-max_date = datetime.datetime.fromtimestamp(max(reviews['DATE'])*86400)
-
-min_date_days = min(reviews['DATE'])
-max_date_days = max(reviews['DATE'])
+print_progress('Constructed normalized prices')
 
 # Construct a balanced dataset
 
+interesting_categories = [2, 3, 4, 7, 9, 17, 22, 35, 43]
+
 balanced_categories = []
 
-for category_id in set(reviews['CATEGORY'].values):
+print_progress('Constructing balanced panel dataset...')
 
-    prices_cat   = prices  [prices  ['CATEGORY'] == category_id]
-    reviews_cat  = reviews [reviews ['CATEGORY'] == category_id]
-    listings_cat = listings[listings['CATEGORY'] == category_id]
+tot = len(interesting_categories)
+prog = 0
+
+for category_id in interesting_categories:
+
+    vendors = copy.deepcopy(_vendors)
+
+    prices_cat   = _prices  [_prices  ['CATEGORY'] == category_id]
+    reviews_cat  = _reviews [_reviews ['CATEGORY'] == category_id]
+    listings_cat = _listings[_listings['CATEGORY'] == category_id]
 
     # Throw out extreme prices (higher than $1000 / gram)
     prices_cat = prices_cat[prices_cat['NORMALIZED'] < 0.2]
@@ -221,11 +236,11 @@ for category_id in set(reviews['CATEGORY'].values):
 
     # Count the number of reviews for each vendor
     for v in vendors['ID']:
-        vendors.set_value(vendors['ID'] == v, 'NUM_REVIEWS', len(reviews_cat[reviews_cat['VENDOR'] == v]))
+        vendors.set_value(_vendors['ID'] == v, 'NUM_REVIEWS', len(reviews_cat[reviews_cat['VENDOR'] == v]))
 
     # Count the number of reviews for each listing
-    for l in listings['ID']:
-        listings.set_value(listings['ID'] == l, 'NUM_REVIEWS', len(reviews_cat[reviews_cat['LISTING'] == l]))
+    for l in listings_cat['ID']:
+        listings_cat.set_value(listings_cat['ID'] == l, 'NUM_REVIEWS', len(reviews_cat[reviews_cat['LISTING'] == l]))
 
     # Throw out vendors who don't sell stuff
     vendors = vendors[vendors['NUM_REVIEWS'] > 0]
@@ -264,3 +279,9 @@ for category_id in set(reviews['CATEGORY'].values):
             balanced.loc[len(balanced)] = [v, date[0], v_reviews_per_day, price, rating, reviews, sales, rating_diff]
 
     balanced = balanced.sort_values(by = ['VENDOR', 'DATE'])
+
+    prog = prog + 1
+    update_progress(prog, tot)
+
+    # Add to the full mix
+    balanced_categories.append(balanced)
