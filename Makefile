@@ -69,7 +69,7 @@ balanced_panel: $(MARKETS:%=balanced_panel/%.csv)
 documentation:
 	@find -name *.db -exec ./scripts/run_script.sh autodocument {} \;;
 
-sense: clean_listings extract_data_listings clean_vendors extract_data_vendors combined_market
+sense: clean_listings extract_data_listings clean_vendors extract_data_vendors combined_market balanced_panel
 
 clean:
 	find -name *.db -delete
