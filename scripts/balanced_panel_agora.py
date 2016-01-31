@@ -211,13 +211,17 @@ _vendors = pandas.DataFrame(vendors, columns = names)
 
 print_progress('Constructed normalized prices')
 
+# Find min and max dates
+min_date_days = min(_reviews['DATE'])
+max_date_days = max(_reviews['DATE'])
+
 # Construct a balanced dataset
 
 interesting_categories = [2, 3, 4, 7, 9, 17, 22, 35, 43]
 
-balanced_categories = []
-
 print_progress('Constructing balanced panel dataset...')
+
+balanced_categories = pandas.DataFrame(columns = ['VENDOR', 'DATE', 'NORMALIZED', 'RATING', 'REVIEWS', 'SALES', 'CATEGORY'])
 
 tot = len(interesting_categories)
 prog = 0
@@ -249,7 +253,7 @@ for category_id in interesting_categories:
     bins_date = [numpy.round(d) for d in numpy.linspace(min_date_days, max_date_days, num = 35)]
     bins_date = [b for b in zip(bins_date[0:-1], bins_date[1:])]
 
-    balanced = pandas.DataFrame(columns = ['VENDOR', 'DATE', 'V_REVIEWS_PER_DAY', 'NORMALIZED', 'RATING', 'REVIEWS', 'SALES', 'RATING_DIFF'])
+    balanced = pandas.DataFrame(columns = ['VENDOR', 'DATE', 'NORMALIZED', 'RATING', 'REVIEWS', 'SALES', 'CATEGORY'])
 
     for v in set(vendors['ID']):
         prices_mask = prices_cat[prices_cat['VENDOR'] == v]
@@ -276,7 +280,7 @@ for category_id in interesting_categories:
 
             rating_diff = 0
 
-            balanced.loc[len(balanced)] = [v, date[0], v_reviews_per_day, price, rating, reviews, sales, rating_diff]
+            balanced.loc[len(balanced)] = [int(v), int(date[0]), price, rating, int(reviews), sales, int(category_id)]
 
     balanced = balanced.sort_values(by = ['VENDOR', 'DATE'])
 
@@ -284,4 +288,12 @@ for category_id in interesting_categories:
     update_progress(prog, tot)
 
     # Add to the full mix
-    balanced_categories.append(balanced)
+    balanced_categories = balanced_categories.append(balanced)
+
+# Write to csv
+if not os.path.exists('balanced_panel'):
+    os.makedirs('balanced_panel')
+
+balanced_categories.to_csv('balanced_panel/agora.csv')
+
+print_progress('Balanced panel data constructed')
