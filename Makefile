@@ -58,6 +58,14 @@ combined_market/%.db: extract_data_vendors/%.db extract_data_listings/%.db
 combined_market: $(MARKETS:%=combined_market/%.db)
 	@./scripts/push.sh "Combined markets" "Complete" || true
 
+# Construct balanced panel data
+balanced_panel/%.db: combined_market/%.db
+	@./scripts/run_script.sh balanced_panel+$* | tee logs/balanced_panel_$*_`date +"%m-%d-%Y-%T"`.log
+	@./scripts/push.sh "Constructing balanced panel data" "$*" || true
+
+balanced_panel: $(MARKETS:%=balanced_panel/%.db)
+	@./scripts/push.sh "Balanced panel dataset" "Complete" || true
+
 documentation:
 	@find -name *.db -exec ./scripts/run_script.sh autodocument {} \;;
 
