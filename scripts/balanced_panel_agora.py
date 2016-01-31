@@ -214,7 +214,7 @@ max_date_days = max(_reviews['DATE'])
 
 # Construct a balanced dataset
 
-interesting_categories = [2, 3, 4, 7, 9, 17, 22, 35, 43]
+interesting_categories = [2, 3, 4, 7, 9, 17, 22, 23, 35, 43]
 
 print_progress('Constructing balanced panel dataset...')
 
