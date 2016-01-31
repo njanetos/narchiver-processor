@@ -4,8 +4,6 @@ from scipy.stats import norm
 from scipy.optimize import minimize
 from scipy.interpolate import interp2d
 import scipy.stats
-import matplotlib.lines
-from IPython.display import Markdown, display
 import time
 from numpy import around
 import pandas
@@ -16,7 +14,6 @@ import os
 from math import log
 from collections import Counter
 import datetime
-import matplotlib.dates as mdates
 import copy
 from update_progress import update_progress
 from update_progress import print_progress

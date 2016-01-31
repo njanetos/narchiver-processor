@@ -8,7 +8,7 @@ if [ -f "scripts/""$1""."* ]; then
 	extension="${scriptname#*.}"
 
 	if [ $extension = "py" ]; then
-		python $scriptname "${@: -1}"
+		python3 $scriptname "${@: -1}"
 	elif [ $extension = "sh" ]; then
 		./$scriptname "${@: -1}"
 	elif [ $extension = "R" ]; then
