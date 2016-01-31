@@ -60,7 +60,7 @@ combined_market: $(MARKETS:%=combined_market/%.db)
 
 # Construct balanced panel data
 balanced_panel/%.db: combined_market/%.db
-	@./scripts/run_script.sh balanced_panel+$* | tee logs/balanced_panel_$*_`date +"%m-%d-%Y-%T"`.log
+	@./scripts/run_script.sh balanced_panel_$* | tee logs/balanced_panel_$*_`date +"%m-%d-%Y-%T"`.log
 	@./scripts/push.sh "Constructing balanced panel data" "$*" || true
 
 balanced_panel: $(MARKETS:%=balanced_panel/%.db)
