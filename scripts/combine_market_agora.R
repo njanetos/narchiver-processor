@@ -33,7 +33,7 @@ ships_to_ = as.data.table(sqldf("SELECT * FROM ships_to", dbname = dblist))
 # Cross reference with vendors_ (categories, ships_from, ships_to should already be good)
 # This is the final ordering of listings
 tmp_size = sqldf("SELECT Count(*) FROM listings", dbname = dblist)
-listings_ = as.data.table(sqldf("SELECT l.title, l.category, v.rowid AS vendor, l.units, l.amount, l.quantity, sf.location AS ships_from, l.ships_to, l.rowid AS ind
+listings_ = as.data.table(sqldf("SELECT l.title, l.category, v.rowid AS vendor, l.units, l.amount, l.quantity, sf.location AS ships_from, l.ships_to, l.rowid AS ind, l.url
                                  FROM listings AS l
                                  JOIN vendors_ AS v
                                     ON v.name == l.vendor
@@ -73,14 +73,14 @@ listings_$ships_from[listings_$ships_from == "worldwide"] = "world"
 listings_$ships_from[listings_$ships_from == "chinaoreu"] = "china"
 listings_$ships_from[listings_$ships_from == "uk,asia"] = "uk"
 
-listings_$ships_from[!(listings_$ships_from %in% c( "netherlands", "eu", "usa", "canada", "germany", "uk", "china", "sweden", "hongkong", 
-                                                    "france", "australia", "belgium", "world", "poland", "ukraine", "europe", "india", 
-                                                    "southafrica", "fiji", "italy", "austria", "philippines", "spain", "switzerland", "pakistan", 
-                                                    "denmark", "finland", "norway", "mexico", "argentina", "ireland", "russianfederation", 
-                                                    "czechrepublic", "cambodia", "colombia", "latvia", "scandinavia", "newzealand", 
-                                                    "swaziland", "singapore", "chinaoreu", "slovakia", "dominicanrepublic", "malaysia", 
+listings_$ships_from[!(listings_$ships_from %in% c( "netherlands", "eu", "usa", "canada", "germany", "uk", "china", "sweden", "hongkong",
+                                                    "france", "australia", "belgium", "world", "poland", "ukraine", "europe", "india",
+                                                    "southafrica", "fiji", "italy", "austria", "philippines", "spain", "switzerland", "pakistan",
+                                                    "denmark", "finland", "norway", "mexico", "argentina", "ireland", "russianfederation",
+                                                    "czechrepublic", "cambodia", "colombia", "latvia", "scandinavia", "newzealand",
+                                                    "swaziland", "singapore", "chinaoreu", "slovakia", "dominicanrepublic", "malaysia",
                                                     "bangkok", "uk,asia", "seychelles", "asia", "brazil", "hungary", "serbia",
-                                                    "belarus", "barbados", "peru", "guatemala", "us", "romania",   
+                                                    "belarus", "barbados", "peru", "guatemala", "us", "romania",
                                                     "thailand", "japan", "chile", "jamaica", "srilanka"))] = ""
 
 # Build a new ships_from table
@@ -283,7 +283,7 @@ try({
     sqldf("INSERT INTO categories SELECT * FROM categories_", dbname = dbout)
 
     sqldf("DROP TABLE IF EXISTS listings")
-    sqldf("CREATE TABLE listings(title TEXT, category INT, vendor INT, units TEXT, amount REAL, quantity INT, ships_from INT, ships_to INT)", dbname = dbout)
+    sqldf("CREATE TABLE listings(title TEXT, category INT, vendor INT, units TEXT, amount REAL, quantity INT, ships_from INT, ships_to INT, url TEXT)", dbname = dbout)
     sqldf("INSERT INTO listings SELECT * FROM listings_", dbname = dbout)
 
     sqldf("DROP TABLE IF EXISTS prices")
