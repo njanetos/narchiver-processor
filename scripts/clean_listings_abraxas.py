@@ -111,7 +111,7 @@ try:
 
         tot_scraped = tot_scraped + 1
 
-        # Write to database
+        # Write to database dat INT, title TEXT, price REAL, vendor TEXT, reviews TEXT, category TEXT, ships_from TEXT, ships_to TEXT, url TEXT
         con.cursor().execute("INSERT INTO listings VALUES({0}, '{1}', {2}, '{3}', '{4}', '{5}', '{6}', '{7}', '{8}')".format(date, title, price, vendor, reviews, category, ships_from, ships_to, f.split('|')[1]))
         buf = buf + 1
     if buf > buffer_limit:

@@ -19,7 +19,7 @@ buffer_limit = 10000
 
 read = lite.connect(os.path.join('clean_listings', market+'.db'))
 read_cur = read.cursor()
-read_cur.execute('SELECT DISTINCT title, vendor, category, ships_from, ships_to FROM listings')
+read_cur.execute('SELECT DISTINCT title, vendor, category, ships_from, ships_to, url FROM listings')
 titles = read_cur.fetchall()
 read_cur.execute('SELECT DISTINCT category FROM listings')
 categories = read_cur.fetchall()
@@ -84,7 +84,7 @@ for t in titles:
         amount = 0.0
         quantity = 0
 
-    write_cur.execute("INSERT INTO listings VALUES('{0}', '{1}', {2}, {3}, {4}, '{5}', {6}, {7})".format(t[0], t[1], 1+categories.index(t[2]), 1+ships_from.index(t[3]), 1+ships_to.index(t[4]), units, amount, quantity))
+    write_cur.execute("INSERT INTO listings VALUES('{0}', '{1}', {2}, {3}, {4}, '{5}', {6}, {7})".format(t[0], t[1], 1+categories.index(t[2]), 1+ships_from.index(t[3]), 1+ships_to.index(t[4]), units, amount, quantity, t[5]))
 
     buf = buf + 1
     if (buf > buffer_limit):
