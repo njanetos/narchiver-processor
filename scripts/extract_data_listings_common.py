@@ -30,11 +30,11 @@ ships_to = read_cur.fetchall()
 
 write = lite.connect(os.path.join('extract_data_listings', 'temp.db'))
 write_cur = write.cursor()
-write_cur.execute('CREATE TABLE listings(title TEXT, vendor TEXT, category INT, ships_from INT, ships_to INT, units TEXT, amount REAL, quantity INT)')
+write_cur.execute('CREATE TABLE listings(title TEXT, vendor TEXT, category INT, ships_from INT, ships_to INT, units TEXT, amount REAL, quantity INT, url TEXT)')
 write_cur.execute('CREATE TABLE categories(category TEXT)')
 write_cur.execute('CREATE TABLE ships_from(location TEXT)')
 write_cur.execute('CREATE TABLE ships_to(location TEXT)')
-write_cur.execute('CREATE TABLE prices(dat INT, listing INT, price REAl, rating REAL, min_sales INT, max_sales INT, url TEXT)')
+write_cur.execute('CREATE TABLE prices(dat INT, listing INT, price REAl, rating REAL, min_sales INT, max_sales INT)')
 write_cur.execute('CREATE TABLE reviews(dat INT, listing INT, review TEXT, val INT, price REAL, scraped_at INT, user_rating REAL, user_deals INT)')
 write.commit()
 
