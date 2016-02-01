@@ -4,12 +4,12 @@ import os
 
 market = 'evolution'
 
-execfile('scripts/clean_listings_common.py')
+exec(open('scripts/clean_listings_common.py').read())
 
 try:
     con = lite.connect(output_path + output_file)
     con.cursor().execute("CREATE TABLE listings(dat INT, title TEXT, price REAL, vendor TEXT, reviews TEXT, category TEXT, vendor_rating TEXT, ships_from TEXT, ships_to TEXT)")
-except lite.Error, e:
+except lite.Error as e:
     print_progress("Failed to clean " + market + " listings, error %s:" % e.args[0])
 
 
@@ -119,12 +119,12 @@ for f in listdir(path):
         con.cursor().execute("INSERT INTO listings VALUES({0}, '{1}', {2}, '{3}', '{4}', '{5}', '{6}', '{7}', '{8}')".format(date, title, price, vendor, reviews, category, vendor_rating, ships_from, ships_to))
         con.commit()
         con.close()
-    except lite.Error, e:
+    except lite.Error as e:
         # print_progress("Failed to insert into database, error %s:" % e.args[0])
         continue
 
     tot_scraped = tot_scraped + 1
-	
+
 try:
     os.rename(output_path + output_file, output_path + final_output)
 except OSError:

@@ -4,4 +4,4 @@ market = 'abraxas'
 
 destinations = zip(['vendors', 'categories', 'listings'], ['%2Fvendor%2F', '2Fc%2F', '%2Flisting%2F'])
 
-execfile('scripts/sort_marketplace_common.py')
+exec(open('scripts/sort_marketplace_common.py').read())

@@ -158,8 +158,8 @@ try:
 
         tot_aggregated = tot_aggregated + 1
 
-except lite.Error, e:
-	print "Error %s:" % e.args[0]
+except lite.Error as e:
+	print("Error %s:" % e.args[0])
 finally:
     if write:
         write.commit()

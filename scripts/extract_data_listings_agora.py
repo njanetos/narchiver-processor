@@ -4,7 +4,7 @@ market = 'agora'
 
 try:
 
-	execfile('scripts/extract_data_listings_common.py')
+	exec(open('scripts/extract_data_listings_common.py').read())
 
 	# Get total number of listings
 	val = (read_cur.execute("SELECT Count(*) FROM listings").fetchall()[0])[0]
@@ -82,8 +82,8 @@ try:
 	# Collapse duplicate rows
 	print_progress("Finished aggregating.")
 
-except lite.Error, e:
-	print "Error %s:" % e.args[0]
+except lite.Error as e:
+	print("Error %s:" % e.args[0])
 finally:
 	if write:
 		write.close()

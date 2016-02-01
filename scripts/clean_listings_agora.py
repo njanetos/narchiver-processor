@@ -4,12 +4,12 @@ import os
 
 market = 'agora'
 
-execfile('scripts/clean_listings_common.py')
+exec(open('scripts/clean_listings_common.py').read())
 
 try:
     con = lite.connect(output_path + output_file)
     con.cursor().execute("CREATE TABLE listings(dat INT, title TEXT, price REAL, vendor TEXT, reviews TEXT, category TEXT, ships_from TEXT, ships_to TEXT, rating REAL, min_sales INT, max_sales INT, url TEXT)")
-except lite.Error, e:
+except lite.Error as e:
     print_progress("Failed to clean " + market + " listings, error %s:" % e.args[0])
 
 count = 0
@@ -142,7 +142,7 @@ try:
             buf = 0
         tot_scraped = tot_scraped + 1
 
-except lite.Error, e:
+except lite.Error as e:
     print_progress("Failed to insert into database, error %s:" % e.args[0])
 finally:
     con.commit()

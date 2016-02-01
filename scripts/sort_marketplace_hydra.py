@@ -4,4 +4,4 @@ market = 'hydra'
 
 destinations = zip(['listings', 'vendors'], ['%2Fsale%2F', '%2Fvendor%2F'])
 
-execfile('scripts/sort_marketplace_common.py')
+exec(open('scripts/sort_marketplace_common.py').read())

@@ -4,7 +4,7 @@ market = 'abraxas'
 
 try:
 
-	execfile('scripts/extract_data_listings_common.py')
+	exec(open('scripts/extract_data_listings_common.py').read())
 
 	# Get total number of listings
 	val = (read_cur.execute("SELECT Count(*) FROM listings").fetchall()[0])[0]
@@ -18,7 +18,7 @@ try:
 		row = read_cur.fetchall()[0]
 
 		# Get the listing id
- 		listing_id = titles.index(row[1]) + 1
+		listing_id = titles.index(row[1]) + 1
 
 		# Add price in
 		write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2})".format(row[0], listing_id, round(float(row[2]), 2)))
@@ -45,8 +45,8 @@ try:
 	# Collapse duplicate rows
 	print_progress("Not collapsing duplicate reviews...")
 
-except lite.Error, e:
-	print "Error %s:" % e.args[0]
+except lite.Error as e:
+	print("Error %s:" % e.args[0])
 finally:
 	if write:
 		write.commit()
@@ -55,8 +55,8 @@ finally:
 		read.close()
 
 try:
-    os.rename(os.path.join('extract_data_listings', 'temp.db'), os.path.join('extract_data_listings', market+'.db'))
+	os.rename(os.path.join('extract_data_listings', 'temp.db'), os.path.join('extract_data_listings', market+'.db'))
 except OSError:
-    pass
+	pass
 
 print_progress("Finished aggregating, output in " + os.path.join('aggregate_listings', market+'.db'))

@@ -4,7 +4,7 @@ market = 'nucleus'
 
 try:
 
-	execfile('scripts/extract_data_listings_common.py')
+	exec(open('scripts/extract_data_listings_common.py').read())
 
 	# Get total number of listings
 	val = (read_cur.execute("SELECT Count(*) FROM listings").fetchall()[0])[0]
@@ -18,7 +18,7 @@ try:
 		row = read_cur.fetchall()[0]
 
 		# Find listing id
-                listing_id = titles.index(row[1]) + 1
+		listing_id = titles.index(row[1]) + 1
 
 		# Add price in
 		write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2}, '{3}')".format(row[0], listing_id, round(float(row[2]), 2), row))
@@ -59,8 +59,8 @@ try:
 
 	print_progress("Finished aggregating.")
 
-except lite.Error, e:
-	print "Error %s:" % e.args[0]
+except lite.Error as e:
+	print("Error %s:" % e.args[0])
 finally:
 	if write:
 		write.close()

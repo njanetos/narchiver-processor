@@ -4,4 +4,4 @@ market = 'evolution'
 
 destinations = zip(['listings', 'categories'], ['%2Flisting%2F', '%2Fcategory%2F'])
 
-execfile('scripts/sort_marketplace_common.py')
+exec(open('scripts/sort_marketplace_common.py').read())

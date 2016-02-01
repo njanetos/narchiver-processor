@@ -36,7 +36,7 @@ if not os.path.exists(output_path):
 try:
     con = lite.connect(output_path + output_file)
     con.cursor().execute("CREATE TABLE vendors( dat INT, name TEXT, rating TEXT, ratings TEXT )")
-except lite.Error, e:
+except lite.Error as e:
     print_progress("Failed to clean " + market + " listings, error %s:" % e.args[0])
 
 size = len([name for name in os.listdir(path)])
@@ -53,11 +53,11 @@ try:
         update_progress(count, size)
         count = count + 1
 
-    	# Load the file into a string
+        # Load the file into a string
         with open(path + f, "r") as file:
             file_string = file.read()
 
-    	# Parse the HTML
+        # Parse the HTML
         tree = html.fromstring(file_string)
 
         name = tree.xpath('//div/strong/text()')
@@ -108,10 +108,10 @@ try:
 
         # Write to database
         buf = buf + 1
-    	if buf > buffer_limit:
+        if buf > buffer_limit:
                 con.commit()
                 buf = 0
-except lite.Error, e:
+except lite.Error as e:
     print_progress("Failed to insert into database, error %s:" % e.args[0])
 finally:
     con.commit()
