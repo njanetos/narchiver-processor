@@ -84,7 +84,7 @@ for t in titles:
         amount = 0.0
         quantity = 0
 
-    write_cur.execute("INSERT INTO listings VALUES('{0}', '{1}', {2}, {3}, {4}, '{5}', {6}, {7}, {8})".format(t[0], t[1], 1+categories.index(t[2]), 1+ships_from.index(t[3]), 1+ships_to.index(t[4]), units, amount, quantity, t[5]))
+    write_cur.execute("INSERT INTO listings VALUES('{0}', '{1}', {2}, {3}, {4}, '{5}', {6}, {7}, '{8}')".format(t[0], t[1], 1+categories.index(t[2]), 1+ships_from.index(t[3]), 1+ships_to.index(t[4]), units, amount, quantity, t[5]))
 
     buf = buf + 1
     if (buf > buffer_limit):

@@ -21,7 +21,7 @@ try:
 		listing_id = titles.index(row[1]) + 1
 
 		# Add price in
-		write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2}, {3}, {4}, {5}, '{6}')".format(row[0], listing_id, float(row[2]), row[8], row[9], row[10], row[11]))
+		write_cur.execute("INSERT INTO prices VALUES({0}, {1}, {2}, {3}, {4}, {5})".format(row[0], listing_id, float(row[2]), row[8], row[9], row[10]))
 		count = count + 1
 		update_progress(count, tot_count)
 
