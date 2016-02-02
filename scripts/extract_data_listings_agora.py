@@ -83,7 +83,7 @@ try:
 	print_progress("Finished aggregating.")
 
 except lite.Error as e:
-	print("Error %s:" % e.args[0])
+	print("Error: ", e)
 finally:
 	if write:
 		write.close()
