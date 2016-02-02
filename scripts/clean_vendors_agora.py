@@ -76,7 +76,7 @@ try:
         else:
             vendor_rating = clean(rating[0].replace('~', '.').replace('/', '.').replace(' deals', '').replace('.5, ', ' '))
 
-        test = tree.xpath('//div[@class="embedded-feedback-list"]/table/tr/td')
+        test = bytes(tree.xpath('//div[@class="embedded-feedback-list"]/table/tr/td'), 'utf-8')
         if len(test) > 0:
             rating_vals = [clean(tostring(t).replace('<td>', '').replace('</td>', '').replace('<strong>', '').replace('</strong>', '')) for t in test[0::5]]
             rating_text = [clean(tostring(t).replace('<td>', '').replace('</td>', '')) for t in test[1::5]]
