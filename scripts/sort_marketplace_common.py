@@ -2,13 +2,16 @@
 
 import os
 import re
+import copy
 from update_progress import update_progress
 from update_progress import print_progress
 
 print_progress("Sorting and cleaning " + market + "...")
 
+dests = copy.deepcopy(destinations)
+
 # Create the destination folders
-for d, m in destinations:
+for d, m in dests:
 	if not os.path.exists(os.path.join('raw_by_site', market, d)):
 	    os.makedirs(os.path.join('raw_by_site', market, d))
 if not os.path.exists(os.path.join('raw_by_site', market, 'remaining')):
@@ -36,11 +39,16 @@ for d in dirs:
 		for f in filenames:
 			if not f in existing_files:
 
+				# No idea why I have to do this!
+				dests = copy.deepcopy(destinations)
+
 				# Identify the Final Destination IV of this file
 				dest_dir = 'remaining'
-				for d, m in destinations:
-					if m in f:
-						dest_dir = d
+				for dest in dests:
+					dp = dest[0]
+					mp = dest[1]
+					if mp in f:
+						dest_dir = dp
 
 				# Read it, remove CSS, and write it out
 				with open (os.path.join(root, f)) as open_file:
