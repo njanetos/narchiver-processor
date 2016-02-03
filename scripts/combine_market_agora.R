@@ -88,7 +88,7 @@ ships_from_ = data.frame(location = unique(listings_$ships_from))
 
 # Cross-reference listings on this table
 tmp_size = sqldf("SELECT Count(*) FROM listings", dbname = dblist)
-listings_ = as.data.table(sqldf("SELECT l.title, l.category, l.vendor, l.units, l.amount, l.quantity, sf.rowid AS ships_from, l.ships_to, l.ind
+listings_ = as.data.table(sqldf("SELECT l.title, l.category, l.vendor, l.units, l.amount, l.quantity, sf.rowid AS ships_from, l.ships_to, l.ind, l.url
                                  FROM listings_ AS l
                                  JOIN ships_from_ AS sf
                                     ON sf.location == l.ships_from", dbname = dblist))
@@ -163,7 +163,7 @@ reviews_ = reviews_[order(reviews_$dat),]
 reviews_ = reviews_[!is.na(reviews_$listing),]
 old_len = length(reviews_$dat)
 
-tmp = as.data.table(sqldf("SELECT m.dat, m.listing, m.val, m.content, m.user_rating, r.rowid AS matched_price
+tmp = as.data.table(sqldf("SELECT m.dat, m.listing, m.val, m.user_rating, r.rowid AS matched_price
                            FROM (
                             SELECT MAX(r.dat) AS max, r.id, p.rowid AS rowid
                               FROM reviews_ AS r
@@ -178,96 +178,93 @@ rm(tmp)
 cat(paste('[combine_market_agora.R]: Cross-referenced reviews. Discrepancy: ', 100*round(length(reviews_$dat)/old_len, digits = 2), '%. If this number is not very close to 100, then something is wrong.\n', sep = ''))
 
 # Build smoothed estimates of daily sales rate from reviews
-prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.vendor, p.rowid AS id FROM prices_ AS p"))
-prices_temp$dat = floor(prices_temp$dat / 86400)
-reviews_temp = as.data.table(sqldf("SELECT r.dat, r.listing, l.vendor FROM reviews_ AS r LEFT JOIN listings_ AS l ON l.rowid == r.listing"))
+#prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.vendor, p.rowid AS id FROM prices_ AS p"))
+#prices_temp$dat = floor(prices_temp$dat)
+#reviews_temp = as.data.table(sqldf("SELECT r.dat, r.listing, l.vendor FROM reviews_ AS r LEFT JOIN listings_ AS l ON l.rowid == r.listing"))
 
 # Build estimate of aggregate reviews up to the time the price was scraped
-prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.vendor, p.id, COUNT(r.rowid) AS prev FROM prices_temp AS p LEFT JOIN reviews_temp AS r ON r.dat <= p.dat AND r.listing == p.listing GROUP BY p.id"))
+#prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.vendor, p.id, COUNT(r.rowid) AS prev FROM prices_temp AS p LEFT JOIN reviews_temp AS r ON r.dat <= p.dat AND r.listing == p.listing GROUP BY p.id"))
 
 # Order the prices
-prices_temp = prices_temp[order(prices_temp$dat),]
+#prices_temp = prices_temp[order(prices_temp$dat),]
 
 # Fit a smooth spline to every listing, compute averages looking ahead
-prices_temp$reviews_per_day = prices_temp$dat*NA
-prices_temp$net_reviews = prices_temp$dat*NA
-prices_temp$net_reviews_smooth = prices_temp$dat*NA
-x = split(prices_temp, f = prices_temp$listing)
-tot = length(names(x))
-cat('[combine_market_agora.R]: Fitting smooth splines to listings...\n')
+#prices_temp$reviews_per_day = prices_temp$dat*NA
+#prices_temp$net_reviews = prices_temp$dat*NA
+#prices_temp$net_reviews_smooth = prices_temp$dat*NA
+#x = split(prices_temp, f = prices_temp$listing)
+#tot = length(names(x))
+#cat('[combine_market_agora.R]: Fitting smooth splines to listings...\n')
 
-for (i in 1:tot) {
-    tryCatch({
+#for (i in 1:tot) {
+#    tryCatch({
         # Eliminate duplicate entries
-        x[[i]] = x[[i]][!duplicated(subset(x[[i]], select = c(listing, dat)))]
+#        x[[i]] = x[[i]][!duplicated(subset(x[[i]], select = c(listing, dat)))]
 
         # Fit a smooth spline
-        mod = smooth.spline(y = x[[i]]$prev, x = x[[i]]$dat, spar = 0.6)
+#        mod = smooth.spline(y = x[[i]]$prev, x = x[[i]]$dat, spar = 0.6)
 
         # Read in the spline values
-        x[[i]]$net_reviews_smooth = predict(mod, x[[i]]$dat, deriv = 0)$y
-        x[[i]]$reviews_per_day = predict(mod, x[[i]]$dat, deriv = 1)$y
-        x[[i]]$net_reviews = x[[i]]$prev
-    }, error = function(e) {})
-    cat('\r')
-    cat(paste('[combine_market_agora.R]: Progress: ', 100*round(i / tot, digits = 4), '%'), sep = '')
-}
-cat('\n[combine_market_agora.R]: Fitted smooth splines to listings.\n')
-prices_temp = as.data.table(do.call(rbind, x))
-reviews_temp = reviews_temp[order(reviews_temp$vendor),]
+#        x[[i]]$net_reviews_smooth = predict(mod, x[[i]]$dat, deriv = 0)$y
+#        x[[i]]$reviews_per_day = predict(mod, x[[i]]$dat, deriv = 1)$y
+#        x[[i]]$net_reviews = x[[i]]$prev
+#    }, error = function(e) {})
+#    cat('\r')
+#    cat(paste('[combine_market_agora.R]: Progress: ', 100*round(i / tot, digits = 4), '%'), sep = '')
+#}
+#cat('\n[combine_market_agora.R]: Fitted smooth splines to listings.\n')
+#prices_temp = as.data.table(do.call(rbind, x))
+#reviews_temp = reviews_temp[order(reviews_temp$vendor),]
 
 # Build estimate of aggregate reviews, for a vendor, up to the time the price was scraped
-prices_temp$vendor_net_reviews_smooth = NA*prices_temp$dat
-prices_temp$vendor_reviews_per_day = NA*prices_temp$dat
-prices_temp$vendor_net_reviews = NA*prices_temp$dat
+#prices_temp$vendor_net_reviews_smooth = NA*prices_temp$dat
+#prices_temp$vendor_reviews_per_day = NA*prices_temp$dat
+#prices_temp$vendor_net_reviews = NA*prices_temp$dat
 
-x = split(prices_temp, f = prices_temp$vendor)
-tot = length(names(x))
-cat('[combine_market_agora.R]: Fitting smooth splines to vendors...\n')
-vendors_names = names(x)
-for (i in 1:length(names(x))) {
-    tryCatch({
+#x = split(prices_temp, f = prices_temp$vendor)
+#tot = length(names(x))
+#cat('[combine_market_agora.R]: Fitting smooth splines to vendors...\n')
+#vendors_names = names(x)
+#for (i in 1:length(names(x))) {
+#    tryCatch({
 
         # Read into temporary variable
-        tmp = x[[i]]
-        tmp_reviews = reviews_temp[reviews_temp$vendor == vendors_names[i]]
-        tmp = sqldf("SELECT p.listing, p.dat, p.vendor, p.id, COUNT(r.rowid) AS vendor_net_reviews, p.reviews_per_day, p.net_reviews, p.net_reviews_smooth, p.vendor_net_reviews_smooth, p.vendor_reviews_per_day FROM tmp AS p LEFT JOIN tmp_reviews AS r ON r.dat <= p.dat AND r.vendor == p.vendor GROUP BY p.id")
-        tmp = tmp[order(tmp$dat),]
+#        tmp = x[[i]]
+#        tmp_reviews = reviews_temp[reviews_temp$vendor == vendors_names[i]]
+#        tmp = sqldf("SELECT p.listing, p.dat, p.vendor, p.id, COUNT(r.rowid) AS vendor_net_reviews, p.reviews_per_day, p.net_reviews, p.net_reviews_smooth, p.vendor_net_reviews_smooth, p.vendor_reviews_per_day FROM tmp AS p LEFT JOIN tmp_reviews AS r ON r.dat <= p.dat AND r.vendor == p.vendor GROUP BY p.id")
+#        tmp = tmp[order(tmp$dat),]
 
         # Read back out
-        x[[i]] = tmp
+#        x[[i]] = tmp
 
         # Fit a smooth spline
-        mod = smooth.spline(y = x[[i]]$vendor_net_reviews, x = x[[i]]$dat, spar = 0.6)
+#        mod = smooth.spline(y = x[[i]]$vendor_net_reviews, x = x[[i]]$dat, spar = 0.6)
 
         # Read in the spline values
-        x[[i]]$vendor_net_reviews_smooth = predict(mod, x[[i]]$dat, deriv = 0)$y
-        x[[i]]$vendor_reviews_per_day = predict(mod, x[[i]]$dat, deriv = 1)$y
-    }, error = function(e) {})
-    cat('\r')
-    cat(paste('[combine_market_agora.R]: Progress: ', 100*round(i / tot, digits = 4), '%'), sep = '')
-}
-prices_temp = as.data.table(do.call(rbind, x))
-cat('\n[combine_market_agora.R]: Fitted smooth splines to vendors.\n')
+#        x[[i]]$vendor_net_reviews_smooth = predict(mod, x[[i]]$dat, deriv = 0)$y
+#        x[[i]]$vendor_reviews_per_day = predict(mod, x[[i]]$dat, deriv = 1)$y
+#    }, error = function(e) {})
+#    cat('\r')
+#    cat(paste('[combine_market_agora.R]: Progress: ', 100*round(i / tot, digits = 4), '%'), sep = '')
+#}
+#prices_temp = as.data.table(do.call(rbind, x))
+#cat('\n[combine_market_agora.R]: Fitted smooth splines to vendors.\n')
 
 # Re-create prices
-prices_ = as.data.table(sqldf("SELECT p.dat,
-                                        p.listing,
-                                        q.max_sales,
-                                        q.min_sales,
-                                        q.price,
-                                        q.rating,
-                                        p.reviews_per_day,
-                                        p.net_reviews,
-                                        p.net_reviews_smooth,
-                                        p.vendor_reviews_per_day,
-                                        p.vendor_net_reviews,
-                                        p.vendor_net_reviews_smooth FROM prices_temp AS p
-                                    JOIN prices_ AS q ON q.rowid == p.id"))
-cat('[combine_market_agora.R]: Sorted prices\n')
+prices_$dat = prices_$days
+prices_ = subset(prices_, select = c(dat, listing, max_sales, min_sales, price, rating))
+#prices_ = as.data.table(sqldf("SELECT p.dat,
+#                                        p.listing,
+#                                        q.max_sales,
+#                                        q.min_sales,
+#                                        q.price,
+#                                        q.rating FROM prices_ AS p
+#                                    JOIN prices_ AS q ON q.rowid == p.id"))
+#cat('[combine_market_agora.R]: Sorted prices\n')
 
 # Write everything to the database, clean up stuff
 listings_ = subset(listings_, select = -c(ind))
+prices_ = subset(prices_, select = -c(days))
 
 # Create the output path
 dir.create("combined_market", showWarnings = FALSE)
@@ -292,17 +289,11 @@ try({
                               max_sales INT,
                               min_sales INT,
                               price REAL,
-                              rating REAL,
-                              reviews_per_day REAL,
-                              net_reviews INT,
-                              net_reviews_smooth REAL,
-                              vendor_reviews_per_day REAL,
-                              vendor_net_reviews INT,
-                              vendor_net_reviews_smooth REAL)", dbname = dbout)
+                              rating REAL)", dbname = dbout)
     sqldf("INSERT INTO prices SELECT * FROM prices_", dbname = dbout)
 
     sqldf("DROP TABLE IF EXISTS reviews")
-    sqldf("CREATE TABLE reviews(dat INT, listing INT, val INT, content TEXT, user_rating REAL, matched_price INT)", dbname = dbout)
+    sqldf("CREATE TABLE reviews(dat INT, listing INT, val INT, user_rating REAL, matched_price INT)", dbname = dbout)
     sqldf("INSERT INTO reviews SELECT * FROM reviews_", dbname = dbout)
 
     sqldf("DROP TABLE IF EXISTS ships_from")
