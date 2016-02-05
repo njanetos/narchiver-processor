@@ -17,8 +17,6 @@ import datetime
 import copy
 from update_progress import update_progress
 from update_progress import print_progress
-from scripts.update_progress import update_progress
-from scripts.update_progress import print_progress
 
 pandas.options.mode.chained_assignment = None
 
