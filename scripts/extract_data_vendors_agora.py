@@ -111,7 +111,7 @@ try:
         # Find day on which it was scraped (in days since 1970)
         scraped_on_days_since_1970 = date//86400
         try:
-            review_date = [scraped_on_days_since_1970 - int(r) for r in review_date]
+            review_date = [86400*(scraped_on_days_since_1970 - int(r)) for r in review_date]
         except:
             review_date = ["'null'"]*len(review_date)
 

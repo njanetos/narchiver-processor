@@ -110,6 +110,7 @@ reviews = [ list(r) for r in reviews ]
 
 # Drop impossible values
 prices =  [ p for p in prices if p[6] != 0 and p[7] != 0 ]
+reviews = [ r for r in reviews if r[0] > 0]
 
 print_progress('Loaded from combined_market')
 
@@ -176,6 +177,10 @@ print_progress('Constructing balanced panel dataset...')
 
 balanced_categories = pandas.DataFrame(columns = ['VENDOR', 'DATE', 'NORMALIZED', 'RATING', 'REVIEWS', 'SALES', 'CATEGORY'])
 
+# Construct date bins
+bins_date = [numpy.round(d) for d in numpy.linspace(min_date_days, max_date_days, num = 35)]
+bins_date = [b for b in zip(bins_date[0:-1], bins_date[1:])]
+
 tot = len(interesting_categories)
 prog = 0
 
@@ -202,8 +207,6 @@ for category_id in interesting_categories:
     vendors = vendors[vendors['NUM_REVIEWS'] > 0]
 
     # Construct a balanced panel data set for each vendor
-    bins_date = [numpy.round(d) for d in numpy.linspace(min_date_days, max_date_days, num = 35)]
-    bins_date = [b for b in zip(bins_date[0:-1], bins_date[1:])]
 
     balanced = pandas.DataFrame(columns = ['VENDOR', 'DATE', 'NORMALIZED', 'RATING', 'REVIEWS', 'SALES', 'CATEGORY'])
 
