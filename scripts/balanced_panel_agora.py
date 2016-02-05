@@ -17,6 +17,8 @@ import datetime
 import copy
 from update_progress import update_progress
 from update_progress import print_progress
+from scripts.update_progress import update_progress
+from scripts.update_progress import print_progress
 
 pandas.options.mode.chained_assignment = None
 
@@ -37,7 +39,6 @@ read_cur.execute(""" SELECT p.dat AS dat,
                             l.quantity AS quantity,
                             l.units AS units,
                             p.dat AS normalized,
-                            p.dat AS log_normalized,
                             p.rowid AS id,
                             p.min_sales AS min_sales,
                             p.max_sales AS max_sales
@@ -81,7 +82,7 @@ vendors = read_cur.fetchall()
 
 print_progress('Loaded vendors')
 
-read_cur.execute("""SELECT l.rowid AS id,
+read_cur.execute("""SELECT l.rowid AS id,
                            l.*,
                            COUNT(r.listing) AS num_reviews
                     FROM listings AS l
@@ -116,31 +117,27 @@ print_progress('Loaded from combined_market')
 
 # Normalize prices and try to put things in the same units
 for p in prices:
-    p[11] = p[4] / (p[7]*p[6])
-
+    p[9] = p[4] / (p[7]*p[6])
     if "g" in p[8]:
-        p[11] = p[11]/1000
+        p[9] = p[9]/1000
         p[8] = "mg"
         p[6] = p[6]*1000
     elif "kg" in p[8]:
-        p[11] = p[11]/1000000
+        p[9] = p[9]/1000000
         p[8] = "mg"
         p[6] = p[6]*1000000
     elif "ug" in p[8]:
-        p[11] = p[11]*1000
+        p[9] = p[9]*1000
         p[8] = "mg"
         p[6] = p[6]/1000
     elif "oz" in p[8]:
-        p[11] = p[11]/28349.5
+        p[9] = p[9]/28349.5
         p[8] = "mg"
         p[6] = p[6]*28349.5
     elif "lb" in p[8]:
-        p[11] = p[11]/453592
+        p[9] = p[9]/453592
         p[8] = "mg"
         p[6] = p[6]*453592
-
-    # Compute logs
-    p[12] = log(p[11])
 
 # Select the stuff we normalized
 prices = [ p for p in prices if 'mg' in p[8]]
