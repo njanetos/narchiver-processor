@@ -151,31 +151,31 @@ reviews = rbind(reviews_listings, reviews_vendors)
 # Remove duplicates
 # Sort by date, date scraped at, content, and value.
 # Delete everything which is on the same date, was scraped at different dates, and has the same value and content
-reviews_ = sqldf("SELECT dat, vendor, listing, val, content, user_rating, rowid AS id, scraped_at FROM reviews GROUP BY dat, vendor, listing, val, content")
+reviews_ = as.data.table(sqldf("SELECT dat, vendor, listing, val, content, user_rating, rowid AS id, scraped_at FROM reviews GROUP BY dat, vendor, listing, val, content"))
 old_len = length(reviews$dat)
 rm(reviews)
 cat(paste('[combine_market_agora.R]: Sorted reviews, ', 100 - 100*round(length(reviews_$dat)/old_len, digits = 2), '% were found to be duplicates.\n', sep = ''))
-cat(paste('[combine_market_agora.R]: Cross-referencing reviews with the price 1 week before the review was left.\n'))
+#cat(paste('[combine_market_agora.R]: Cross-referencing reviews with the price 1 week before the review was left.\n'))
 # Find an estimate for each review of the price at the time it was left
-prices_$days = floor(prices_$dat / 86400)
-reviews_$days_ago = reviews_$dat
-reviews_ = reviews_[order(reviews_$dat),]
-reviews_ = reviews_[!is.na(reviews_$listing),]
-old_len = length(reviews_$dat)
+#prices_$days = floor(prices_$dat / 86400)
+#reviews_$days_ago = reviews_$dat
+#reviews_ = reviews_[order(reviews_$dat),]
+#reviews_ = reviews_[!is.na(reviews_$listing),]
+#old_len = length(reviews_$dat)
 
-tmp = as.data.table(sqldf("SELECT m.dat, m.listing, m.val, m.user_rating, r.rowid AS matched_price
-                           FROM (
-                            SELECT MAX(r.dat) AS max, r.id, p.rowid AS rowid
-                              FROM reviews_ AS r
-                            JOIN prices_ AS p
-                              ON p.days < r.days_ago - 4 AND p.listing == r.listing
-                            GROUP BY r.id
-                          ) AS r
-                          INNER JOIN reviews_ AS m ON m.id = r.id"))
+#tmp = as.data.table(sqldf("SELECT m.dat, m.listing, m.val, m.user_rating, r.rowid AS matched_price
+#                           FROM (
+#                            SELECT MAX(r.dat) AS max, r.id, p.rowid AS rowid
+#                              FROM reviews_ AS r
+#                            JOIN prices_ AS p
+#                              ON p.days < r.days_ago - 4 AND p.listing == r.listing
+#                            GROUP BY r.id
+#                          ) AS r
+#                          INNER JOIN reviews_ AS m ON m.id = r.id"))
 
-reviews_ = tmp
-rm(tmp)
-cat(paste('[combine_market_agora.R]: Cross-referenced reviews. Discrepancy: ', 100*round(length(reviews_$dat)/old_len, digits = 2), '%. If this number is not very close to 100, then something is wrong.\n', sep = ''))
+#reviews_ = tmp
+#rm(tmp)
+#cat(paste('[combine_market_agora.R]: Cross-referenced reviews. Discrepancy: ', 100*round(length(reviews_$dat)/old_len, digits = 2), '%. If this number is not very close to 100, then something is wrong.\n', sep = ''))
 
 # Build smoothed estimates of daily sales rate from reviews
 #prices_temp = as.data.table(sqldf("SELECT p.listing, p.dat, p.vendor, p.rowid AS id FROM prices_ AS p"))
@@ -251,8 +251,7 @@ cat(paste('[combine_market_agora.R]: Cross-referenced reviews. Discrepancy: ', 1
 #cat('\n[combine_market_agora.R]: Fitted smooth splines to vendors.\n')
 
 # Re-create prices
-prices_$dat = prices_$days
-prices_ = subset(prices_, select = c(dat, listing, max_sales, min_sales, price, rating))
+#prices_$dat = prices_$days
 #prices_ = as.data.table(sqldf("SELECT p.dat,
 #                                        p.listing,
 #                                        q.max_sales,
@@ -264,7 +263,8 @@ prices_ = subset(prices_, select = c(dat, listing, max_sales, min_sales, price, 
 
 # Write everything to the database, clean up stuff
 listings_ = subset(listings_, select = -c(ind))
-prices_ = subset(prices_, select = -c(days))
+prices_ = subset(prices_, select = c(dat, listing, max_sales, min_sales, price, rating))
+reviews_ = subset(reviews_, select = c(dat, listing, val))
 
 # Create the output path
 dir.create("combined_market", showWarnings = FALSE)
@@ -293,7 +293,7 @@ try({
     sqldf("INSERT INTO prices SELECT * FROM prices_", dbname = dbout)
 
     sqldf("DROP TABLE IF EXISTS reviews")
-    sqldf("CREATE TABLE reviews(dat INT, listing INT, val INT, user_rating REAL, matched_price INT)", dbname = dbout)
+    sqldf("CREATE TABLE reviews(dat INT, listing INT, val INT)", dbname = dbout)
     sqldf("INSERT INTO reviews SELECT * FROM reviews_", dbname = dbout)
 
     sqldf("DROP TABLE IF EXISTS ships_from")
@@ -309,4 +309,6 @@ try({
     sqldf("INSERT INTO vendors SELECT * FROM vendors_", dbname = dbout)
 })
 
-dbDisconnect(db)
+if (dbDisconnect(db)) {
+    cat('\n[combine_market_agora.R]: Successfully wrote to database.\n')
+}
