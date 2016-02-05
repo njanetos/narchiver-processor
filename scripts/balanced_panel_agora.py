@@ -57,15 +57,10 @@ print_progress('Loaded categories...')
 
 # Fetch reviews
 read_cur.execute("""SELECT r.dat,
-                           l.category,
-                           l.vendor,
                            r.listing,
-                           l.amount,
-                           l.quantity,
-                           l.units,
-                           r.dat AS normalized,
-                           r.dat AS log_normalized,
-                           r.rowid AS id,
+                           l.vendor,
+                           l.category,
+                           r.rowid AS id
                         FROM reviews AS r
                             JOIN listings AS l
                                 ON l.rowid == r.listing""")
@@ -115,7 +110,6 @@ reviews = [ list(r) for r in reviews ]
 
 # Drop impossible values
 prices =  [ p for p in prices if p[6] != 0 and p[7] != 0 ]
-reviews = [ r for r in reviews if r[6] != 0 and r[7] != 0 ]
 
 print_progress('Loaded from combined_market')
 
@@ -155,11 +149,13 @@ names = ['DATE', 'CATEGORY', 'VENDOR', 'LISTING', 'PRICE',
          'RATING', 'AMOUNT', 'QUANTITY', 'UNITS', 'NORMALIZED',
          'LOG_NORMALIZED', 'ID', 'MIN_SALES', 'MAX_SALES']
 _prices = pandas.DataFrame(prices, columns = names)
+
+names = ['DATE', 'LISTING', 'CATEGORY', 'VENDOR', 'ID']
 _reviews = pandas.DataFrame(reviews, columns = names)
 
 # Read listings into panda data frame
 names = ['ID', 'TITLE', 'CATEGORY', 'VENDOR', 'UNITS', 'AMOUNT',
-         'QUANTITY', 'SHIPS_FROM', 'SHIPS_TO', 'NUM_REVIEWS']
+         'QUANTITY', 'SHIPS_FROM', 'SHIPS_TO', 'NUM_REVIEWS', 'URL']
 _listings = pandas.DataFrame(listings, columns = names)
 
 # Read vendors in panda data frame
@@ -220,13 +216,12 @@ for category_id in interesting_categories:
             reviews_date = reviews_mask[ (reviews_mask['DATE'] >= date[0])
                                        & (reviews_mask['DATE'] <  date[1])]
             # Find the average of each value over this particular bin
-            if (len(prices_date['V_REVIEWS_PER_DAY'].values) > 0):
+            if (len(prices_date['DATE'].values) > 0):
                 price             = numpy.mean(prices_date['NORMALIZED'].values)
                 rating            = numpy.mean(prices_date['RATING'].values)
                 sales             = numpy.mean(prices_date['MIN_SALES'].values)
                 reviews           = len(reviews_date['RATING'].values)
             else:
-                v_reviews_per_day = 0
                 # reviews = float('nan')
                 reviews = 0
                 price = float('nan')
