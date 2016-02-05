@@ -112,7 +112,7 @@ try:
         # the number of days since the review was left, times the number of seconds
         # in a day, from the date on which it was scraped.
         try:
-            review_date = [(86400*int(r) - date) for r in review_date]
+            review_date = [(date - 86400*int(r)) for r in review_date]
         except:
             review_date = ["'null'"]*len(review_date)
 
