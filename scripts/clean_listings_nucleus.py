@@ -26,7 +26,7 @@ try:
 
         # Load the file into a string
         with open(path + f, "r") as file:
-            file_string = file.read().decode('utf-8').encode('ascii', errors='ignore')
+            file_string = file.read()
 
         # Parse the HTML
         try:
