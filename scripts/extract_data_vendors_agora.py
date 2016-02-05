@@ -108,10 +108,11 @@ try:
         review_date = review_raw[3::5]
         review_user = review_raw[4::5]
 
-        # Find day on which it was scraped (in days since 1970)
-        scraped_on_days_since_1970 = date//86400
+        # Work backward, try to find the date on which it was left by subtracting
+        # the number of days since the review was left, times the number of seconds
+        # in a day, from the date on which it was scraped.
         try:
-            review_date = [86400*(scraped_on_days_since_1970 - int(r)) for r in review_date]
+            review_date = [(86400*int(r) - date) for r in review_date]
         except:
             review_date = ["'null'"]*len(review_date)
 
