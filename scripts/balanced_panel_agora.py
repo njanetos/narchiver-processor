@@ -36,8 +36,6 @@ read_cur.execute(""" SELECT p.dat AS dat,
                             l.amount AS amount,
                             l.quantity AS quantity,
                             l.units AS units,
-                            p.reviews_per_day AS reviews_per_day,
-                            p.vendor_reviews_per_day AS vendor_reviews_per_day,
                             p.dat AS normalized,
                             p.dat AS log_normalized,
                             p.rowid AS id,
@@ -67,8 +65,6 @@ read_cur.execute("""SELECT r.dat,
                            l.amount,
                            l.quantity,
                            l.units,
-                           p.reviews_per_day,
-                           p.vendor_reviews_per_day,
                            p.dat AS normalized,
                            p.dat AS log_normalized,
                            r.rowid AS id,
@@ -191,9 +187,8 @@ reviews = [ r for r in reviews if 'mg' in r[8]]
 
 # Read into panda data frame
 names = ['DATE', 'CATEGORY', 'VENDOR', 'LISTING', 'PRICE',
-         'RATING', 'AMOUNT', 'QUANTITY', 'UNITS', 'REVIEWS_PER_DAY',
-         'V_REVIEWS_PER_DAY', 'NORMALIZED', 'LOG_NORMALIZED', 'ID',
-         'MIN_SALES', 'MAX_SALES']
+         'RATING', 'AMOUNT', 'QUANTITY', 'UNITS', 'NORMALIZED', 
+         'LOG_NORMALIZED', 'ID', 'MIN_SALES', 'MAX_SALES']
 _prices = pandas.DataFrame(prices, columns = names)
 _reviews = pandas.DataFrame(reviews, columns = names)
 
@@ -262,7 +257,6 @@ for category_id in interesting_categories:
                                        & (reviews_mask['DATE'] <  date[1])]
             # Find the average of each value over this particular bin
             if (len(prices_date['V_REVIEWS_PER_DAY'].values) > 0):
-                v_reviews_per_day = numpy.mean(prices_date['V_REVIEWS_PER_DAY'].values)
                 price             = numpy.mean(prices_date['NORMALIZED'].values)
                 rating            = numpy.mean(prices_date['RATING'].values)
                 sales             = numpy.mean(prices_date['MIN_SALES'].values)
