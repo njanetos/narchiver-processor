@@ -60,21 +60,15 @@ read_cur.execute("""SELECT r.dat,
                            l.category,
                            l.vendor,
                            r.listing,
-                           p.price,
-                           p.rating,
                            l.amount,
                            l.quantity,
                            l.units,
-                           p.dat AS normalized,
-                           p.dat AS log_normalized,
+                           r.dat AS normalized,
+                           r.dat AS log_normalized,
                            r.rowid AS id,
-                           p.min_sales AS min_sales,
-                           p.max_sales AS max_sales
                         FROM reviews AS r
                             JOIN listings AS l
-                                ON l.rowid == r.listing
-                            JOIN prices AS p
-                                ON p.rowid == r.matched_price""")
+                                ON l.rowid == r.listing""")
 reviews = read_cur.fetchall()
 
 print_progress('Loaded reviews...')
@@ -153,41 +147,12 @@ for p in prices:
     # Compute logs
     p[12] = log(p[11])
 
-# Normalize reviews and try to put things in the same units
-for r in reviews:
-    r[11] = r[4] / (r[7]*r[6])
-
-    if "g" in r[8]:
-        r[11] = r[11]/1000
-        r[8] = "mg"
-        r[6] = r[6]*1000
-    elif "kg" in r[8]:
-        r[11] = r[11]/1000000
-        r[8] = "mg"
-        r[6] = r[6]*1000000
-    elif "ug" in r[8]:
-        r[11] = r[11]*1000
-        r[8] = "mg"
-        r[6] = r[6]/1000
-    elif "oz" in r[8]:
-        r[11] = r[11]/28349.5
-        r[8] = "mg"
-        r[6] = r[6]*28349.5
-    elif "lb" in r[8]:
-        r[11] = r[11]/453592
-        r[8] = "mg"
-        r[6] = r[6]*453592
-
-    # Compute logs
-    r[12] = log(r[11])
-
 # Select the stuff we normalized
 prices = [ p for p in prices if 'mg' in p[8]]
-reviews = [ r for r in reviews if 'mg' in r[8]]
 
 # Read into panda data frame
 names = ['DATE', 'CATEGORY', 'VENDOR', 'LISTING', 'PRICE',
-         'RATING', 'AMOUNT', 'QUANTITY', 'UNITS', 'NORMALIZED', 
+         'RATING', 'AMOUNT', 'QUANTITY', 'UNITS', 'NORMALIZED',
          'LOG_NORMALIZED', 'ID', 'MIN_SALES', 'MAX_SALES']
 _prices = pandas.DataFrame(prices, columns = names)
 _reviews = pandas.DataFrame(reviews, columns = names)
@@ -228,7 +193,6 @@ for category_id in interesting_categories:
 
     # Throw out extreme prices (higher than $1000 / gram)
     prices_cat = prices_cat[prices_cat['NORMALIZED'] < 0.2]
-    reviews_cat = reviews_cat[reviews_cat['NORMALIZED'] < 0.2]
 
     # Count the number of reviews for each vendor
     for v in vendors['ID']:
