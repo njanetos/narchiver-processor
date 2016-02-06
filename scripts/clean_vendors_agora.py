@@ -76,16 +76,14 @@ try:
         else:
             vendor_rating = clean(rating[0].replace('~', '.').replace('/', '.').replace(' deals', '').replace('.5, ', ' '))
 
-        try:
-            test = bytes(tree.xpath('//div[@class="embedded-feedback-list"]/table/tr/td'), 'utf-8')
-        except TypeError:
-            test = []
+        test = tree.xpath('//div[@class="embedded-feedback-list"]/table/tr/td//text()')
+
         if len(test) > 0:
-            rating_vals = [clean(tostring(t).replace('<td>', '').replace('</td>', '').replace('<strong>', '').replace('</strong>', '')) for t in test[0::5]]
-            rating_text = [clean(tostring(t).replace('<td>', '').replace('</td>', '')) for t in test[1::5]]
-            rating_product = [clean(re.sub('(<)(.*?)(>)', '', tostring(t))) for t in test[2::5]]
-            rating_date = [clean(re.sub('(<)(.*?)(>)', '', tostring(t)).replace(' days ago', '')) for t in test[3::5]]
-            rating_rating = [clean(re.sub('(<)(.*?)(>)', '', tostring(t)).replace('~', ' ').replace('/', 's').replace('deals', '').replace('anon &#160;', '')) for t in test[4::5]]
+            rating_vals = [clean(t.replace('<td>', '').replace('</td>', '').replace('<strong>', '').replace('</strong>', '')) for t in test[0::5]]
+            rating_text = [clean(t.replace('<td>', '').replace('</td>', '')) for t in test[1::5]]
+            rating_product = [clean(re.sub('(<)(.*?)(>)', '', t)) for t in test[2::5]]
+            rating_date = [clean(re.sub('(<)(.*?)(>)', '', t).replace(' days ago', '')) for t in test[3::5]]
+            rating_rating = [clean(re.sub('(<)(.*?)(>)', '', t).replace('~', ' ').replace('/', 's').replace('deals', '').replace('anon &#160;', '')) for t in test[4::5]]
 
         if not (len(rating_vals) == len(rating_text) == len(rating_product) == len(rating_date) == len(rating_rating)):
             continue
@@ -125,5 +123,5 @@ try:
 except OSError:
     pass
 
-print_progress("Cleaned abraxas vendors, output in " + output_path + final_output)
+print_progress("Cleaned agora vendors, output in " + output_path + final_output)
 print_progress("Scraped " + str(tot_scraped) + " out of " + str(count) + " vendors.")
