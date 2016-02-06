@@ -142,15 +142,19 @@ try:
         # Insert reviews
         for i in range(1, len(review_rating)):
             # vendor INT, val INT, content TEXT, product TEXT, dat INT, scraped_at INT, user_rating REAL, min_user_sales INT, max_user_sales INT
-            write_cur.execute("INSERT INTO reviews VALUES({0}, {1}, '{2}', '{3}', {4}, {5}, {6}, {7}, {8})".format(vendor_id,
-                                                                                                                   int(review_rating[i][1:]),
-                                                                                                                   review_text[i],
-                                                                                                                   review_product[i],
-                                                                                                                   review_date[i],
-                                                                                                                   scraped_on_days_since_1970,
-                                                                                                                   review_user_rating[i],
-                                                                                                                   review_user_min_sales[i],
-                                                                                                                   review_user_max_sales[i]))
+            try:
+                write_cur.execute("INSERT INTO reviews VALUES({0}, {1}, '{2}', '{3}', {4}, {5}, {6}, {7}, {8})".format(vendor_id,
+                                                                                                                       int(review_rating[i][1:]),
+                                                                                                                       review_text[i],
+                                                                                                                       review_product[i],
+                                                                                                                       review_date[i],
+                                                                                                                       scraped_on_days_since_1970,
+                                                                                                                       review_user_rating[i],
+                                                                                                                       review_user_min_sales[i],
+                                                                                                                       review_user_max_sales[i]))
+            except:
+                continue
+            
             buf = buf + 1
 
         if (buf > buffer_limit):
