@@ -77,19 +77,28 @@ try:
             vendor_rating = clean(rating[0].replace('~', '.').replace('/', '.').replace(' deals', '').replace('.5, ', ' '))
 
         test = tree.xpath('//div[@class="embedded-feedback-list"]/table/tr/td//text()')
+        test = [t for t in test if t.replace(' ', '') != '']
+
+        vals_re = re.compile('[0-5]/[0-5]')
+        days_ago_re = re.compile('[0-9]+ days ago')
 
         if len(test) > 0:
-            rating_vals = [clean(t.replace('<td>', '').replace('</td>', '').replace('<strong>', '').replace('</strong>', '')) for t in test[0::5]]
-            rating_text = [clean(t.replace('<td>', '').replace('</td>', '')) for t in test[1::5]]
-            rating_product = [clean(re.sub('(<)(.*?)(>)', '', t)) for t in test[2::5]]
-            rating_date = [clean(re.sub('(<)(.*?)(>)', '', t).replace(' days ago', '')) for t in test[3::5]]
-            rating_rating = [clean(re.sub('(<)(.*?)(>)', '', t).replace('~', ' ').replace('/', 's').replace('deals', '').replace('anon &#160;', '')) for t in test[4::5]]
-
-        if not (len(rating_vals) == len(rating_text) == len(rating_product) == len(rating_date) == len(rating_rating)):
+            rating_inds = [ind for ind, t in enumerate(test) if vals_re.match(t)]
+            days_ago_inds = [ind for ind, t in enumerate(test) if days_ago_re.match(t)]
+        else:
             continue
 
-        # interweave arrays
+        # The only reviews which are really reviews are those which
+        # are followed by a 'left X days ago' thing
+        real_reviews_ind = [r for r in rating_inds if r + 3 in days_ago_inds]
 
+        rating_vals    = [clean(test[t]) for t in real_reviews_ind]
+        rating_text    = [clean(test[t+1]) for t in real_reviews_ind]
+        rating_product = [clean(test[t+2]) for t in real_reviews_ind]
+        rating_date    = [clean(test[t+3]) for t in real_reviews_ind]
+        rating_rating  = [clean(test[t+5]) for t in real_reviews_ind]
+
+        # interweave arrays
         ratings = [""]*len(rating_vals)*5
         ratings[0::5] = rating_vals
         ratings[1::5] = rating_text
