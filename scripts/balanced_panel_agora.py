@@ -80,12 +80,20 @@ vendors = read_cur.fetchall()
 
 print_progress('Loaded vendors')
 
-read_cur.execute("""SELECT l.rowid AS id,
-                           l.*,
-                           COUNT(r.listing) AS num_reviews
+read_cur.execute("""SELECT l.rowid AS id,
+                           l.title,
+                           l.category,
+                           l.vendor,
+                           l.units,
+                           l.amount,
+                           l.quantity,
+                           l.ships_from,
+                           l.ships_to,
+                           COUNT(r.listing) AS num_reviews,
+                           l.url
                     FROM listings AS l
                         JOIN reviews AS r
-                            ON r.listing = l.rowid
+                            ON r.listing == l.rowid
                     GROUP BY r.listing""")
 listings = read_cur.fetchall()
 
@@ -143,7 +151,7 @@ prices = [ p for p in prices if 'mg' in p[8]]
 # Read into panda data frame
 names = ['DATE', 'CATEGORY', 'VENDOR', 'LISTING', 'PRICE',
          'RATING', 'AMOUNT', 'QUANTITY', 'UNITS', 'NORMALIZED',
-         'LOG_NORMALIZED', 'ID', 'MIN_SALES', 'MAX_SALES']
+         'ID', 'MIN_SALES', 'MAX_SALES']
 _prices = pandas.DataFrame(prices, columns = names)
 
 names = ['DATE', 'LISTING', 'CATEGORY', 'VENDOR', 'ID']
