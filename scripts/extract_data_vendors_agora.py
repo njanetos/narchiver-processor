@@ -154,7 +154,7 @@ try:
                                                                                                                        review_user_max_sales[i]))
             except:
                 continue
-            
+
             buf = buf + 1
 
         if (buf > buffer_limit):
