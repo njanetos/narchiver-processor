@@ -24,10 +24,6 @@ titles = read_cur.fetchall()
 read_cur.execute('SELECT DISTINCT category FROM listings')
 categories = read_cur.fetchall()
 
-# add custom categories
-categories.append('custom.benzocaine')
-categories.append('custom.cocaleaves')
-
 read_cur.execute('SELECT DISTINCT ships_from FROM listings')
 ships_from = read_cur.fetchall()
 read_cur.execute('SELECT DISTINCT ships_to FROM listings')
@@ -46,6 +42,10 @@ write.commit()
 categories = [c[0] for c in categories]
 ships_from = [c[0] for c in ships_from]
 ships_to = [c[0] for c in ships_to]
+
+# Custom categories
+categories.append('custom.benzocaine')
+categories.append('custom.cocaleaves')
 
 # Add all the categories
 print_progress("Writing categories...")
