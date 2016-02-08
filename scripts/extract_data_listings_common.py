@@ -23,6 +23,11 @@ read_cur.execute('SELECT DISTINCT title, vendor, category, ships_from, ships_to,
 titles = read_cur.fetchall()
 read_cur.execute('SELECT DISTINCT category FROM listings')
 categories = read_cur.fetchall()
+
+# add custom categories
+categories.append('custom.benzocaine')
+categories.append('custom.cocaleaves')
+
 read_cur.execute('SELECT DISTINCT ships_from FROM listings')
 ships_from = read_cur.fetchall()
 read_cur.execute('SELECT DISTINCT ships_to FROM listings')
@@ -84,7 +89,15 @@ for t in titles:
         amount = 0.0
         quantity = 0
 
-    write_cur.execute("INSERT INTO listings VALUES('{0}', '{1}', {2}, {3}, {4}, '{5}', {6}, {7}, '{8}')".format(t[0], t[1], 1+categories.index(t[2]), 1+ships_from.index(t[3]), 1+ships_to.index(t[4]), units, amount, quantity, t[5]))
+    category = 1 + categories.index(t[2])
+
+    # Custom stuff
+    if 'benzocaine' in t[0]:
+        category = 1 + categories.index('custom.benzocaine')
+    if 'coca leave' in t[0]:
+        category = 1 + categories.index('custom.cocaleaves')
+
+    write_cur.execute("INSERT INTO listings VALUES('{0}', '{1}', {2}, {3}, {4}, '{5}', {6}, {7}, '{8}')".format(t[0], t[1], category, 1+ships_from.index(t[3]), 1+ships_to.index(t[4]), units, amount, quantity, t[5]))
 
     buf = buf + 1
     if (buf > buffer_limit):
