@@ -280,7 +280,7 @@ try({
     sqldf("INSERT INTO categories SELECT * FROM categories_", dbname = dbout)
 
     sqldf("DROP TABLE IF EXISTS listings")
-    sqldf("CREATE TABLE listings(title TEXT, category INT, vendor INT, units TEXT, amount REAL, quantity INT, ships_from INT, ships_to INT, url TEXT)", dbname = dbout)
+    sqldf("CREATE TABLE listings(category INT, vendor INT, units TEXT, amount REAL, quantity INT, ships_from INT, ships_to INT, url TEXT)", dbname = dbout)
     sqldf("INSERT INTO listings SELECT * FROM listings_", dbname = dbout)
 
     sqldf("DROP TABLE IF EXISTS prices")
