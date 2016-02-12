@@ -1,5 +1,6 @@
 raw.zip
 *.pyc
+*.csv
 *.log
 *.zip
 *.RData
