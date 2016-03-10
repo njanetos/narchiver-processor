@@ -143,9 +143,6 @@ if (tmp_size != length(listings_$title)) {
     warning("Shrinkage in listings!")
 }
 
-# Write out ships_from table
-ships_from_ = sqldf("SELECT * FROM ships_from", dbname = dblist)
-
 # Check to see if there's any difference between the rowid and the original index
 # If so, something's fishy
 # Otherwise, this is consistent and that column is removed
