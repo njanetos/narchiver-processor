@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Generates a random dataset with 10000 pages pulled at random, in raw_zipped.zip, zipped for E-Z distribution.
+# Generates a random dataset with pages pulled at random, in raw_zipped.zip, zipped for E-Z distribution.
 
 rm -rf raw_zipped_test && mkdir raw_zipped_test && cd raw
 
-randomfiles=`find -type f | shuf -n 10000`
+randomfiles=`find -type f | shuf -n 100000`
 
 while read -r file; do
 	cp --parents "$file" ../raw_zipped_test
