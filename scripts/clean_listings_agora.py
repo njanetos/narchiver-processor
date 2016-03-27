@@ -25,7 +25,16 @@ try:
 
         # Load the file into a string
         with open(path + f, "r") as file:
-            file_string = file.read()
+            try:
+                file_string = file.read()
+            except OSError as e:
+                # Some files are corrupted, try to fix this
+                continue
+
+
+        # Check if empty (some are empty for some reason)
+        if not file_string:
+            continue
 
         # Parse the HTML
         tree = html.fromstring(file_string)
