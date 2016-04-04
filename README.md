@@ -1,8 +1,5 @@
 # Readme
 
-[![Build Status](https://travis-ci.org/njanetos/narchiver-processor.svg?branch=master)](https://travis-ci.org/njanetos/narchiver-processor)
-[![Project Status: Wip - Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://img.shields.io/badge/status-WIP-yellow.svg)](https://img.shields.io/badge/status-WIP-yellow.svg)
-
 Processing scripts for the Narchiver.
 
 ## Usage
