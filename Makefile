@@ -58,13 +58,13 @@ combined_market/%.db: extract_data_vendors/%.db extract_data_listings/%.db
 combined_market: $(MARKETS:%=combined_market/%.db)
 	@./scripts/push.sh "Combined markets" "Complete" || true
 
-# Constructs a balanced panel dataset by binning data from combined_market
-balanced_panel/%.csv: combined_market/%.db
-	@./scripts/run_script.sh balanced_panel_$* | tee logs/balanced_panel_$*_`date +"%m-%d-%Y-%T"`.log
-	@./scripts/push.sh "Constructing balanced panel data" "$*" || true
+# Constructs final-use data
+public_data/%-reviews.csv: combined_market/%.db
+	@./scripts/run_script.sh public_data_$* | tee public_data_$*_`date +"%m-%d-%Y-%T"`.log
+	@./scripts/push.sh "Constructing public data" "$*" || true
 
-balanced_panel: $(MARKETS:%=balanced_panel/%.csv)
-	@./scripts/push.sh "Balanced panel dataset" "Complete" || true
+public_data: $(MARKETS:%=balanced_panel/%.csv)
+	@./scripts/push.sh "Public data" "Complete" || true
 
 # Automagically builds the codebooks for the various databases
 documentation:
