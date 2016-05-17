@@ -3,9 +3,6 @@ import copy
 import csv
 import datetime
 import math
-import matplotlib.pyplot as plt
-import matplotlib.lines
-import matplotlib.dates as mdates
 import numpy
 import os
 import pandas
@@ -16,9 +13,9 @@ import statsmodels.api as stats
 import statsmodels.formula.api as smf
 import sqlite3
 import warnings
-from update_progress import update_progress
-from update_progress import print_progress
-from update_progress import ProgressBar
+from scripts.update_progress import update_progress
+from scripts.update_progress import print_progress
+from scripts.update_progress import ProgressBar
 
 # Load the database
 read = sqlite3.connect(os.path.join(os.getcwd(), 'combined_market/agora.db'))
@@ -190,7 +187,6 @@ reviews = pandas.merge(reviews, listings, left_on='LISTING', right_on='ID', suff
 reviews.drop('ID', axis=1, inplace=True)
 reviews.drop('QUANTITY_y', axis=1, inplace=True)
 reviews.drop('CATEGORY_y', axis=1, inplace=True)
-reviews.drop('VENDOR_y', axis=1, inplace=True)
 reviews.drop('AMOUNT_y', axis=1, inplace=True)
 reviews.drop('NUM_REVIEWS', axis=1, inplace=True)
 reviews.drop('URL', axis=1, inplace=True)
@@ -232,20 +228,20 @@ for c in range(1, len(categories)+1):
 names = ['NAME', 'NUM_REVIEWS']
 categories_ = pandas.DataFrame(list(map(list, zip(*[[c[0] for c in categories], total_num]))), columns = names)
 
+reviews = reviews[reviews['CATEGORY'] == 26]
+
 # construct estimates of age, cumulative reviews, and sales rate, by vendor
-r_vendor = reviews.groupby('VENDOR')
 reviews.sort_values('DATE')
+reviews['WEEKLY_SALES'] = 0
+reviews['WEEKLY_REVENUE'] = 0
+reviews['REVIEWS'] = 1
+r_vendor = reviews.groupby('VENDOR')
 
 reviews['AGE'] = r_vendor['DATE'].transform(lambda x: x - min(x))
-reviews['REVIEWS'] = 1
 reviews['REVIEWS'] = r_vendor['REVIEWS'].transform(lambda x: x.cumsum())
 
 # estimate of weekly sales rate
 print_progress("Constructing weekly revenue and sales estimates...")
-reviews['WEEKLY_SALES'] = 0
-reviews['WEEKLY_REVENUE'] = 0
-r_vendor = reviews.groupby('VENDOR')
-reviews.sort_values('DATE')
 
 count = 0
 tot_count = len(set(reviews['VENDOR'].values))
@@ -260,7 +256,9 @@ def roll(x):
         x.set_value(i, 'WEEKLY_REVENUE', sum(x_date['PRICE'].values))
     return(x)
 
-reviews = r_vendor.transform(lambda x: roll(x))
+reviews[['WEEKLY_SALES', 'WEEKLY_REVENUE', 'DATE', 'PRICE']] = r_vendor[['WEEKLY_SALES', 'WEEKLY_REVENUE', 'DATE', 'PRICE']].transform(lambda x: roll(x))
+reviews['VENDOR'] = reviews['VENDOR_y']
+reviews.drop('VENDOR_y', axis=1, inplace=True)
 
 print_progress("Save to csv...")
 # Save these to csvs
