@@ -78,6 +78,7 @@ listings_$ships_from[listings_$ships_from == "chile"] = "southamerica"
 listings_$ships_from[listings_$ships_from == "guatemala"] = "southamerica"
 listings_$ships_from[listings_$ships_from == "peru"] = "southamerica"
 listings_$ships_from[listings_$ships_from == "brazil"] = "southamerica"
+listings_$ships_from[listings_$ships_from == "columbia"] = "columbia"
 listings_$ships_from[listings_$ships_from == "china"] = "asia"
 listings_$ships_from[listings_$ships_from == "hongkong"] = "asia"
 listings_$ships_from[listings_$ships_from == "india"] = "asia"
@@ -128,17 +129,37 @@ listings_$ships_from[listings_$ships_from == "argentina"] = "southamerica"
 listings_$ships_from[listings_$ships_from == "newzealand"] = "australia"
 listings_$ships_from[listings_$ships_from == "russianfederation"] = "europe"
 
-listings_$ships_from[!(listings_$ships_from %in% c( "netherlands", "usa", "uk", "australia", "world", "europe", "colombia", "asia"))] = "other"
+listings_$ships_from[!(listings_$ships_from %in% c( "netherlands", "usa", "uk", "australia", "world", "europe", "asia", "northamerica", "southamerica", "africa"))] = "other"
 
 # Build a new ships_from table
 ships_from_ = data.frame(location = unique(listings_$ships_from))
 
+# build better ships_to info
+for (i in 1:length(listings_$ships_to)) {
+    if (grepl("world", tolower(ships_to_[as.numeric(listings_$ships_to[i])]), perl = TRUE)) {
+        listings_$ships_to[i] = "world"
+    } else if (grepl("(?=.*us)(?=.*eu)", tolower(ships_to_[as.numeric(listings_$ships_to[i])]), perl = TRUE)) {
+        listings_$ships_to[i] = "useu"
+    } else if (grepl("us", tolower(ships_to_[as.numeric(listings_$ships_to[i])]), perl = TRUE)) {
+        listings_$ships_to[i] = "us"
+    } else if (grepl("eu", tolower(ships_to_[as.numeric(listings_$ships_to[i])]), perl = TRUE)) {
+        listings_$ships_to[i] = "eu"
+    } else {
+        listings_$ships_to[i] = "other"
+    }
+}
+
+# Build a new ships_to table
+ships_to_ = data.frame(location = unique(listings_$ships_to))
+
 # Cross-reference listings on this table
 tmp_size = sqldf("SELECT Count(*) FROM listings", dbname = dblist)
-listings_ = as.data.table(sqldf("SELECT l.title, l.category, l.vendor, l.units, l.amount, l.quantity, sf.rowid AS ships_from, l.ships_to, l.ind, l.url
+listings_ = as.data.table(sqldf("SELECT l.title, l.category, l.vendor, l.units, l.amount, l.quantity, sf.rowid AS ships_from, st.rowid AS ships_TO, l.ind, l.url
                                  FROM listings_ AS l
                                  JOIN ships_from_ AS sf
-                                    ON sf.location == l.ships_from", dbname = dblist))
+                                    ON sf.location == l.ships_from
+                                 JOIN ships_to_ as st
+                                    ON st.location == l.ships_to", dbname = dblist))
 if (tmp_size != length(listings_$title)) {
     warning("Shrinkage in listings!")
 }

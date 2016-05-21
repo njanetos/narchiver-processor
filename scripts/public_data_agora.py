@@ -228,8 +228,6 @@ for c in range(1, len(categories)+1):
 names = ['NAME', 'NUM_REVIEWS']
 categories_ = pandas.DataFrame(list(map(list, zip(*[[c[0] for c in categories], total_num]))), columns = names)
 
-reviews = reviews[reviews['CATEGORY'] == 26]
-
 # construct estimates of age, cumulative reviews, and sales rate, by vendor
 reviews.sort_values('DATE')
 reviews['WEEKLY_SALES'] = 0
