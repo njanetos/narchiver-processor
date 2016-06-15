@@ -15,7 +15,11 @@ fi
 
 mkdir -p raw && cd raw_zipped
 
+../scripts/update_progress.sh "Looking for new archives..."
+
 find -type f -exec sh -c 'temp=${0#./} && if [ ! -d "../raw/""${temp%.zip}" ]; then ../scripts/update_progress.sh "Found new zip file, ""$temp"", unzipping..." && unzip -q -d ../raw/"${temp%.zip}" "$0"; fi' {} \;;
+
+../scripts/update_progress.sh "All archives unzipped. I will now recursively unzip all zip files in the folder raw."
 
 cd ../raw
 

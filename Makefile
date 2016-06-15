@@ -71,7 +71,7 @@ documentation:
 	@find -name *.db -exec ./scripts/run_script.sh autodocument {} \;;
 
 # Global build target
-sense: clean_listings extract_data_listings clean_vendors extract_data_vendors combined_market balanced_panel
+sense: clean_listings extract_data_listings clean_vendors extract_data_vendors combined_market
 
 clean:
 	find -name *.db -delete
