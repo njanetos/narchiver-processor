@@ -17,12 +17,21 @@ for d, m in dests:
 if not os.path.exists(os.path.join('raw_by_site', market, 'remaining')):
 	os.makedirs(os.path.join('raw_by_site', market, 'remaining'))
 
+print_progress("Finding all exiting files... " + market + "...")
+
 # Find the set of existing files and convert to hashed list
 existing_files = []
+count = 0
 for root, dirnames, filenames in os.walk('raw_by_site/' + market):
 	for f in filenames:
 		existing_files.append(f)
+		count = count + 1
+		if (count > 1000):
+			print_progress(" ..." + f)
+			count = 0
 existing_files = frozenset(existing_files)
+
+print_progress("Extracting all files with " + market + " in the name...")
 
 # Find all the directories with the marketplace name in the title
 dirs = []
@@ -31,6 +40,8 @@ for root, dirnames, filenames in os.walk('raw'):
 		dirs.append(os.path.join(root + '/' + dirname))
 
 tot_count = len(dirs)
+
+print_progress("Removing css...")
 
 # Go through and remove the CSS unless they already exist.
 count = 0
