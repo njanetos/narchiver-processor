@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+
+"""Anonymizes and puts in csv format data in combined_market."""
+
 # Imports
 import copy
 import csv
@@ -51,16 +55,9 @@ print_progress("Fetching reviews...")
 
 # Fetch reviews
 read_cur.execute("""SELECT r.dat,
-                           r.listing,
-                           l.vendor,
-                           l.category,
-                           l.amount,
-                           l.quantity,
                            r.matched_price,
-                           r.rowid AS id
-                        FROM reviews AS r
-                            JOIN listings AS l
-                                ON l.rowid == r.listing""")
+                           r.val
+                        FROM reviews AS r""")
 reviews = read_cur.fetchall()
 
 read_cur.execute("""SELECT v.rowid AS id,
@@ -149,7 +146,7 @@ names = ['DATE', 'CATEGORY', 'VENDOR', 'LISTING', 'PRICE',
          'ID', 'MIN_SALES', 'MAX_SALES']
 prices = pandas.DataFrame(prices, columns = names)
 
-names = ['DATE', 'LISTING', 'VENDOR', 'CATEGORY', 'AMOUNT', 'QUANTITY', 'MATCHED_PRICE', 'ID']
+names = ['DATE', 'MATCHED_PRICE', 'VAL']
 reviews = pandas.DataFrame(reviews, columns = names)
 
 # Read listings into panda data frame
@@ -160,6 +157,7 @@ all_listings = pandas.DataFrame(all_listings, columns = names)
 for i in listings['ID'].values:
     num_rev = listings[listings['ID'] == i]['NUM_REVIEWS'].values[0]
     all_listings.loc[all_listings['ID'] == i, 'NUM_REVIEWS'] = num_rev
+
 listings = all_listings
 
 # Read categories into panda data frame
@@ -167,30 +165,21 @@ names = ['NAME']
 categories_ = pandas.DataFrame([c[0] for c in categories], columns = names)
 
 # Join to matched price
-reviews.drop('AMOUNT', axis=1, inplace=True)
 reviews = pandas.merge(reviews, prices, left_on='MATCHED_PRICE', right_on='ID', suffixes=('', '_y'))
-reviews.drop('DATE_y', axis=1, inplace=True)
-reviews.drop('CATEGORY_y', axis=1, inplace=True)
-reviews.drop('VENDOR_y', axis=1, inplace=True)
-reviews.drop('LISTING_y', axis=1, inplace=True)
-reviews.drop('ID', axis=1, inplace=True)
-reviews.drop('MATCHED_PRICE', axis=1, inplace=True)
-reviews.drop('QUANTITY', axis=1, inplace=True)
-reviews.drop('ID_y', axis=1, inplace=True)
+reviews.drop('ID',              axis = 1, inplace = True)
+reviews.drop('MATCHED_PRICE',   axis = 1, inplace = True)
+reviews.drop('DATE_y',          axis = 1, inplace = True)
 
 # Change from units to 'trusted price' dummy
 reviews['FOUND_PRICE'] = reviews['UNITS'] == 'mg'
 reviews.drop('UNITS', axis=1, inplace=True)
 
-# Merge with listings
-reviews = pandas.merge(reviews, listings, left_on='LISTING', right_on='ID', suffixes=('', '_y'))
-reviews.drop('ID', axis=1, inplace=True)
-reviews.drop('QUANTITY_y', axis=1, inplace=True)
-reviews.drop('CATEGORY_y', axis=1, inplace=True)
-reviews.drop('AMOUNT_y', axis=1, inplace=True)
-reviews.drop('NUM_REVIEWS', axis=1, inplace=True)
-reviews.drop('URL', axis=1, inplace=True)
-reviews.drop('UNITS', axis=1, inplace=True)
+# Join to listings
+reviews = pandas.merge(reviews, listings, left_on = 'LISTING', right_on = 'ID', suffixes = ('', '_y'))
+reviews.drop('CATEGORY_y', axis = 1, inplace = True)
+reviews.drop('VENDOR_y',   axis = 1, inplace = True)
+reviews.drop('AMOUNT_y',   axis = 1, inplace = True)
+reviews.drop('QUANTITY_y', axis = 1, inplace = True)
 
 # Read vendors in panda data frame
 names = ['ID', 'NAME', 'NUM_REVIEWS']
@@ -220,50 +209,30 @@ for v in set(reviews['VENDOR'].values):
               'EXITED',
               max(reviews[reviews['VENDOR'] == v]['DATE']))
 
-# Find the total number of things in each category
+# Find the total number of reviews in each category
 total_num = []
 for c in range(1, len(categories)+1):
     total_num.append(len(reviews[reviews['CATEGORY'] == c]['CATEGORY'].values))
 
+# construct category data frame
 names = ['NAME', 'NUM_REVIEWS']
 categories_ = pandas.DataFrame(list(map(list, zip(*[[c[0] for c in categories], total_num]))), columns = names)
 
 # construct estimates of age, cumulative reviews, and sales rate, by vendor
 reviews = reviews.sort_values('DATE')
-reviews['WEEKLY_SALES'] = 0
-reviews['WEEKLY_REVENUE'] = 0
 reviews['REVIEWS'] = 1
 r_vendor = reviews.groupby('VENDOR')
 
 reviews['AGE'] = r_vendor['DATE'].transform(lambda x: x - min(x))
 reviews['REVIEWS'] = r_vendor['REVIEWS'].transform(lambda x: x.cumsum())
 
-# estimate of weekly sales rate
-print_progress("Constructing weekly revenue and sales estimates...")
-
-count = 0
-tot_count = len(set(reviews['VENDOR'].values))
-def roll(x):
-    global count
-    update_progress(count, tot_count)
-    count = count + 1
-    for i, row in x.iterrows():
-        x_date = x[   (x['DATE'] >= x['DATE'][i]-4)
-                    & (x['DATE'] <= x['DATE'][i]+4)].replace([numpy.inf, -numpy.inf], numpy.nan).dropna()
-        x.set_value(i, 'WEEKLY_SALES', len(x_date['DATE'].values))
-        x.set_value(i, 'WEEKLY_REVENUE', sum(x_date['PRICE'].values))
-    return(x)
-
-reviews[['WEEKLY_SALES', 'WEEKLY_REVENUE', 'DATE', 'PRICE']] = r_vendor[['WEEKLY_SALES', 'WEEKLY_REVENUE', 'DATE', 'PRICE']].transform(lambda x: roll(x))
-reviews['VENDOR'] = reviews['VENDOR_y']
-reviews.drop('VENDOR_y', axis=1, inplace=True)
-
 print_progress("Save to csv...")
 # Save these to csvs
+if not os.path.exists('public_data'):
+    os.makedirs('public_data')
+
 reviews.to_csv('public_data/agora-reviews.csv')
-# prices.to_csv('public_data/agora-prices.csv')
 vendors.to_csv('public_data/agora-vendors.csv')
-# rename categories to be more professional
 categories_.to_csv('public_data/agora-categories.csv')
 
 # construct balanced dataset
@@ -275,12 +244,13 @@ with open('public_data/agora-dates.csv', 'w') as f:
 
 bins_date = [b for b in zip(bins_date[0:-1], bins_date[1:])]
 
-
 balanced_categories = {}
 
-# Categories to focus on
-#interesting_categories = [4, 35, 7, 17, 43, 38]
-interesting_categories = [4, 50, 7, 26]
+# Find interesting categories
+interesting_category_names = ['Drugs.Cannabis.Weed', 'Drugs.Stimulants.Cocaine', 'Drugs.Opioids.Heroin', 'Drugs.Ecstasy.MDMA']
+interesting_categories = []
+for i in interesting_category_names:
+    interesting_categories.append(categories_[categories_['NAME'] == i].index[0]+1)
 
 print_progress("Constructing balanced dataset...")
 
@@ -294,8 +264,8 @@ for category in interesting_categories:
     listings_cat = listings[(listings['CATEGORY'] == category)]
 
     # Find extreme values
-    upper = numpy.nanpercentile(prices_cat['NORMALIZED'], 90)
-    lower = numpy.nanpercentile(prices_cat['NORMALIZED'], 10)
+    upper = numpy.nanpercentile(prices_cat[prices_cat['NORMALIZED'] < float('inf')]['NORMALIZED'], 90)
+    lower = numpy.nanpercentile(prices_cat[prices_cat['NORMALIZED'] < float('inf')]['NORMALIZED'], 10)
 
     prices_cat = prices_cat[prices_cat['NORMALIZED'] < upper]
     prices_cat = prices_cat[prices_cat['NORMALIZED'] > lower]
@@ -322,7 +292,7 @@ for category in interesting_categories:
                 review            = len(reviews_date['DATE'].values)
                 quantity          = numpy.nanmean(prices_date['QUANTITY'].values)
                 amount            = numpy.nanmean(prices_date['AMOUNT'].values)
-                reviews           = len(reviews_date['AMOUNT'].values)
+                reviewst          = len(reviews_date['AMOUNT'].values)
             else:
                 review     = 0
                 price      = float('nan')
@@ -330,17 +300,15 @@ for category in interesting_categories:
                 sales      = float('nan')
                 quantity   = float('nan')
                 amount     = float('nan')
-                reviews    = 0
-
+                reviewst   = 0
             rating_diff = 0
-
-            balanced.loc[len(balanced)] = [v, date[0], price, rating, review, sales, quantity, amount, reviews]
+            balanced.loc[len(balanced)] = [v, date[0], price, rating, review, sales, quantity, amount, reviewst]
 
     balanced = balanced.sort_values(by = ['VENDOR', 'DATE'])
     balanced['CATEGORY'] = category
     balanced_categories[category] = copy.deepcopy(balanced)
 
-final_balanced = pandas.DataFrame(columns = ['VENDOR', 'DATE', 'NORMALIZED', 'RATING', 'REVIEWS', 'SALES', 'QUANTITY', 'AMOUNT', 'CATEGORY', 'REVIEWS'])
+final_balanced = pandas.DataFrame(columns = ['VENDOR', 'DATE', 'NORMALIZED', 'RATING', 'REVIEWS', 'SALES', 'QUANTITY', 'AMOUNT', 'REVIEWS', 'CATEGORY'])
 for cat in interesting_categories:
     final_balanced = final_balanced.append(balanced_categories[cat])
 

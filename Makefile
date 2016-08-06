@@ -1,4 +1,5 @@
-MARKETS = abraxas agora blackbank dream evolution hydra marketplace nucleus silkroad
+# MARKETS = abraxas agora blackbank dream evolution hydra marketplace nucleus silkroad
+MARKETS = agora
 
 # Unzip everything
 raw: raw_zipped
